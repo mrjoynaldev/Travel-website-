@@ -1,0 +1,73 @@
+# Project TODO
+
+- [x] Read the complete supplied enterprise blog platform blueprint, including its architecture, security, workflow, data model, and acceptance-test sections.
+- [x] Capture the accepted blueprint foundation in implementation artifacts: tenant and site scoping, capability-based authorization, auditability, structured content, provider adapters, and an explicit out-of-scope roadmap for post-launch enterprise extensions.
+- [x] Establish the platform design system, responsive public navigation, accessible interaction patterns, and SEO document metadata foundations.
+- [x] Define database tables and migration for expanded editorial roles, author profiles, posts, post revisions, categories, tags, comments, media assets, subscribers, notifications, and analytics events.
+- [x] Enforce the exact post workflow states: draft, review, published, and archived, including authorized state transitions and immutable publishing timestamps.
+- [x] Implement role-based permissions for Admin, Editor, and Author, including protected server procedures and an admin user-management interface.
+- [x] Build the public blog homepage with featured posts, category filters, text search, pagination, and well-defined loading, empty, and error states.
+- [x] Build SEO-friendly article pages with sanitized rich-content rendering, canonical slugs, metadata fields, runtime Open Graph metadata, author bios, tags, related posts, RSS, sitemap, and robots endpoints.
+- [x] Build public author profile pages that show the author biography and their published posts.
+- [x] Build an editorial workspace with post creation, editing, preview, revision history, and review/approval actions.
+- [x] Embed an AI writing assistant within the post editor for outline generation, improvement suggestions, summaries, and meta-description generation, using server-side calls only.
+- [x] Build category and tag management for authorized editorial roles.
+- [x] Build an S3-backed media library that uploads, organizes, searches, reuses, and validates image and document references using CDN-ready URLs.
+- [x] Build a public comment system and an admin moderation queue with approve, reject, and delete actions.
+- [x] Build an analytics dashboard with page-view, top-post, and engagement metrics, plus privacy-conscious event capture.
+- [x] Implement role-targeted notification records and a Resend-compatible delivery adapter for review submissions, approval or rejection outcomes, and new-published-post subscriber alerts.
+- [x] Add external email-provider configuration only after an email service and sender domain are confirmed; retain a visible notification outbox and owner-alert fallback until then.
+- [x] Implement multi-provider LLM routing (OpenAI, Anthropic, Gemini, Nvidia NIM, custom OpenAI-compatible) with automatic model discovery, per-task model assignment, and admin management UI at /studio/ai.
+- [x] Wire Gmail API (OAuth2) as a notification email transport alongside Resend, with outbox-only fallback when neither is configured.
+- [ ] Add server and UI unit tests for permissions, workflow transitions, queries, AI input validation, comments, analytics calculations, and media validation.
+- [x] Run repeatable type checking, unit testing, browser interaction testing, production SSR crawling, and desktop/mobile visual reviews; resolve issues in iterative loops.
+- [x] Confirm the Supabase endpoint and server-only service credential with a lightweight authenticated integration test.
+- [x] Run and document a source and browser-request security check proving that privileged Supabase and storage credentials are absent from client code, source files, and browser-visible requests.
+- [x] Save a final verified project checkpoint and provide production configuration, deployment, and operating instructions.
+- [x] Prevent later modification of a first publication timestamp at the database boundary and add a regression test.
+- [x] Add visible public-feed query error states for category and post-loading failures.
+- [x] Add an authenticated unpublished preview route for drafts and review-stage posts.
+- [x] Enable selecting existing S3 media-library assets inside the rich-text editor and add stronger folder organization controls.
+- [x] Add an explicit delete action to the comment moderation interface.
+- [x] Complete crawler-visible per-article SEO metadata through server rendering or documented prerendering before public launch.
+- [ ] Verify production email dispatch after a verified email sender and provider key are supplied.
+- [ ] Run authenticated browser interaction tests for studio post editing, media reuse, workflow transitions, and moderation actions after a publication administrator signs in.
+- [x] Re-run production SSR crawl checks after the final rebuild, including homepage metadata and the article 404 body/noindex contract.
+- [x] Produce a requirement-by-requirement audit of the full enterprise blueprint, separating verified implemented capabilities, in-progress capabilities, and configuration-dependent integrations.
+- [ ] Implement a real authenticated administrator-to-public-reader acceptance test post without fabricating reviews, ratings, or testimonials.
+- [ ] Verify the post through editor save, AI assistance, media selection, exact workflow transitions, publication, public search, reading, comment submission, subscription capture, analytics, moderation, audit records, and notifications outbox.
+- [ ] Implement missing core CMS capabilities identified by the audit, including scheduled publication, explicit autosave behavior, safe source/HTML modes, rich content blocks, and content-type foundations.
+- [ ] Implement missing public reader capabilities identified by the audit, including topic and tag routes, archives or collections, navigation, accessibility controls, and reader account foundations.
+- [ ] Implement missing enterprise administration capabilities identified by the audit, including capability-policy foundations, site settings, audit-log viewing, feature controls, import/export foundations, and observability endpoints.
+- [ ] Implement missing AI-agent, developer-platform, and asynchronous-provider capabilities only behind typed, authorized adapters and with the necessary provider configuration; do not simulate third-party delivery, payment, domain, queue, or webhook behavior.
+- [x] Create isolated, clearly labeled QA organization, site, administrator, editor, author, reader, and subscriber records for acceptance testing without bypassing production authentication.
+- [x] Create and exercise a QA post through draft, review, published, and archived workflow states using the same server-enforced policy and audit pathways as the production application.
+- [x] Verify the QA post through public search, article reading, metadata, taxonomy, author page, public comment submission, subscription capture, analytics capture, moderation, outbox creation, and archive discovery.
+- [x] Archive the QA post after acceptance testing while retaining its QA audit and workflow records for the test report.
+- [ ] Run and document an authenticated browser/session QA flow with real sign-in and role-scoped accounts; do not treat synthetic server contexts as proof of browser authentication.
+- [x] Extend QA coverage to verify stored article metadata plus public archive, category, and tag discovery routes for the QA post.
+- [x] Create a QA acceptance report documenting the archived QA post identifier and confirming that audit and workflow records remain available after archival.
+- [x] Extend QA coverage to verify stored article metadata plus public archive, category, and tag discovery routes for the QA post.
+- [x] Create a QA acceptance report documenting the archived QA post identifier and confirming that audit and workflow records remain available after archival.
+- [x] Run and document QA verification against the actual public discovery routes and pages for topics, tags, archive index, and yearly archive—not only the underlying API filters.
+- [x] Re-review the supplied enterprise blueprint specifically for general-purpose blogging, public legal pages, site-brand settings, administrative configuration, and governed AI-agent requirements.
+- [x] Create a site-wide privacy policy page, link it from the public footer and subscriber/comment flows, and make its publication metadata configurable by an administrator.
+- [x] Add public legal and contact-page foundations, including terms and data-use placeholders that are explicitly marked for owner review where jurisdiction-specific advice is required.
+- [x] Expand site settings with website name, tagline, description, logo media asset, favicon/brand mark, default social image, public navigation, footer links, contact details, and brand color tokens.
+- [x] Apply stored site-identity settings consistently across public navigation, footer, document metadata, Open Graph values, RSS, sitemap, and the Studio header.
+- [x] Add a protected administrator experience for managing general website pages, site identity, legal-page copy, and public navigation without editing source code.
+- [x] Build a server-only AI agent workspace with read-only publication analysis tools and explicitly previewed actions for drafting, taxonomy suggestions, SEO optimization, and editorial operations.
+- [x] Require explicit administrator approval for every AI agent action that creates, edits, transitions, schedules, publishes, archives, moderates, changes settings, or sends a notification; log each request, approval, execution, and failure.
+- [x] Add tests proving the AI agent cannot execute high-impact actions without approval, cannot exceed the actor’s role scope, and never exposes secrets or direct privileged credentials to the browser.
+- [x] Add explicit privacy-policy links beside public comment submission and newsletter subscription forms, with regression coverage.
+- [x] Replace hardcoded Studio branding with stored publication identity and verify configurable identity coverage across public and studio shells.
+- [x] Add focused regression coverage that the Studio shell reads stored publication identity instead of a hardcoded name.
+- [x] Add a rendered component regression test for the Studio identity label with a mocked publication response.
+- [x] Document the environment setup order, production build/start commands, and managed publish workflow explicitly.
+- [x] Reorganize frontend source into separate public-site and admin-site folders while retaining shared components and routes.
+- [x] Document the unified backend ownership and updated repository structure.
+- [x] Run complete build, type, and regression verification after the source reorganization.
+- [ ] Create a complete ZIP archive that includes source, documentation, migrations, and the supplied enterprise blueprint Markdown file.
+- [x] Verify the complete production build, test suite, and representative public and Studio routes after the source-folder reorganization.
+- [x] Replace the external OAuth sign-in dependency with self-hosted Supabase email/password authentication: server-side token validation, signed session cookies, a public `/login` page, and auto-provisioning of profile/workspace/publication/admin membership on first Studio access.
+- [x] Validate the full sign-in loop against the live dev server with a real Supabase account: create user via admin API, sign in, `auth.me` returns the mapped user, first protected Studio call auto-provisions an admin publication, post creation works, and `ai.assist` routes through the env fallback to the Nvidia NIM model; then remove the QA user and its data.

@@ -1,0 +1,43 @@
+{
+  "name": "@fieldnote/client-common",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./components/*": "./src/components/*",
+    "./components/ui/*": "./src/components/ui/*",
+    "./components/public/*": "./src/components/public/*",
+    "./hooks/*": "./src/hooks/*",
+    "./lib/*": "./src/lib/*",
+    "./contexts/*": "./src/contexts/*",
+    "./_core/*": "./src/_core/*",
+    "./const": "./src/const.ts",
+    "./index.css": "./src/index.css"
+  },
+  "scripts": {
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fieldnote/contracts": "workspace:*",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@trpc/client": "^11.6.0",
+    "@trpc/react-query": "^11.6.0",
+    "@trpc/server": "^11.6.0",
+    "@tanstack/react-query": "^5.90.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.1",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "superjson": "^1.13.3"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}
