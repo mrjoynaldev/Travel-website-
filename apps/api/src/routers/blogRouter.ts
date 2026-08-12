@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { publishScheduled } from "../blog";
 import { getSupabase } from "../supabase";
 import { publicProcedure, router } from "../_core/trpc";
 
@@ -68,13 +69,44 @@ export const blogRouter = router({
     if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "Page not found." });
     return data;
   }),
-
   categories: publicProcedure.query(async () => {
     const site = await publicSiteOrThrow();
     if (!site) return [];
     const { data, error } = await getSupabase().from("categories").select("id, name, slug, description").eq("site_id", site.id).order("name");
     if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load categories." });
     return data ?? [];
+  }),
+
+  sections: publicProcedure.query(async () => {
+    const site = await publicSiteOrThrow();
+    if (!site) return [];
+    await publishScheduled(site.id);
+    const db = getSupabase();
+    const { data: sections, error } = await db.from("site_sections").select("id, title, section_type, subtitle, rendered_html, sort_order, is_visible, category_id, tag_id").eq("site_id", site.id).eq("is_visible", true).order("sort_order");
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load homepage sections." });
+    if (!sections?.length) return [];
+
+    const feed = await Promise.all((sections ?? []).map(async section => {
+      if (section.section_type === "custom") return { ...section, posts: [] };
+      let query = db.from("posts").select("id, title, slug, excerpt, published_at, updated_at, featured, featured_media_id, author_id").eq("site_id", site.id).eq("status", "published").is("deleted_at", null).order("published_at", { ascending: false }).limit(6);
+      if (section.section_type === "category" && section.category_id) {
+        const { data: rows } = await db.from("post_categories").select("post_id").eq("category_id", section.category_id);
+        const ids = (rows ?? []).map(row => row.post_id);
+        if (!ids.length) return { ...section, posts: [] };
+        query = query.in("id", ids);
+      }
+      if (section.section_type === "tag" && section.tag_id) {
+        const { data: rows } = await db.from("post_tags").select("post_id").eq("tag_id", section.tag_id);
+        const ids = (rows ?? []).map(row => row.post_id);
+        if (!ids.length) return { ...section, posts: [] };
+        query = query.in("id", ids);
+      }
+      if (section.section_type === "featured") query = query.eq("featured", true);
+      const { data, error: feedError } = await query;
+      if (feedError) return { ...section, posts: [] };
+      return { ...section, posts: await hydratePosts(data ?? []) };
+    }));
+    return feed;
   }),
 
   tags: publicProcedure.query(async () => {
@@ -89,6 +121,7 @@ export const blogRouter = router({
     const site = await publicSiteOrThrow();
     if (!site) return { items: [], total: 0, page: input.page, totalPages: 0 };
     const db = getSupabase();
+    await publishScheduled(site.id);
     let categoryId: string | undefined;
     if (input.category) {
       const { data: category } = await db.from("categories").select("id").eq("site_id", site.id).eq("slug", input.category).maybeSingle();
@@ -111,7 +144,7 @@ export const blogRouter = router({
       postIds = postIds ? postIds.filter(id => taggedIds.includes(id)) : taggedIds;
       if (!postIds.length) return { items: [], total: 0, page: input.page, totalPages: 0 };
     }
-    let query = db.from("posts").select("*", { count: "exact" }).eq("site_id", site.id).eq("status", "published").order("featured", { ascending: false }).order("published_at", { ascending: false });
+    let query = db.from("posts").select("*", { count: "exact" }).eq("site_id", site.id).eq("status", "published").is("deleted_at", null).order("featured", { ascending: false }).order("published_at", { ascending: false });
     if (postIds) query = query.in("id", postIds);
     if (input.year) query = query.gte("published_at", `${input.year}-01-01T00:00:00.000Z`).lt("published_at", `${input.year + 1}-01-01T00:00:00.000Z`);
     if (input.query) query = query.or(`title.ilike.%${input.query.replace(/[,%]/g, "")}%,excerpt.ilike.%${input.query.replace(/[,%]/g, "")}%`);
@@ -125,7 +158,7 @@ export const blogRouter = router({
   archives: publicProcedure.query(async () => {
     const site = await publicSiteOrThrow();
     if (!site) return [];
-    const { data, error } = await getSupabase().from("posts").select("published_at").eq("site_id", site.id).eq("status", "published").not("published_at", "is", null);
+    const { data, error } = await getSupabase().from("posts").select("published_at").eq("site_id", site.id).eq("status", "published").is("deleted_at", null).not("published_at", "is", null);
     if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load publication archives." });
     const years = new Map<number, number>();
     for (const post of data ?? []) { const year = new Date(post.published_at).getUTCFullYear(); years.set(year, (years.get(year) ?? 0) + 1); }
@@ -135,11 +168,12 @@ export const blogRouter = router({
   bySlug: publicProcedure.input(z.object({ slug: z.string().min(1).max(180) })).query(async ({ input }) => {
     const site = await publicSiteOrThrow();
     if (!site) throw new TRPCError({ code: "NOT_FOUND", message: "Publication not found." });
-    const { data, error } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("slug", input.slug).eq("status", "published").maybeSingle();
+    await publishScheduled(site.id);
+    const { data, error } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("slug", input.slug).eq("status", "published").is("deleted_at", null).maybeSingle();
     if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load the article." });
     if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "Article not found." });
     const [post] = await hydratePosts([data]);
-    const { data: related } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("status", "published").neq("id", data.id).order("published_at", { ascending: false }).limit(3);
+    const { data: related } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("status", "published").is("deleted_at", null).neq("id", data.id).order("published_at", { ascending: false }).limit(3);
     return { post, related: await hydratePosts(related ?? []) };
   }),
 
@@ -148,7 +182,7 @@ export const blogRouter = router({
     if (!site) throw new TRPCError({ code: "NOT_FOUND", message: "Publication not found." });
     const { data: author, error: authorError } = await getSupabase().from("profiles").select("id, display_name, bio, avatar_url, website_url").eq("id", input.authorId).maybeSingle();
     if (authorError || !author) throw new TRPCError({ code: "NOT_FOUND", message: "Author not found." });
-    const { data: posts, error } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("author_id", input.authorId).eq("status", "published").order("published_at", { ascending: false });
+    const { data: posts, error } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("author_id", input.authorId).eq("status", "published").is("deleted_at", null).order("published_at", { ascending: false });
     if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load author posts." });
     return { author, posts: await hydratePosts(posts ?? []) };
   }),

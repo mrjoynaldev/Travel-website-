@@ -5,6 +5,7 @@ import type { TrpcContext } from "./_core/context";
 function publicContext(): TrpcContext {
   return {
     user: null,
+    apiToken: null,
     req: { protocol: "https", headers: {} } as TrpcContext["req"],
     res: {} as TrpcContext["res"],
   };
@@ -20,5 +21,19 @@ describeDb("public publication feed", () => {
     expect(Array.isArray(feed.items)).toBe(true);
     expect(feed.page).toBe(1);
     expect(feed.total).toBeGreaterThanOrEqual(0);
+  }, 15_000);
+
+  it("returns configured homepage sections with only public story data", async () => {
+    const caller = appRouter.createCaller(publicContext());
+    const sections = await caller.blog.sections();
+
+    expect(Array.isArray(sections)).toBe(true);
+    for (const section of sections) {
+      expect(section.is_visible).toBe(true);
+      expect(Array.isArray(section.posts)).toBe(true);
+      expect(section.posts.every((post: { id: string; slug: string; title: string }) => Boolean(post.id && post.slug && post.title))).toBe(true);
+      expect(section.posts.every((post: { organization_id?: string }) => !Object.prototype.hasOwnProperty.call(post, "organization_id"))).toBe(true);
+      expect(section.rendered_html || "").not.toMatch(/<script|javascript:/i);
+    }
   }, 15_000);
 });

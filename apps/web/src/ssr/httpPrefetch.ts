@@ -15,6 +15,7 @@ export function createHttpPrefetch(): SsrPrefetch {
     pageBySlug: (slug: string) => client.blog.pageBySlug.query({ slug }),
     categories: () => client.blog.categories.query(),
     tags: () => client.blog.tags.query(),
+    sections: () => client.blog.sections.query(),
     archives: () => client.blog.archives.query(),
     list: (input: { page: number; query?: string; category?: string; tag?: string; year?: number }) =>
       client.blog.list.query(input),

@@ -27,6 +27,7 @@ function createContext(): { ctx: TrpcContext; setCookies: CookieCall[] } {
   const setCookies: CookieCall[] = [];
   const ctx: TrpcContext = {
     user: null,
+    apiToken: null,
     req: { protocol: "https", headers: {} } as TrpcContext["req"],
     res: {
       cookie: (name: string, _value: string, options: Record<string, unknown>) => {

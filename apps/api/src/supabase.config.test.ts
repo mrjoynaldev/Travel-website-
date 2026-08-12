@@ -20,7 +20,7 @@ describe("Supabase configuration", () => {
     expect(response.status).toBeLessThan(500);
   });
 
-  it("validates the project-administration credential against Supabase project metadata", async () => {
+  it.skipIf(!process.env.SUPABASE_ACCESS_TOKEN)("validates the project-administration credential against Supabase project metadata", async () => {
     const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
     const projectRef = new URL(process.env.VITE_SUPABASE_URL!).hostname.split(".")[0];
 

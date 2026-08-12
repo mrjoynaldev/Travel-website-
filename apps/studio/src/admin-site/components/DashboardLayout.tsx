@@ -22,7 +22,7 @@ import {
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
-import { BarChart3, Bell, Bot, Cpu, Download, FileText, Images, LayoutDashboard, LogOut, MessageSquare, Palette, PanelLeft, ScrollText, Settings2, ShieldCheck, Tags, Users } from "lucide-react";
+import { BarChart3, Bell, Bot, Cpu, Download, FileText, Images, KeyRound, LayoutDashboard, LayoutTemplate, LogOut, Mail, MessageSquare, Palette, PanelLeft, ScrollText, Settings2, ShieldCheck, Tags, Users } from "lucide-react";
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -42,9 +42,12 @@ const menuItems = [
   { icon: Settings2, label: "Settings", path: "/studio/settings" },
   { icon: Palette, label: "Brand", path: "/studio/brand" },
   { icon: FileText, label: "Public pages", path: "/studio/pages" },
+  { icon: LayoutTemplate, label: "Homepage", path: "/studio/sections", adminOnly: true },
   { icon: ShieldCheck, label: "Capabilities", path: "/studio/capabilities" },
   { icon: ScrollText, label: "Audit log", path: "/studio/audit" },
   { icon: Download, label: "Export", path: "/studio/export" },
+  { icon: Mail, label: "Subscribers", path: "/studio/subscribers" },
+  { icon: KeyRound, label: "API tokens", path: "/studio/api-tokens" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -128,7 +131,9 @@ function DashboardLayoutContent({
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
   const { data: publication } = trpc.blog.publication.useQuery();
-  const studioName = `${publication?.name || "Fieldnote"} Studio`;
+  const { data: bootstrap } = trpc.studio.bootstrap.useQuery();
+  const studioName = `${publication?.name || "CodeReport Global"} Studio`;
+  const visibleMenuItems = menuItems.filter(item => !item.adminOnly || bootstrap?.actor.role === "admin");
 
   useEffect(() => {
     if (isCollapsed) {
@@ -195,7 +200,7 @@ function DashboardLayoutContent({
 
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
+              {visibleMenuItems.map(item => {
                 const isActive = location === item.path;
                 return (
                   <SidebarMenuItem key={item.path}>

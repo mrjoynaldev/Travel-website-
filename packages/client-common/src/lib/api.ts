@@ -18,6 +18,15 @@ export const apiUrl = (path: string): string => (API_URL ? `${API_URL}${path}` :
 
 export const getTrpcUrl = (): string => apiUrl("/api/trpc");
 
+/**
+ * fetch wrapper that always includes credentials so the httpOnly session
+ * cookie flows cross-origin (e.g. Studio on Vercel → API on Render). In local
+ * dev the Vite proxy keeps requests same-origin, where this is equivalent to
+ * the default behavior.
+ */
+export const credentialsFetch: typeof fetch = (input, init) =>
+  fetch(input, { ...init, credentials: "include" });
+
 export const resolveMediaUrl = (url?: string | null): string => {
   if (!url) return "";
   if (/^(https?:)?\/\//.test(url)) return url.startsWith("//") ? `https:${url}` : url;

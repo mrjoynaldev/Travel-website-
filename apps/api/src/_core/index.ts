@@ -59,7 +59,7 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
-  app.get("/healthz", (_req, res) => res.status(200).json({ ok: true, service: "fieldnote-api", timestamp: new Date().toISOString() }));
+  app.get("/healthz", (_req, res) => res.status(200).json({ ok: true, service: "codereport-api", timestamp: new Date().toISOString() }));
   app.get("/readyz", async (_req, res) => {
     try {
       const result = await Promise.race([
@@ -67,10 +67,10 @@ async function startServer() {
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error("database readiness probe timed out")), 5_000)),
       ]);
       const { error } = result;
-      if (error) return res.status(503).json({ ok: false, service: "fieldnote-api", dependency: "database" });
-      return res.status(200).json({ ok: true, service: "fieldnote-api", dependency: "database" });
+      if (error) return res.status(503).json({ ok: false, service: "codereport-api", dependency: "database" });
+      return res.status(200).json({ ok: true, service: "codereport-api", dependency: "database" });
     } catch {
-      return res.status(503).json({ ok: false, service: "fieldnote-api", dependency: "database" });
+      return res.status(503).json({ ok: false, service: "codereport-api", dependency: "database" });
     }
   });
   registerStorageProxy(app);
@@ -94,7 +94,7 @@ async function startServer() {
   }
 
   server.listen(port, () => {
-    console.log(`Fieldnote API running on http://localhost:${port}/`);
+    console.log(`CodeReport Global API running on http://localhost:${port}/`);
   });
 }
 

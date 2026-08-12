@@ -67,7 +67,14 @@
 - [x] Reorganize frontend source into separate public-site and admin-site folders while retaining shared components and routes.
 - [x] Document the unified backend ownership and updated repository structure.
 - [x] Run complete build, type, and regression verification after the source reorganization.
+- [x] Apply all Supabase migrations to the live project (including the api_tokens table) and fix a CTE-scoping bug in the codereport-global seed migration that blocked `db push`.
+- [x] Provision `.env` files for api/web/studio with live Supabase credentials and a generated `JWT_SECRET`.
+- [x] Send `credentials: include` from the web/Studio tRPC clients so the session cookie works across the decoupled Vercel → Render deployment.
 - [ ] Create a complete ZIP archive that includes source, documentation, migrations, and the supplied enterprise blueprint Markdown file.
 - [x] Verify the complete production build, test suite, and representative public and Studio routes after the source-folder reorganization.
 - [x] Replace the external OAuth sign-in dependency with self-hosted Supabase email/password authentication: server-side token validation, signed session cookies, a public `/login` page, and auto-provisioning of profile/workspace/publication/admin membership on first Studio access.
 - [x] Validate the full sign-in loop against the live dev server with a real Supabase account: create user via admin API, sign in, `auth.me` returns the mapped user, first protected Studio call auto-provisions an admin publication, post creation works, and `ai.assist` routes through the env fallback to the Nvidia NIM model; then remove the QA user and its data.
+- [x] Wire configured homepage sections into public rendering and SSR hydration, including a resilient legacy-feed fallback.
+- [x] Add the protected Studio homepage-section manager with create, edit, reorder, visibility, and remove controls.
+- [ ] Run authenticated browser/session QA against the homepage-section manager and all production Studio routes after administrator sign-in; the real API/session acceptance flow is complete, but the current browser harness reports an isolated/mock environment for authenticated Studio interactions.
+- [x] Install a Chromium-compatible browser and run a real canonical-publication API acceptance flow covering sign-in, rich post workflow, public reading/search, comments/moderation, subscriptions, analytics, homepage sections, export, API token scopes/revocation, CLI, and deterministic QA cleanup.

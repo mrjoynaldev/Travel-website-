@@ -11,7 +11,10 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 vi.mock("@/hooks/useMobile", () => ({ useIsMobile: () => false }));
 
 vi.mock("@/lib/trpc", () => ({
-  trpc: { blog: { publication: { useQuery: () => ({ data: { name: "Northstar Review" } }) } } },
+  trpc: {
+    blog: { publication: { useQuery: () => ({ data: { name: "Northstar Review" } }) } },
+    studio: { bootstrap: { useQuery: () => ({ data: { actor: { role: "admin" } } }) } },
+  },
 }));
 
 describe("configurable publication identity", () => {

@@ -29,6 +29,7 @@ export function renderHead(head: HeadMeta): string {
     if (head.publishedTime) tags.push(`<meta property="article:published_time" content="${head.publishedTime}" />`);
     if (head.modifiedTime) tags.push(`<meta property="article:modified_time" content="${head.modifiedTime}" />`);
   }
+  if (head.jsonLd) tags.push(`<script type="application/ld+json">${head.jsonLd}</script>`);
   return tags.join("\n    ");
 }
 

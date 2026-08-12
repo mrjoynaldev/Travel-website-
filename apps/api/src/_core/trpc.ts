@@ -11,10 +11,16 @@ export const router = t.router;
 export const publicProcedure = t.procedure;
 
 const requireUser = t.middleware(async opts => {
-  const { ctx, next } = opts;
+  const { ctx, next, type } = opts;
 
   if (!ctx.user) {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+  }
+
+  // API access tokens may be read-only: block mutations unless the token
+  // carries the "write" scope.
+  if (type === "mutation" && ctx.apiToken && !ctx.apiToken.scopes.includes("write")) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "This access token is read-only and cannot perform this action." });
   }
 
   return next({

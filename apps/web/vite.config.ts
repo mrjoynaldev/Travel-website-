@@ -16,7 +16,7 @@ export default defineConfig({
     ],
   },
   envDir: rootDir,
-  publicDir: false,
+  publicDir: "public",
   build: {
     outDir: path.resolve(rootDir, "dist/client"),
     emptyOutDir: true,

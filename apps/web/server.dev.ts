@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
+import "dotenv/config";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import http from "node:http";
 import https from "node:https";
 import type { IncomingMessage, ServerResponse } from "node:http";
@@ -80,7 +81,7 @@ async function main() {
         });
       });
     });
-    server.listen(PORT, () => console.log(`Fieldnote web (dev) running on http://localhost:${PORT}/`));
+    server.listen(PORT, () => console.log(`CodeReport Global web (dev) running on http://localhost:${PORT}/`));
     return;
   }
 
@@ -93,12 +94,12 @@ async function main() {
   const server = http.createServer((req, res) => {
     const url = req.url ?? "/";
     const pathname = url.split("?")[0];
+    const staticFile = contentPathFor(pathname, clientDir);
+    if (staticFile && existsSync(staticFile) && statSync(staticFile).isFile()) {
+      serveStatic(res, staticFile);
+      return;
+    }
     if (pathname.startsWith("/assets/")) {
-      const filePath = contentPathFor(pathname, clientDir);
-      if (filePath && existsSync(filePath)) {
-        serveStatic(res, filePath);
-        return;
-      }
       res.writeHead(404);
       res.end("Not found");
       return;
@@ -113,7 +114,7 @@ async function main() {
       res.end("Internal server error");
     });
   });
-  server.listen(PORT, () => console.log(`Fieldnote web (preview) running on http://localhost:${PORT}/`));
+  server.listen(PORT, () => console.log(`CodeReport Global web (preview) running on http://localhost:${PORT}/`));
 }
 
 async function handleSsr(res: ServerResponse, renderFn: RenderFn, template: string, url: string): Promise<void> {

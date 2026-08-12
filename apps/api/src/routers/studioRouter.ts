@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { assertCanEditPost, assertRole, canTransition, editorDocumentSchema, getActor, getAnalyticsSummary, getPostForActor, POST_STATUSES, queueWorkflowNotifications, recordAudit, sanitizeArticleHtml, saveRevision, uploadInputSchema, uploadMedia } from "../blog";
+import { assertCanEditPost, assertRole, canTransition, editorDocumentSchema, getActor, getAnalyticsSummary, getPostForActor, POST_STATUSES, publishScheduled, queueWorkflowNotifications, recordAudit, sanitizeArticleHtml, saveRevision, uploadInputSchema, uploadMedia } from "../blog";
+import { generateApiToken } from "../_core/apiTokens";
 import { getSupabase } from "../supabase";
 import { dispatchPendingNotifications } from "../email";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -27,6 +28,26 @@ async function syncTaxonomy(postId: string, categoryIds: string[], tagIds: strin
   }
 }
 
+async function assertSectionSource(actor: any, sectionType: "featured" | "latest" | "category" | "tag" | "custom", categoryId: string | null | undefined, tagId: string | null | undefined) {
+  if (sectionType === "category") {
+    if (!categoryId) throw new TRPCError({ code: "BAD_REQUEST", message: "A category section requires a category." });
+    const { data, error } = await getSupabase().from("categories").select("id").eq("id", categoryId).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).maybeSingle();
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not validate the category section source." });
+    if (!data) throw new TRPCError({ code: "FORBIDDEN", message: "That category does not belong to this publication." });
+    if (tagId) throw new TRPCError({ code: "BAD_REQUEST", message: "A category section cannot also use a tag." });
+    return;
+  }
+  if (sectionType === "tag") {
+    if (!tagId) throw new TRPCError({ code: "BAD_REQUEST", message: "A tag section requires a tag." });
+    const { data, error } = await getSupabase().from("tags").select("id").eq("id", tagId).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).maybeSingle();
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not validate the tag section source." });
+    if (!data) throw new TRPCError({ code: "FORBIDDEN", message: "That tag does not belong to this publication." });
+    if (categoryId) throw new TRPCError({ code: "BAD_REQUEST", message: "A tag section cannot also use a category." });
+    return;
+  }
+  if (categoryId || tagId) throw new TRPCError({ code: "BAD_REQUEST", message: "This homepage section type cannot use a category or tag source." });
+}
+
 export const studioRouter = router({
   bootstrap: protectedProcedure.query(async ({ ctx }) => {
     const actor = await actorFor(ctx);
@@ -37,7 +58,8 @@ export const studioRouter = router({
   posts: router({
     list: protectedProcedure.input(z.object({ status: z.enum(POST_STATUSES).optional(), search: z.string().trim().max(100).optional() })).query(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const db = getSupabase();
-      let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("updated_at", { ascending: false });
+      await publishScheduled(actor.siteId);
+      let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, scheduled_at, featured, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).is("deleted_at", null).order("updated_at", { ascending: false });
       if (actor.role === "author") query = query.eq("author_id", actor.profileId);
       if (input.status) query = query.eq("status", input.status);
       if (input.search) query = query.ilike("title", `%${input.search.replace(/[,%]/g, "")}%`);
@@ -74,7 +96,11 @@ export const studioRouter = router({
     transition: protectedProcedure.input(z.object({ id: z.string().uuid(), status: z.enum(POST_STATUSES), rejectionNote: z.string().max(500).optional() })).mutation(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const { post, ownsPost } = await assertCanEditPost(actor, input.id);
       if (!canTransition(actor.role, post.status, input.status, ownsPost)) throw new TRPCError({ code: "FORBIDDEN", message: "This workflow transition is not permitted." });
-      const { data, error } = await getSupabase().from("posts").update({ status: input.status, reviewer_id: actor.role === "author" ? post.reviewer_id : actor.profileId }).eq("id", post.id).select("*").single();
+      const patch: Record<string, unknown> = { status: input.status, reviewer_id: actor.role === "author" ? post.reviewer_id : actor.profileId };
+      // Restoring a trashed post (archived + deleted_at) back to draft clears the
+      // soft-delete marker so it reappears in Studio and can be re-published.
+      if (input.status === "draft" && post.deleted_at) patch.deleted_at = null;
+      const { data, error } = await getSupabase().from("posts").update(patch).eq("id", post.id).select("*").single();
       if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The workflow transition could not be completed." });
       await queueWorkflowNotifications(actor, post, post.status, input.status, input.rejectionNote);
       await recordAudit(actor, "post.workflow_transition", "post", post.id, { from: post.status, to: input.status });
@@ -92,6 +118,31 @@ export const studioRouter = router({
       if (error || !revision) throw new TRPCError({ code: "NOT_FOUND", message: "Revision not found." }); await saveRevision(actor, post, "Revision restored");
       const { data, error: updateError } = await getSupabase().from("posts").update({ title: revision.title, content_json: revision.content_json, rendered_html: revision.rendered_html }).eq("id", input.postId).select("*").single();
       if (updateError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not restore the revision." }); return data;
+    }),
+    schedule: protectedProcedure.input(z.object({ id: z.string().uuid(), scheduledAt: z.string().datetime().optional(), clear: z.boolean().optional() })).mutation(async ({ ctx, input }) => {
+      const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { post } = await assertCanEditPost(actor, input.id);
+      if (!["draft", "review"].includes(post.status)) throw new TRPCError({ code: "FORBIDDEN", message: "Only draft or review posts can be scheduled." });
+      if (!input.clear && !input.scheduledAt) throw new TRPCError({ code: "BAD_REQUEST", message: "A publication time is required." });
+      const patch: Record<string, unknown> = input.clear ? { scheduled_at: null } : { scheduled_at: input.scheduledAt };
+      if (!input.clear && post.status === "draft") patch.status = "review";
+      const { data, error } = await getSupabase().from("posts").update(patch).eq("id", post.id).select("*").single();
+      if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The schedule could not be saved." });
+      await recordAudit(actor, "post.scheduled", "post", post.id, { scheduledAt: input.clear ? null : input.scheduledAt });
+      return data;
+    }),
+    toggleFeatured: protectedProcedure.input(z.object({ id: z.string().uuid(), featured: z.boolean() })).mutation(async ({ ctx, input }) => {
+      const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { post } = await assertCanEditPost(actor, input.id);
+      const { data, error } = await getSupabase().from("posts").update({ featured: input.featured }).eq("id", post.id).select("*").single();
+      if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The featured flag could not be updated." });
+      await recordAudit(actor, "post.featured_updated", "post", post.id, { featured: input.featured });
+      return data;
+    }),
+    remove: protectedProcedure.input(z.object({ id: z.string().uuid(), confirmed: z.literal(true) })).mutation(async ({ ctx, input }) => {
+      const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { post } = await assertCanEditPost(actor, input.id);
+      const { data, error } = await getSupabase().from("posts").update({ deleted_at: new Date().toISOString(), status: "archived" }).eq("id", post.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single();
+      if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "The post could not be deleted." });
+      await recordAudit(actor, "post.deleted", "post", post.id, { softDeleted: true });
+      return data;
     }),
   }),
 
@@ -135,9 +186,28 @@ export const studioRouter = router({
     list: protectedProcedure.input(z.object({ resourceType: z.string().max(80).optional(), limit: z.number().int().min(1).max(200).default(100) })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); let query = getSupabase().from("audit_events").select("id, action, resource_type, resource_id, metadata, created_at, profiles!audit_events_actor_profile_id_fkey(display_name, email)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }).limit(input.limit); if (input.resourceType) query = query.eq("resource_type", input.resourceType); const { data, error } = await query; if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load audit events." }); return data ?? []; }),
   }),
 
+  sections: router({
+    list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("site_sections").select("*, categories(name, slug), tags(name, slug)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("sort_order"); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load homepage sections." }); return data ?? []; }),    create: protectedProcedure.input(z.object({ title: z.string().trim().min(1).max(120), sectionType: z.enum(["featured", "latest", "category", "tag", "custom"]), categoryId: z.string().uuid().nullable().optional(), tagId: z.string().uuid().nullable().optional(), subtitle: z.string().max(300).optional(), renderedHtml: z.string().max(50_000).optional(), isVisible: z.boolean().default(true) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); await assertSectionSource(actor, input.sectionType, input.categoryId, input.tagId); const db = getSupabase();
+ const { data: last } = await db.from("site_sections").select("sort_order").eq("site_id", actor.siteId).order("sort_order", { ascending: false }).limit(1).maybeSingle(); const { data, error } = await db.from("site_sections").insert({ organization_id: actor.organizationId, site_id: actor.siteId, title: input.title, section_type: input.sectionType, category_id: input.categoryId ?? null, tag_id: input.tagId ?? null, subtitle: input.subtitle ?? null, rendered_html: sanitizeArticleHtml(input.renderedHtml ?? ""), sort_order: (last?.sort_order ?? -1) + 1, is_visible: input.isVisible }).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The section could not be created. A category or tag section requires its source selected." }); await recordAudit(actor, "section.created", "site_section", data.id, { sectionType: data.section_type, title: data.title }); return data; }),    update: protectedProcedure.input(z.object({ id: z.string().uuid(), title: z.string().trim().min(1).max(120), sectionType: z.enum(["featured", "latest", "category", "tag", "custom"]), categoryId: z.string().uuid().nullable().optional(), tagId: z.string().uuid().nullable().optional(), subtitle: z.string().max(300).optional(), renderedHtml: z.string().max(50_000).optional(), sortOrder: z.number().int().min(0).max(10_000), isVisible: z.boolean() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); await assertSectionSource(actor, input.sectionType, input.categoryId, input.tagId); const { data, error } = await getSupabase().from("site_sections").update({
+ title: input.title, section_type: input.sectionType, category_id: input.categoryId ?? null, tag_id: input.tagId ?? null, subtitle: input.subtitle ?? null, rendered_html: sanitizeArticleHtml(input.renderedHtml ?? ""), sort_order: input.sortOrder, is_visible: input.isVisible }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The section could not be saved." }); await recordAudit(actor, "section.updated", "site_section", data.id, { sectionType: data.section_type, title: data.title }); return data; }),
+    reorder: protectedProcedure.input(z.object({ ids: z.array(z.string().uuid()).min(1).max(100) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data: current, error: readError } = await getSupabase().from("site_sections").select("id").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (readError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not read homepage sections." }); const currentIds = (current ?? []).map(item => item.id); const submitted = new Set(input.ids); if (submitted.size !== currentIds.length || currentIds.some(id => !submitted.has(id))) throw new TRPCError({ code: "BAD_REQUEST", message: "The section order must include every section exactly once." }); for (const [index, id] of input.ids.entries()) { const { error } = await getSupabase().from("site_sections").update({ sort_order: index }).eq("id", id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not save the homepage section order." }); } await recordAudit(actor, "section.reordered", "site_section", null, { order: input.ids }); return { success: true }; }),
+    remove: protectedProcedure.input(z.object({ id: z.string().uuid(), confirmed: z.literal(true) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data, error } = await getSupabase().from("site_sections").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "The section could not be removed." }); await recordAudit(actor, "section.removed", "site_section", data.id, { sectionType: data.section_type, title: data.title }); return { success: true }; }),
+  }),
+
   capabilities: router({
     list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const [catalog, policy] = await Promise.all([getSupabase().from("capabilities").select("*").order("capability_key"), getSupabase().from("site_role_capabilities").select("id, role, capability_id, allowed").eq("site_id", actor.siteId)]); if (catalog.error || policy.error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load the capability policy." }); return { catalog: catalog.data ?? [], policy: policy.data ?? [] }; }),
     set: protectedProcedure.input(z.object({ role: z.enum(["admin", "editor", "author"]), capabilityId: z.string().uuid(), allowed: z.boolean(), confirmed: z.literal(true) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data, error } = await getSupabase().from("site_role_capabilities").upsert({ organization_id: actor.organizationId, site_id: actor.siteId, role: input.role, capability_id: input.capabilityId, allowed: input.allowed }, { onConflict: "site_id,role,capability_id" }).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The capability policy could not be updated." }); await recordAudit(actor, "capability.policy_updated", "capability", input.capabilityId, { role: input.role, allowed: input.allowed, confirmed: true }); return data; }),
+  }),
+
+  subscribers: router({
+    list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("subscribers").select("id, email, status, consented_at, unsubscribed_at, created_at").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }).limit(500); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load subscribers." }); return data ?? []; }),
+    remove: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { error } = await getSupabase().from("subscribers").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "NOT_FOUND", message: "The subscriber could not be removed." }); await recordAudit(actor, "subscriber.removed", "subscriber", input.id, {}); return { success: true }; }),
+  }),
+
+  apiTokens: router({
+    list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data, error } = await getSupabase().from("api_tokens").select("id, name, token_prefix, scopes, last_used_at, expires_at, revoked_at, created_at").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load API tokens." }); return data ?? []; }),
+    create: protectedProcedure.input(z.object({ name: z.string().trim().min(1).max(80), scopes: z.array(z.enum(["read", "write"])).min(1).default(["read", "write"]), expiresAt: z.string().datetime().optional() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { token, hash, prefix } = generateApiToken(); const { data, error } = await getSupabase().from("api_tokens").insert({ organization_id: actor.organizationId, site_id: actor.siteId, profile_id: actor.profileId, name: input.name, token_hash: hash, token_prefix: prefix, scopes: input.scopes, expires_at: input.expiresAt ?? null }).select("id, name, token_prefix, scopes, created_at").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The token could not be created." }); await recordAudit(actor, "api_token.created", "api_token", data.id, { name: data.name, scopes: input.scopes }); return { ...data, token }; }),
+    revoke: protectedProcedure.input(z.object({ id: z.string().uuid(), confirmed: z.literal(true) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data, error } = await getSupabase().from("api_tokens").update({ revoked_at: new Date().toISOString() }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("id").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "The token could not be revoked." }); await recordAudit(actor, "api_token.revoked", "api_token", input.id, {}); return { success: true }; }),
   }),
 
   exportContent: protectedProcedure.input(z.object({ format: z.enum(["json", "markdown"]).default("json") })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const db = getSupabase(); const [posts, categories, tags, media, subscribers] = await Promise.all([db.from("posts").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).is("deleted_at", null).order("created_at"), db.from("categories").select("*").eq("site_id", actor.siteId).order("name"), db.from("tags").select("*").eq("site_id", actor.siteId).order("name"), db.from("media_assets").select("*").eq("site_id", actor.siteId).order("created_at"), db.from("subscribers").select("email, status, consented_at, created_at").eq("site_id", actor.siteId).order("created_at")]); if (posts.error || categories.error || tags.error || media.error || subscribers.error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not prepare the content export." }); await recordAudit(actor, "content.exported", "site", actor.siteId, { format: input.format }); if (input.format === "markdown") { const markdown = (posts.data ?? []).map(post => `---\ntitle: ${JSON.stringify(post.title)}\nslug: ${post.slug}\nstatus: ${post.status}\npublished_at: ${post.published_at || ""}\ncanonical_url: ${post.canonical_url || ""}\n---\n\n${post.rendered_html}`).join("\n\n---\n\n"); return { format: "markdown" as const, content: markdown }; } return { format: "json" as const, content: JSON.stringify({ exportedAt: new Date().toISOString(), organizationId: actor.organizationId, siteId: actor.siteId, posts: posts.data ?? [], categories: categories.data ?? [], tags: tags.data ?? [], media: media.data ?? [], subscribers: subscribers.data ?? [] }, null, 2) }; }),

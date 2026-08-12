@@ -41,7 +41,7 @@ export function registerPublicFeeds(app: Express) {
       const { site, posts } = await latestPosts(); const base = origin();
       if (!base) return res.status(503).type("text/plain").send("CANONICAL_ORIGIN must be configured before RSS generation.");
       const items = posts.slice(0, 50).map(post => `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description></item>`).join("");
-      const name = site?.name || process.env.SITE_NAME || "Fieldnote";
+      const name = site?.name || process.env.SITE_NAME || "CodeReport Global";
       res.type("application/rss+xml").send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description>${items}</channel></rss>`);
     } catch {
       res.status(503).type("text/plain").send("RSS is temporarily unavailable.");

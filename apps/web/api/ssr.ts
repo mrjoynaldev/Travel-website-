@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import path from "node:path";
 import superjson from "superjson";
@@ -26,12 +26,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const url = req.url ?? "/";
   const pathname = url.split("?")[0];
 
+  const staticFile = contentPathFor(pathname);
+  if (staticFile && existsSync(staticFile) && statSync(staticFile).isFile()) {
+    serveStatic(res, staticFile);
+    return;
+  }
+
   if (pathname.startsWith("/assets/")) {
-    const filePath = contentPathFor(pathname);
-    if (filePath && existsSync(filePath)) {
-      serveStatic(res, filePath);
-      return;
-    }
     res.statusCode = 404;
     res.end("Not found");
     return;

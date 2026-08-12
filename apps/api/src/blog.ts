@@ -34,24 +34,53 @@ function dbError(message: string, error: unknown): never {
 }
 
 export function sanitizeArticleHtml(html: string) {
-  return sanitizeHtml(html, {
+  const cleaned = sanitizeHtml(html, {
     allowedTags: [
       "p", "br", "h1", "h2", "h3", "h4", "blockquote", "ul", "ol", "li", "strong", "em",
-      "s", "a", "img", "pre", "code", "hr", "table", "thead", "tbody", "tr", "th", "td",
+      "s", "del", "u", "mark", "a", "img", "pre", "code", "hr", "table", "thead", "tbody", "tr", "th", "td",
+      "figure", "figcaption", "audio", "video", "source", "iframe", "span",
     ],
     allowedAttributes: {
-      a: ["href", "target", "rel"],
+      a: ["href", "target", "rel", "class"],
       img: ["src", "alt", "title", "width", "height"],
       code: ["class"],
+      span: ["class"],
+      pre: ["class"],
       th: ["colspan", "rowspan"],
       td: ["colspan", "rowspan"],
+      figure: ["class"],
+      figcaption: ["class"],
+      audio: ["src", "controls", "preload", "loop"],
+      video: ["src", "controls", "poster", "preload", "loop", "width", "height"],
+      source: ["src", "type"],
+      iframe: ["src", "width", "height", "title", "loading", "allow", "allowfullscreen", "frameborder", "referrerpolicy"],
     },
     allowedSchemes: ["http", "https", "mailto"],
     allowedSchemesAppliedToAttributes: ["href", "src"],
+    allowedIframeHostnames: [
+      "www.youtube.com", "www.youtube-nocookie.com", "youtube.com", "m.youtube.com",
+      "player.vimeo.com", "vimeo.com", "w.soundcloud.com", "soundcloud.com",
+    ],
     transformTags: {
       a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer", target: "_blank" }),
+      img: sanitizeHtml.simpleTransform("img", { loading: "lazy" }),
+      iframe: (tagName, attribs) => ({
+        tagName,
+        attribs: {
+          ...attribs,
+          title: attribs.title || "Embedded video",
+          loading: attribs.loading || "lazy",
+          allowfullscreen: "true",
+          referrerpolicy: attribs.referrerpolicy || "strict-origin-when-cross-origin",
+        },
+      }),
+      audio: (tagName, attribs) => ({ tagName, attribs: { ...attribs, controls: "" } }),
+      video: (tagName, attribs) => ({ tagName, attribs: { ...attribs, controls: "" } }),
     },
   });
+  // Drop any iframe whose src was stripped (e.g. a non-allowlisted host) so no
+  // empty frame is left in the rendered article.
+  return cleaned.replace(/<iframe(?![^>]*\bsrc=)[^>]*>\s*<\/iframe>/g, "");
 }
 
 export const editorDocumentSchema = z.object({
@@ -163,6 +192,20 @@ export async function getActor(identity: AuthIdentity): Promise<BlogActor> {
   };
 }
 
+export async function publishScheduled(siteId: string) {
+  const { data, error } = await getSupabase()
+    .from("posts")
+    .update({ status: "published" })
+    .eq("site_id", siteId)
+    .eq("status", "review")
+    .not("scheduled_at", "is", null)
+    .lte("scheduled_at", new Date().toISOString())
+    .is("deleted_at", null)
+    .select("id");
+  if (error) return 0;
+  return data?.length ?? 0;
+}
+
 export async function resolvePublicSite() {
   const { data, error } = await getSupabase()
     .from("sites")
@@ -223,6 +266,7 @@ export const uploadInputSchema = z.object({
   mimeType: z.enum([
     "image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml", "application/pdf",
     "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm", "video/mp4", "video/webm",
   ]),
   base64: z.string().min(8).max(14_000_000),
   folder: z.string().trim().min(1).max(80).default("library"),

@@ -42,3 +42,4 @@ describe("permissioned agent safeguards", () => {
     const pending = await adminCaller.agent.actions.list(); expect(pending.find(item => item.id === action.id)?.status).toBe("proposed"); await adminCaller.agent.actions.reject({ actionId: action.id, confirmed: true });
   }, 30_000);
 });
+});

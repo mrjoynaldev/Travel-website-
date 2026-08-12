@@ -9,7 +9,9 @@ import { StudioAIProviders } from "@/admin-site/pages/StudioAI";
 import { StudioEditor } from "@/admin-site/pages/StudioEditor";
 import StudioPreview from "@/admin-site/pages/StudioPreview";
 import { StudioBranding, StudioPages } from "@/admin-site/pages/SiteManagement";
+import { StudioApiTokens, StudioSubscribers } from "@/admin-site/pages/StudioDeveloper";
 import AgentWorkspace from "@/admin-site/pages/AgentWorkspace";
+import StudioSections from "@/admin-site/pages/SiteSections";
 
 function App() {
   return (
@@ -35,9 +37,12 @@ function App() {
             <Route path={"/studio/settings"} component={StudioSettings} />
             <Route path={"/studio/brand"} component={StudioBranding} />
             <Route path={"/studio/pages"} component={StudioPages} />
+            <Route path={"/studio/sections"} component={StudioSections} />
             <Route path={"/studio/capabilities"} component={StudioCapabilities} />
             <Route path={"/studio/audit"} component={StudioAudit} />
             <Route path={"/studio/export"} component={StudioExport} />
+            <Route path={"/studio/subscribers"} component={StudioSubscribers} />
+            <Route path={"/studio/api-tokens"} component={StudioApiTokens} />
             <Route path={"/"} component={StudioOverview} />
             <Route component={StudioOverview} />
           </Switch>

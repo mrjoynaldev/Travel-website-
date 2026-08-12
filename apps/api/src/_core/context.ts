@@ -1,4 +1,5 @@
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { resolveApiToken, type ApiTokenContext } from "./apiTokens";
 import { authenticateRequest } from "./session";
 
 export type AuthUser = {
@@ -17,23 +18,34 @@ export type TrpcContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: AuthUser | null;
+  apiToken: ApiTokenContext | null;
 };
 
 export async function createContext(
   opts: CreateExpressContextOptions
 ): Promise<TrpcContext> {
   let user: AuthUser | null = null;
+  let apiToken: ApiTokenContext | null = null;
 
   try {
     user = await authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
-    user = null;
+  } catch {
+    // Session cookie/header did not authenticate. Try an API access token.
+    const authHeader = opts.req.headers.authorization;
+    if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
+      const resolved = await resolveApiToken(authHeader.slice(7));
+      if (resolved) {
+        user = resolved.user;
+        apiToken = resolved.token;
+      }
+    }
+    if (!user) user = null;
   }
 
   return {
     req: opts.req,
     res: opts.res,
     user,
+    apiToken,
   };
 }
