@@ -14,7 +14,7 @@ export function renderHead(head: HeadMeta): string {
   const tags: string[] = [];
   tags.push(`<title>${escapeHtml(head.title)}</title>`);
   tags.push(`<meta name="description" content="${escapeHtml(head.description)}" />`);
-  if (head.noindex) tags.push(`<meta name="robots" content="noindex,nofollow" />`);
+  if (head.noindex || head.notFound) tags.push(`<meta name="robots" content="noindex,nofollow" />`);
   tags.push(`<meta property="og:site_name" content="${escapeHtml(head.title)}" />`);
   tags.push(`<meta property="og:title" content="${escapeHtml(head.title)}" />`);
   tags.push(`<meta property="og:description" content="${escapeHtml(head.description)}" />`);

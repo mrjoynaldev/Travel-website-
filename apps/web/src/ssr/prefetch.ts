@@ -1,8 +1,15 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
+import { TRPCClientError } from "@trpc/client";
 import { TRPCError, type inferRouterOutputs } from "@trpc/server";
 import type { AppRouter } from "@shared/app-router";
 import { trpc } from "@/lib/trpc";
+
+function isNotFoundError(error: unknown): boolean {
+  if (error instanceof TRPCError) return error.code === "NOT_FOUND";
+  if (error instanceof TRPCClientError) return error.data?.code === "NOT_FOUND";
+  return false;
+}
 
 export type HeadMeta = { title: string; description: string; ogType?: "website" | "article"; ogImage?: string; canonicalPath?: string; publishedTime?: string; modifiedTime?: string; noindex?: boolean; notFound?: boolean; jsonLd?: string };
 type Outputs = inferRouterOutputs<AppRouter>;
@@ -50,12 +57,12 @@ export async function prefetchForPath(url: string, queryClient: QueryClient, pre
         publisher: { "@type": "Organization", name: publicationName },
       });
       return { title: post.meta_title?.trim() || `${post.title} · ${publicationName}`, description: post.meta_description?.trim() || post.excerpt || DESC, ogType: "article", ogImage: post.og_image_url || post.featuredMedia?.url || publicationSettings?.brand?.defaultOgImageUrl, canonicalPath: `/articles/${post.slug}`, publishedTime: post.published_at || undefined, modifiedTime: post.updated_at || undefined, jsonLd };
-    } catch (error) { if (error instanceof TRPCError && error.code === "NOT_FOUND") { seed(queryClient, getQueryKey(trpc.blog.bySlug, { slug: article[1] }, "query"), null); return { title: publicationName, description: publication.description || DESC, notFound: true }; } throw error; }
+    } catch (error) { if (isNotFoundError(error)) { seed(queryClient, getQueryKey(trpc.blog.bySlug, { slug: article[1] }, "query"), null); return { title: publicationName, description: publication.description || DESC, notFound: true }; } throw error; }
   }
   const author = clean.match(/^\/authors\/([^/]+)$/);
   if (author) {
     try { const data = await prefetch.author(author[1]); seed(queryClient, getQueryKey(trpc.blog.author, { authorId: author[1] }, "query"), data); return { title: `${data.author.display_name} · ${SITE}`, description: data.author.bio || `Published work by ${data.author.display_name}.`, canonicalPath: `/authors/${author[1]}` }; }
-    catch (error) { if (error instanceof TRPCError && error.code === "NOT_FOUND") return { title: SITE, description: DESC, notFound: true }; throw error; }
+    catch (error) { if (isNotFoundError(error)) return { title: SITE, description: DESC, notFound: true }; throw error; }
   }
   const topic = clean.match(/^\/topics\/([^/]+)$/);
   if (topic) {
@@ -93,7 +100,7 @@ export async function prefetchForPath(url: string, queryClient: QueryClient, pre
   const topLevelPage = clean.match(/^\/([a-z0-9]+(?:-[a-z0-9]+)*)$/);
   if (topLevelPage) {
     try { const page = await prefetch.pageBySlug(topLevelPage[1]); seed(queryClient, getQueryKey(trpc.blog.pageBySlug, { slug: topLevelPage[1] }, "query"), page); return { title: page.meta_title?.trim() || `${page.title} · ${publicationName}`, description: page.meta_description?.trim() || publication.description || DESC, ogImage: publicationSettings?.brand?.defaultOgImageUrl, canonicalPath: `/${page.slug}`, modifiedTime: page.updated_at || undefined }; }
-    catch (error) { if (error instanceof TRPCError && error.code === "NOT_FOUND") return { title: publicationName, description: publication.description || DESC, notFound: true }; throw error; }
+    catch (error) { if (isNotFoundError(error)) return { title: publicationName, description: publication.description || DESC, notFound: true }; throw error; }
   }
   return { title: publicationName, description: publication.description || DESC, notFound: true };
 }

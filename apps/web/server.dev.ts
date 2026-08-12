@@ -18,6 +18,9 @@ const API_TARGET = (process.env.VITE_API_URL || "http://localhost:4000").replace
 type RenderResult = { html: string; dehydratedState: unknown; head: HeadMeta };
 type RenderFn = (url: string, prefetch: SsrPrefetch) => Promise<RenderResult>;
 
+const FEED_PATHS = new Set(["/robots.txt", "/sitemap.xml", "/rss.xml"]);
+const isFeedPath = (pathname: string) => FEED_PATHS.has(pathname);
+
 function contentPathFor(urlPath: string, rootDir: string): string | null {
   const decoded = decodeURIComponent(urlPath);
   const full = path.normalize(path.join(rootDir, decoded));
@@ -73,6 +76,11 @@ async function main() {
     };
     const server = http.createServer((req, res) => {
       const url = req.url ?? "/";
+      const pathname = url.split("?")[0];
+      if (isFeedPath(pathname)) {
+        proxyApi(req, res, url);
+        return;
+      }
       vite.middlewares(req, res, () => {
         handleSsr(res, renderFn, template, url).catch(error => {
           console.error("[ssr]", error);
@@ -104,7 +112,7 @@ async function main() {
       res.end("Not found");
       return;
     }
-    if (pathname.startsWith("/api/") || pathname.startsWith("/manus-storage")) {
+    if (pathname.startsWith("/api/") || pathname.startsWith("/manus-storage") || isFeedPath(pathname)) {
       proxyApi(req, res, url);
       return;
     }
@@ -125,7 +133,7 @@ async function handleSsr(res: ServerResponse, renderFn: RenderFn, template: stri
   doc = doc.replace("<!--app-html-->", html);
   const serialized = superjson.stringify(dehydratedState);
   doc = doc.replace("</body>", `<script>window.__RQ_STATE__=${serializeState(serialized)};</script></body>`);
-  res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+  res.writeHead(head.notFound ? 404 : 200, { "content-type": "text/html; charset=utf-8" });
   res.end(doc);
 }
 

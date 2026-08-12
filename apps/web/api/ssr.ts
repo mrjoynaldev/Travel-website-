@@ -1,11 +1,44 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import http from "node:http";
+import https from "node:https";
 import path from "node:path";
 import superjson from "superjson";
 import { createHttpPrefetch } from "../src/ssr/httpPrefetch";
 import { MIME_TYPES, renderHead, serializeState } from "../src/ssr/html";
 
 const CLIENT_DIR = path.resolve(process.cwd(), "dist/client");
+const API_ORIGIN = (process.env.VITE_API_URL || process.env.API_URL || "").replace(/\/$/, "");
+const FEED_PATHS = new Set(["/robots.txt", "/sitemap.xml", "/rss.xml"]);
+
+function proxyToApi(req: IncomingMessage, res: ServerResponse, url: string): void {
+  if (!API_ORIGIN) {
+    res.statusCode = 503;
+    res.setHeader("content-type", "text/plain");
+    res.end("API origin is not configured.");
+    return;
+  }
+  const target = new URL(`${API_ORIGIN}${url}`);
+  const lib = target.protocol === "https:" ? https : http;
+  const proxyReq = lib.request(
+    target,
+    {
+      method: req.method,
+      headers: { ...req.headers, host: target.host },
+    },
+    proxyRes => {
+      res.statusCode = proxyRes.statusCode ?? 502;
+      for (const [key, value] of Object.entries(proxyRes.headers)) res.setHeader(key, value as string);
+      proxyRes.pipe(res);
+    },
+  );
+  proxyReq.on("error", () => {
+    res.statusCode = 502;
+    res.setHeader("content-type", "text/plain");
+    res.end("Bad gateway");
+  });
+  req.pipe(proxyReq);
+}
 
 function contentPathFor(urlPath: string): string | null {
   const decoded = decodeURIComponent(urlPath);
@@ -25,6 +58,11 @@ function serveStatic(res: ServerResponse, filePath: string): void {
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const url = req.url ?? "/";
   const pathname = url.split("?")[0];
+
+  if (FEED_PATHS.has(pathname)) {
+    proxyToApi(req, res, url);
+    return;
+  }
 
   const staticFile = contentPathFor(pathname);
   if (staticFile && existsSync(staticFile) && statSync(staticFile).isFile()) {
@@ -68,9 +106,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const serialized = superjson.stringify(dehydratedState);
     template = template.replace("</body>", `<script>window.__RQ_STATE__=${serializeState(serialized)};</script></body>`);
 
-    res.statusCode = 200;
+    res.statusCode = head.notFound ? 404 : 200;
     res.setHeader("content-type", "text/html; charset=utf-8");
-    res.setHeader("cache-control", "public, s-maxage=300, stale-while-revalidate=600");
+    res.setHeader("cache-control", head.notFound ? "noindex, no-cache" : "public, s-maxage=300, stale-while-revalidate=600");
     res.end(template);
   } catch (error) {
     console.error("[ssr] render failed for", url, error);

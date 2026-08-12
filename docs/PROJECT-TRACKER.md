@@ -4,7 +4,6 @@
 >
 > **Last updated:** 2026-08-12
 > **Current milestone:** Launch-ready professional blog (core CMS + editor complete, headless API + CLI live)
-
 ---
 
 ## 0. Rules (how this tracker must be used)
@@ -198,6 +197,10 @@ React 19 · TypeScript 5.9 (strict) · tRPC v11 (superjson) · Express 4 · Supa
 
 | Date | Change |
 |---|---|
+| 2026-08-12 | **QA artifact cleanup:** removed all 82 accumulated QA posts (revisions/comments/analytics/taxonomy joins), the `qa-lifecycle` category/tag, QA subscribers, 1075 notification-outbox and 443 audit records, and all agent threads/actions from the live site — DB is back to pristine state (8 categories · 16 tags · site identity + legal pages only) |
+| 2026-08-12 | **Public-origin feeds fix:** `/rss.xml`, `/sitemap.xml`, and `/robots.txt` were only served on the API origin, so they 404'd on the public site; both SSR servers (`server.dev.ts` + Vercel `api/ssr.ts`) now proxy feed paths to the API — verified 200 with correct sitemap/robots content on the web origin |
+| 2026-08-12 | **Environment provisioned:** `.env` created for api/web/studio with live Supabase credentials + generated `JWT_SECRET`; all 11 migrations confirmed applied remotely; full suite runs green against the live project (25 passed · 1 skipped) |
+| 2026-08-12 | **404 SSR contract fix:** HTTP prefetch threw `TRPCClientError` (not `TRPCError`), so missing articles/authors/pages bubbled as HTTP 500 instead of 404; prefetch now detects NOT_FOUND on both error classes and both SSR servers return HTTP 404 + `noindex` (verified in dev and production builds) |
 | 2026-08-12 | **Production QA:** installed Google Chrome 151, fixed the web production start/static-directory path, and verified the real Supabase sign-in → canonical publication → rich post → moderation/audience/analytics/export → API token/CLI flow with zero QA residuals |
 | 2026-08-12 | **Homepage composition:** public SSR now renders configured homepage sections with a safe feed fallback; Studio adds a scoped section manager for create/edit/reorder/visibility/remove |
 | 2026-08-12 | **Database live:** applied all 11 migrations to the Supabase project (llm_providers, site_sections, codereport seed, api_tokens); fixed a CTE-scoping bug in the seed migration that blocked `db push` |
@@ -223,12 +226,14 @@ React 19 · TypeScript 5.9 (strict) · tRPC v11 (superjson) · Express 4 · Supa
 |---|---|
 | TypeScript (`pnpm check`) | ✅ 5/5 packages |
 | Build (`pnpm build`) | ✅ api + studio + web (+ SSR) |
-| Tests (`pnpm test`) | ✅ 25 passed · 2 skipped · 0 failures |
+| Tests (`pnpm test`) | ✅ 25 passed · 1 skipped · 0 failures (live Supabase + live SSR web server) |
+| Public routes (dev + production SSR) | ✅ `/`, `/privacy`, `/terms`, `/contact`, `/about`, `/archive`, `/topics/*`, `/tags/*`, `/archive/:year` → 200; missing article `/articles/*` and `/404` → 404 + `noindex` |
+| Live auth loop | ✅ real Supabase sign-in issues httpOnly session cookie; first Studio call auto-provisions admin membership; QA user/data fully removed afterward |
 | Real local acceptance | ✅ Chrome public-route smoke; real API sign-in, canonical publication workflow, audience/moderation/analytics/export, token scope/revocation, CLI, and zero residual QA records |
 
-### Skipped Tests (environmental prerequisites — skip cleanly, no failure)
+### Skipped Test (environmental prerequisite — skips cleanly, no failure)
 
-1. **`qa.publicRoutes.test.ts`** — probes `http://localhost:3000` and skips when the SSR dev server is not running.
+1. **`supabase.config.test.ts` provider-delivery probe** — the second half of this file requires a live email provider key (`RESEND_API_KEY`/`EMAIL_FROM` or Gmail OAuth) and skips cleanly without one.
 
 ---
 
@@ -257,7 +262,7 @@ pnpm test     # tests
 
 ## 8. Next Steps (Priority Order)
 
-1. **Clean up QA artifacts** — the active site still carries a `qa-lifecycle` category/tag and archived QA posts from acceptance testing; remove the category/tag before launch so they don't appear in public topic/tag listings.
+1. **Publish real content** — the database is now pristine: no posts yet, with 8 real categories, 16 tags, and the CodeReport Global brand/pages/legal copy in place. Write and publish the first real articles.
 2. **Verify in browser** — public Chrome route smoke is complete; authenticated Studio UI still needs a repeatable non-mocked browser harness against the local Vite proxy, while the real authenticated API acceptance flow is complete.
 3. **Production deploy config** — set `VITE_API_URL` (Render URL) + `CANONICAL_ORIGIN` + `CORS_ORIGINS` (Vercel domains) for the decoupled Vercel/Render deployment.
 4. **Scheduled publishing cron** — move lazy auto-publish to a background scheduler (optional; read-side fallback is live).
