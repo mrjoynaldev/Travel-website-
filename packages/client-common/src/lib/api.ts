@@ -16,6 +16,8 @@ export const API_URL: string = viteEnv.VITE_API_URL ?? (typeof process !== "unde
 
 export const apiUrl = (path: string): string => (API_URL ? `${API_URL}${path}` : path);
 
+export const getTrpcUrl = (): string => apiUrl("/api/trpc");
+
 export const resolveMediaUrl = (url?: string | null): string => {
   if (!url) return "";
   if (/^(https?:)?\/\//.test(url)) return url.startsWith("//") ? `https:${url}` : url;

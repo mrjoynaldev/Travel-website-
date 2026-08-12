@@ -3,11 +3,11 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerStorageProxy } from "./_core/storageProxy";
-import { appRouter } from "./routers";
-import { createContext } from "./_core/context";
-import { registerPublicFeeds } from "./publicFeeds";
-import { getSupabase } from "./supabase";
+import { registerStorageProxy } from "./storageProxy";
+import { appRouter } from "../routers";
+import { createContext } from "./context";
+import { registerPublicFeeds } from "../publicFeeds";
+import { getSupabase } from "../supabase";
 
 const CORS_ORIGINS = (process.env.CORS_ORIGINS || "")
   .split(",")

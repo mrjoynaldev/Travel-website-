@@ -33,7 +33,7 @@ function createContext(): { ctx: TrpcContext; setCookies: CookieCall[] } {
         setCookies.push({ name, options });
       },
       clearCookie: () => undefined,
-    } as TrpcContext["res"],
+    } as unknown as TrpcContext["res"],
   };
   return { ctx, setCookies };
 }

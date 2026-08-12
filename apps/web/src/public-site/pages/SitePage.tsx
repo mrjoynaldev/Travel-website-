@@ -1,4 +1,4 @@
-import { PublicShell } from "@/public-site/components/PublicShell";
+import { PublicShell } from "@/components/public/PublicShell";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, FileWarning, Loader2 } from "lucide-react";

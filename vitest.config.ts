@@ -4,16 +4,28 @@ import path from "path";
 const templateRoot = path.resolve(import.meta.dirname);
 
 export default defineConfig({
-  root: templateRoot,
   resolve: {
-    alias: {
-      "@": path.resolve(templateRoot, "client", "src"),
-      "@shared": path.resolve(templateRoot, "shared"),
-      "@assets": path.resolve(templateRoot, "attached_assets"),
-    },
+    alias: [
+      { find: "@/admin-site", replacement: path.resolve(templateRoot, "apps/studio/src/admin-site") },
+      { find: "@shared", replacement: path.resolve(templateRoot, "packages/contracts/src") },
+      { find: "@", replacement: path.resolve(templateRoot, "packages/client-common/src") },
+    ],
   },
   test: {
+    root: templateRoot,
     environment: "node",
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts"],
+    env: {
+      JWT_SECRET: "test-only-jwt-secret-0123456789abcdef0123456789abcdef",
+      VITE_SUPABASE_URL: process.env.VITE_SUPABASE_URL ?? "",
+      VITE_SUPABASE_PUBLISHABLE_KEY: process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "",
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
+      SUPABASE_ACCESS_TOKEN: process.env.SUPABASE_ACCESS_TOKEN ?? "",
+    },
+    include: [
+      "apps/api/src/**/*.test.ts",
+      "apps/api/src/**/*.spec.ts",
+      "apps/studio/src/**/*.test.ts",
+      "apps/studio/src/**/*.spec.ts",
+    ],
   },
 });

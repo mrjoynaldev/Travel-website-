@@ -1,5 +1,5 @@
-import { ArticleCard } from "@/public-site/components/ArticleCard";
-import { PublicShell } from "@/public-site/components/PublicShell";
+import { ArticleCard } from "@/components/public/ArticleCard";
+import { PublicShell } from "@/components/public/PublicShell";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
 import { Link, useRoute } from "wouter";

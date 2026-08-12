@@ -1,5 +1,5 @@
-import { ArticleCard } from "@/public-site/components/ArticleCard";
-import { PublicShell, SearchField } from "@/public-site/components/PublicShell";
+import { ArticleCard } from "@/components/public/ArticleCard";
+import { PublicShell, SearchField } from "@/components/public/PublicShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, Loader2, Mail, MoveRight, RefreshCw } from "lucide-react";

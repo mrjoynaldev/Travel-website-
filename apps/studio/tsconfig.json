@@ -1,12 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "vite.config.ts"],
   "exclude": ["node_modules", "dist"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/admin-site/*": ["./src/admin-site/*"],
+      "@/*": ["../../packages/client-common/src/*"],
       "@shared/*": ["../../packages/contracts/src/*"],
-      "@fieldnote/api/*": ["./*"]
+      "@fieldnote/api/*": ["../../apps/api/*"]
     }
   }
 }

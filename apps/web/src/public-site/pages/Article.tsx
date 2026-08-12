@@ -1,6 +1,6 @@
-import { ArticleCard } from "@/public-site/components/ArticleCard";
-import { ArticleMeta } from "@/public-site/components/ArticleMeta";
-import { PublicShell } from "@/public-site/components/PublicShell";
+import { ArticleCard } from "@/components/public/ArticleCard";
+import { ArticleMeta } from "@/components/public/ArticleMeta";
+import { PublicShell } from "@/components/public/PublicShell";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -1,7 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { getQueryKey } from "@trpc/react-query";
 import { TRPCError, type inferRouterOutputs } from "@trpc/server";
-import type { AppRouter } from "../../../server/routers";
+import type { AppRouter } from "@shared/app-router";
 import { trpc } from "@/lib/trpc";
 
 export type HeadMeta = { title: string; description: string; ogType?: "website" | "article"; ogImage?: string; canonicalPath?: string; publishedTime?: string; modifiedTime?: string; noindex?: boolean; notFound?: boolean };

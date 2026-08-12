@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm build",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/api/ssr"
+    }
+  ]
+}

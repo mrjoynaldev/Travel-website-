@@ -4,7 +4,7 @@ import { renderToString } from "react-dom/server";
 import superjson from "superjson";
 import { Router } from "wouter";
 import App from "./App";
-import { trpc } from "./lib/trpc";
+import { trpc } from "@/lib/trpc";
 import { prefetchForPath, type HeadMeta, type SsrPrefetch } from "./ssr/prefetch";
 
 export async function render(url: string, prefetch: SsrPrefetch): Promise<{ html: string; dehydratedState: unknown; head: HeadMeta }> {

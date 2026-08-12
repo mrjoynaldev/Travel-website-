@@ -1,0 +1,47 @@
+{
+  "name": "@fieldnote/studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fieldnote/client-common": "workspace:*",
+    "@fieldnote/contracts": "workspace:*",
+    "@tanstack/react-query": "^5.90.2",
+    "@tiptap/extension-character-count": "^3.30.0",
+    "@tiptap/extension-image": "^3.30.0",
+    "@tiptap/extension-link": "^3.30.0",
+    "@tiptap/extension-placeholder": "^3.30.0",
+    "@tiptap/react": "^3.30.0",
+    "@tiptap/starter-kit": "^3.30.0",
+    "@trpc/client": "^11.6.0",
+    "@trpc/react-query": "^11.6.0",
+    "@trpc/server": "^11.6.0",
+    "lucide-react": "^0.453.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "sonner": "^2.0.7",
+    "superjson": "^1.13.3",
+    "wouter": "^3.3.5"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@tailwindcss/vite": "^4.1.3",
+    "@types/node": "^24.7.0",
+    "@types/react": "^19.2.1",
+    "@types/react-dom": "^19.2.1",
+    "@vitejs/plugin-react": "^5.0.4",
+    "jsdom": "^30.0.1",
+    "tailwindcss": "^4.1.14",
+    "typescript": "5.9.3",
+    "vite": "^7.1.7",
+    "vitest": "^2.1.4"
+  }
+}

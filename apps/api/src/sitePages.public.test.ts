@@ -3,7 +3,9 @@ import { appRouter } from "./routers";
 
 const publicContext = { user: null, req: { headers: {}, protocol: "https" }, res: { clearCookie: () => undefined } } as any;
 
-describe("public site pages", () => {
+const describeDb = process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? describe : describe.skip;
+
+describeDb("public site pages", () => {
   it("serves configured privacy, terms, and contact pages through the public reader API without unsafe script markup", async () => {
     const caller = appRouter.createCaller(publicContext);
     const pages = await caller.blog.pages();

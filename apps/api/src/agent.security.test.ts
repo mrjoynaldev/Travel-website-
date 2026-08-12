@@ -18,7 +18,10 @@ let organizationId = ""; let siteId = "";
 
 function context(identity: typeof admin) { return { user: { id: -1, openId: identity.openId, name: identity.name, email: identity.email, loginMethod: "qa", role: "user", createdAt: new Date(), updatedAt: new Date(), lastSignedIn: new Date() }, req: { headers: {}, protocol: "https" }, res: { clearCookie: () => undefined } } as any; }
 
-beforeAll(async () => {
+const describeDb = process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? describe : describe.skip;
+
+describeDb("permissioned agent safeguards", () => {
+  beforeAll(async () => {
   const db = getSupabase(); const { data: site, error } = await db.from("sites").select("id, organization_id").eq("status", "active").order("created_at", { ascending: true }).limit(1).single(); if (error || !site) throw error ?? new Error("No active publication found."); siteId = site.id; organizationId = site.organization_id;
   const { data: profiles, error: profileError } = await db.from("profiles").upsert([admin, author].map(person => ({ external_auth_id: person.openId, display_name: person.name, email: person.email })), { onConflict: "external_auth_id" }).select("id, external_auth_id"); if (profileError || !profiles) throw profileError ?? new Error("Could not seed QA agent profiles."); const ids = new Map(profiles.map(profile => [profile.external_auth_id, profile.id]));
   const { error: memberError } = await db.from("memberships").upsert([{ organization_id: organizationId, site_id: siteId, profile_id: ids.get(admin.openId), role: "admin" }, { organization_id: organizationId, site_id: siteId, profile_id: ids.get(author.openId), role: "author" }], { onConflict: "organization_id,site_id,profile_id" }); if (memberError) throw memberError;

@@ -1,5 +1,5 @@
-import { ArticleCard } from "@/public-site/components/ArticleCard";
-import { PublicShell } from "@/public-site/components/PublicShell";
+import { ArticleCard } from "@/components/public/ArticleCard";
+import { PublicShell } from "@/components/public/PublicShell";
 import { Button } from "@/components/ui/button";
 import { Loader2, Tags } from "lucide-react";
 import { useMemo } from "react";

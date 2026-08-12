@@ -10,7 +10,9 @@ function publicContext(): TrpcContext {
   };
 }
 
-describe("public publication feed", () => {
+const describeDb = process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? describe : describe.skip;
+
+describeDb("public publication feed", () => {
   it("returns a paginated feed from the configured Supabase project", async () => {
     const caller = appRouter.createCaller(publicContext());
     const feed = await caller.blog.list({ page: 1 });

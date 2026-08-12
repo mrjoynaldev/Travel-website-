@@ -1,5 +1,5 @@
-import { ArticleMeta } from "@/public-site/components/ArticleMeta";
-import { PublicShell } from "@/public-site/components/PublicShell";
+import { ArticleMeta } from "@/components/public/ArticleMeta";
+import { PublicShell } from "@/components/public/PublicShell";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import { Link, useRoute } from "wouter";
