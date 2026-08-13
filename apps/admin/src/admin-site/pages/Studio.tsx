@@ -4,12 +4,27 @@ import DashboardLayout from "@/admin-site/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { Boxes, Download, Film, Folder, FolderOpen, Image as ImageIcon, Loader2, Music2, PenLine, Plus, ScrollText, Settings2, ShieldCheck, Tags, UploadCloud, UsersRound } from "lucide-react";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+
+function CreateMenu() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button className="gap-2"><Plus className="h-4 w-4" />New post</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuItem asChild><Link href="/studio/posts/new" className="cursor-pointer"><PenLine className="mr-2 h-4 w-4" /><span><span className="block font-medium">Story</span><span className="block text-xs text-muted-foreground">Rich text editor</span></span></Link></DropdownMenuItem>
+        <DropdownMenuItem asChild><Link href="/studio/gravity" className="cursor-pointer"><Boxes className="mr-2 h-4 w-4" /><span><span className="block font-medium">Space</span><span className="block text-xs text-muted-foreground">Block layout editor</span></span></Link></DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 function Frame({ title, eyebrow, children, actions }: { title: string; eyebrow?: string; children: React.ReactNode; actions?: React.ReactNode }) {
   const bootstrap = trpc.studio.bootstrap.useQuery();
@@ -22,7 +37,7 @@ export const StatusPill = ({ state }: { state: string }) => <span className={`in
 export function StudioOverview() {
   const posts = trpc.studio.posts.list.useQuery({}); const analytics = trpc.studio.analytics.useQuery({});
   const current = posts.data ?? []; const counts = ["draft", "review", "published", "archived"].map(status => ({ status, count: current.filter(post => post.status === status).length }));
-  return <Frame title="Editorial overview" eyebrow="Your publication, at a glance" actions={<Link href="/studio/posts/new"><Button className="gap-2"><Plus className="h-4 w-4" />New post</Button></Link>}><div className="grid gap-4 md:grid-cols-4">{counts.map(item => <div key={item.status} className="rounded-xl border border-border bg-white p-5 shadow-sm"><p className="font-label text-[10px] text-muted-foreground">{item.status}</p><p className="mt-3 font-display text-4xl font-semibold">{item.count}</p></div>)}</div><div className="mt-7 grid gap-6 lg:grid-cols-[1.15fr_.85fr]"><section className="rounded-xl border border-border bg-white p-6 shadow-sm"><div className="flex items-center justify-between"><div><p className="font-label text-[10px] text-primary">Review queue</p><h2 className="mt-2 font-display text-2xl font-semibold">Awaiting an editorial decision</h2></div><Link href="/studio/posts" className="text-sm font-medium text-primary">View all</Link></div><div className="mt-5 divide-y divide-border">{current.filter(post => post.status === "review").slice(0, 5).map(post => <Link key={post.id} href={`/studio/posts/${post.id}`} className="flex items-center justify-between gap-4 py-4 hover:text-primary"><div><p className="font-medium">{post.title}</p><p className="mt-1 text-xs text-muted-foreground">Submitted {post.submitted_at ? new Date(post.submitted_at).toLocaleDateString() : "recently"}</p></div><StatusPill state={post.status} /></Link>)}{!current.some(post => post.status === "review") && <p className="py-10 text-center text-sm text-muted-foreground">Nothing is waiting for review.</p>}</div></section><section className="rounded-xl bg-[#1b382d] p-6 text-[#edf4ea]"><p className="font-label text-[10px] text-[#abc8b2]">Last 30 days</p><p className="mt-3 font-display text-5xl font-semibold">{analytics.data?.totalViews ?? 0}</p><p className="mt-1 text-sm text-[#c6d5ca]">Measured page views</p><div className="mt-8 border-t border-[#396550] pt-5"><p className="text-sm font-medium">{analytics.data?.engagementRate ?? 0}% engagement rate</p><p className="mt-1 text-xs leading-5 text-[#abc8b2]">Engagement is calculated from meaningful reading, scroll, comment, and subscription events.</p></div></section></div></Frame>;
+  return <Frame title="Editorial overview" eyebrow="Your publication, at a glance" actions={<CreateMenu />}><div className="grid gap-4 md:grid-cols-4">{counts.map(item => <div key={item.status} className="rounded-xl border border-border bg-white p-5 shadow-sm"><p className="font-label text-[10px] text-muted-foreground">{item.status}</p><p className="mt-3 font-display text-4xl font-semibold">{item.count}</p></div>)}</div><div className="mt-7 grid gap-6 lg:grid-cols-[1.15fr_.85fr]"><section className="rounded-xl border border-border bg-white p-6 shadow-sm"><div className="flex items-center justify-between"><div><p className="font-label text-[10px] text-primary">Review queue</p><h2 className="mt-2 font-display text-2xl font-semibold">Awaiting an editorial decision</h2></div><Link href="/studio/posts" className="text-sm font-medium text-primary">View all</Link></div><div className="mt-5 divide-y divide-border">{current.filter(post => post.status === "review").slice(0, 5).map(post => <Link key={post.id} href={`/studio/posts/${post.id}`} className="flex items-center justify-between gap-4 py-4 hover:text-primary"><div><p className="font-medium">{post.title}</p><p className="mt-1 text-xs text-muted-foreground">Submitted {post.submitted_at ? new Date(post.submitted_at).toLocaleDateString() : "recently"}</p></div><StatusPill state={post.status} /></Link>)}{!current.some(post => post.status === "review") && <p className="py-10 text-center text-sm text-muted-foreground">Nothing is waiting for review.</p>}</div></section><section className="rounded-xl bg-[#1b382d] p-6 text-[#edf4ea]"><p className="font-label text-[10px] text-[#abc8b2]">Last 30 days</p><p className="mt-3 font-display text-5xl font-semibold">{analytics.data?.totalViews ?? 0}</p><p className="mt-1 text-sm text-[#c6d5ca]">Measured page views</p><div className="mt-8 border-t border-[#396550] pt-5"><p className="text-sm font-medium">{analytics.data?.engagementRate ?? 0}% engagement rate</p><p className="mt-1 text-xs leading-5 text-[#abc8b2]">Engagement is calculated from meaningful reading, scroll, comment, and subscription events.</p></div></section></div></Frame>;
 }
 
 type PostFolder = { kind: "all" } | { kind: "category"; id: string } | { kind: "tag"; id: string };
@@ -31,9 +46,24 @@ export function StudioPosts() {
   const [search, setSearch] = useState("");
   const [folder, setFolder] = useState<PostFolder>({ kind: "all" });
   const all = trpc.studio.posts.list.useQuery({});
+  const taxonomy = trpc.studio.taxonomy.list.useQuery();
+  const [newCategoryOpen, setNewCategoryOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newTagOpen, setNewTagOpen] = useState(false);
+  const [newTagName, setNewTagName] = useState("");
+  const createCategory = trpc.studio.taxonomy.createCategory.useMutation({
+    onSuccess: data => { taxonomy.refetch(); setNewCategoryName(""); setNewCategoryOpen(false); setFolder({ kind: "category", id: data.id }); toast.success(`Category "${data.name}" created.`); },
+    onError: error => toast.error(error.message),
+  });
+  const createTag = trpc.studio.taxonomy.createTag.useMutation({
+    onSuccess: data => { taxonomy.refetch(); setNewTagName(""); setNewTagOpen(false); setFolder({ kind: "tag", id: data.id }); toast.success(`Tag "#${data.name}" created.`); },
+    onError: error => toast.error(error.message),
+  });
   const folders = useMemo(() => {
     const cats = new Map<string, { name: string; count: number }>();
     const tags = new Map<string, { name: string; count: number }>();
+    for (const cat of taxonomy.data?.categories ?? []) cats.set(cat.id, { name: cat.name, count: 0 });
+    for (const tag of taxonomy.data?.tags ?? []) tags.set(tag.id, { name: tag.name, count: 0 });
     for (const post of all.data ?? []) {
       for (const cat of post.categories ?? []) cats.set(cat.id, { name: cat.name, count: (cats.get(cat.id)?.count ?? 0) + 1 });
       for (const tag of post.tags ?? []) tags.set(tag.id, { name: tag.name, count: (tags.get(tag.id)?.count ?? 0) + 1 });
@@ -42,7 +72,7 @@ export function StudioPosts() {
       cats: Array.from(cats.entries()).map(([id, value]) => ({ id, ...value })).sort((a, b) => b.count - a.count),
       tags: Array.from(tags.entries()).map(([id, value]) => ({ id, ...value })).sort((a, b) => b.count - a.count),
     };
-  }, [all.data]);
+  }, [all.data, taxonomy.data]);
   const filtered = useMemo(() => (all.data ?? []).filter(post =>
     (status === "all" || post.status === status) &&
     (search.trim() === "" || post.title.toLowerCase().includes(search.trim().toLowerCase())) &&
@@ -60,23 +90,30 @@ export function StudioPosts() {
     </button>
   );
   return (
-    <Frame title="Posts" eyebrow="Plan, write, review, publish" actions={<Link href="/studio/posts/new"><Button className="gap-2"><Plus className="h-4 w-4" />New post</Button></Link>}>
+    <Frame title="Posts" eyebrow="Plan, write, review, publish" actions={<CreateMenu />}>
       <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="h-fit rounded-xl border border-border bg-white p-4 shadow-sm">
           <div className="space-y-1">
             <FolderButton item={{ kind: "all" }} icon={<FolderOpen className="h-4 w-4" />} label="All posts" count={all.data?.length ?? 0} />
           </div>
-          <p className="mt-5 mb-2 font-label text-[10px] text-muted-foreground">Categories</p>
-          <div className="space-y-1">
+          <div className="mt-5 flex items-center justify-between">
+            <p className="font-label text-[10px] text-muted-foreground">Categories</p>
+            <button type="button" className="flex items-center gap-0.5 text-xs font-medium text-primary" onClick={() => setNewCategoryOpen(value => !value)}><Plus className="h-3.5 w-3.5" />New</button>
+          </div>
+          <div className="mt-2 space-y-1">
+            {newCategoryOpen && <div className="flex gap-1.5 pb-1"><Input autoFocus value={newCategoryName} onChange={event => setNewCategoryName(event.target.value)} onKeyDown={event => { if (event.key === "Enter") createCategory.mutate({ name: newCategoryName }); if (event.key === "Escape") setNewCategoryOpen(false); }} placeholder="Category name" className="h-8 text-xs" /><Button size="sm" className="h-8 px-2 text-xs" disabled={createCategory.isPending || !newCategoryName.trim()} onClick={() => createCategory.mutate({ name: newCategoryName })}>Add</Button></div>}
             {folders.cats.map(cat => <FolderButton key={cat.id} item={{ kind: "category", id: cat.id }} icon={<Folder className="h-4 w-4" />} label={cat.name} count={cat.count} />)}
-            {!folders.cats.length && <p className="px-3 py-2 text-xs text-muted-foreground">No categories yet.</p>}
+            {!folders.cats.length && !newCategoryOpen && <p className="px-3 py-2 text-xs text-muted-foreground">No categories yet.</p>}
           </div>
-          <p className="mt-5 mb-2 font-label text-[10px] text-muted-foreground">Tags</p>
-          <div className="space-y-1">
+          <div className="mt-5 flex items-center justify-between">
+            <p className="font-label text-[10px] text-muted-foreground">Tags</p>
+            <button type="button" className="flex items-center gap-0.5 text-xs font-medium text-primary" onClick={() => setNewTagOpen(value => !value)}><Plus className="h-3.5 w-3.5" />New</button>
+          </div>
+          <div className="mt-2 space-y-1">
+            {newTagOpen && <div className="flex gap-1.5 pb-1"><Input autoFocus value={newTagName} onChange={event => setNewTagName(event.target.value)} onKeyDown={event => { if (event.key === "Enter") createTag.mutate({ name: newTagName }); if (event.key === "Escape") setNewTagOpen(false); }} placeholder="Tag name" className="h-8 text-xs" /><Button size="sm" className="h-8 px-2 text-xs" disabled={createTag.isPending || !newTagName.trim()} onClick={() => createTag.mutate({ name: newTagName })}>Add</Button></div>}
             {folders.tags.map(tag => <FolderButton key={tag.id} item={{ kind: "tag", id: tag.id }} icon={<Tags className="h-4 w-4" />} label={`#${tag.name}`} count={tag.count} />)}
-            {!folders.tags.length && <p className="px-3 py-2 text-xs text-muted-foreground">No tags yet.</p>}
+            {!folders.tags.length && !newTagOpen && <p className="px-3 py-2 text-xs text-muted-foreground">No tags yet.</p>}
           </div>
-          <div className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground"><p>Categories and tags are managed under <Link href="/studio/taxonomy" className="font-medium text-primary">Taxonomy</Link>.</p></div>
         </aside>
         <section>
           <div className="mb-5 flex flex-col gap-3 sm:flex-row">

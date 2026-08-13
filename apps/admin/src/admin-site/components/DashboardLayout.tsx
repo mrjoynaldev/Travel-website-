@@ -12,6 +12,9 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -24,33 +27,76 @@ import {
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
-import { BarChart3, Bell, Bot, Boxes, Cpu, Download, FileText, Images, KeyRound, LayoutDashboard, LayoutTemplate, LogOut, Mail, MessageSquare, Palette, PanelLeft, ScrollText, Settings2, ShieldCheck, Tags, Users } from "lucide-react";
+import { BarChart3, Bell, Bot, Boxes, Cpu, Download, FileText, Images, KeyRound, LayoutDashboard, LayoutTemplate, LogOut, Mail, MessageSquare, Palette, PanelLeft, ScrollText, Settings2, ShieldCheck, Tags, UploadCloud, Users, type LucideIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "@/components/ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Overview", path: "/studio" },
-  { icon: FileText, label: "Posts", path: "/studio/posts" },
-  { icon: Boxes, label: "Gravity editor", path: "/studio/gravity" },
-  { icon: Images, label: "Media", path: "/studio/media" },
-  { icon: Tags, label: "Taxonomy", path: "/studio/taxonomy" },
-  { icon: MessageSquare, label: "Moderation", path: "/studio/moderation" },
-  { icon: BarChart3, label: "Analytics", path: "/studio/analytics" },
-  { icon: Users, label: "Team", path: "/studio/team" },
-  { icon: Bell, label: "Outbox", path: "/studio/notifications" },
-  { icon: Bot, label: "AI Agent", path: "/studio/agent" },
-  { icon: Cpu, label: "AI Providers", path: "/studio/ai" },
-  { icon: Settings2, label: "Settings", path: "/studio/settings" },
-  { icon: Palette, label: "Brand", path: "/studio/brand" },
-  { icon: FileText, label: "Public pages", path: "/studio/pages" },
-  { icon: LayoutTemplate, label: "Homepage", path: "/studio/sections", adminOnly: true },
-  { icon: ShieldCheck, label: "Capabilities", path: "/studio/capabilities" },
-  { icon: ScrollText, label: "Audit log", path: "/studio/audit" },
-  { icon: Download, label: "Export", path: "/studio/export" },
-  { icon: Mail, label: "Subscribers", path: "/studio/subscribers" },
-  { icon: KeyRound, label: "API tokens", path: "/studio/api-tokens" },
+type MenuItem = { icon: LucideIcon; label: string; path: string; adminOnly?: boolean };
+const menuGroups: { label: string; items: MenuItem[] }[] = [
+  {
+    label: "Start",
+    items: [{ icon: LayoutDashboard, label: "Overview", path: "/studio" }],
+  },
+  {
+    label: "Create",
+    items: [
+      { icon: FileText, label: "New story", path: "/studio/posts/new" },
+      { icon: Boxes, label: "New space", path: "/studio/gravity" },
+      { icon: UploadCloud, label: "Upload media", path: "/studio/media" },
+    ],
+  },
+  {
+    label: "Content",
+    items: [
+      { icon: FileText, label: "Posts", path: "/studio/posts" },
+      { icon: Boxes, label: "Gravity editor", path: "/studio/gravity" },
+      { icon: Images, label: "Media", path: "/studio/media" },
+      { icon: Tags, label: "Categories & tags", path: "/studio/taxonomy" },
+      { icon: LayoutTemplate, label: "Homepage", path: "/studio/sections", adminOnly: true },
+      { icon: MessageSquare, label: "Moderation", path: "/studio/moderation" },
+    ],
+  },
+  {
+    label: "Audience",
+    items: [
+      { icon: Mail, label: "Subscribers", path: "/studio/subscribers" },
+      { icon: Bell, label: "Outbox", path: "/studio/notifications" },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [{ icon: BarChart3, label: "Analytics", path: "/studio/analytics" }],
+  },
+  {
+    label: "People",
+    items: [{ icon: Users, label: "Team", path: "/studio/team" }],
+  },
+  {
+    label: "Automation",
+    items: [
+      { icon: Bot, label: "AI Agent", path: "/studio/agent" },
+      { icon: Cpu, label: "AI Providers", path: "/studio/ai" },
+    ],
+  },
+  {
+    label: "Site",
+    items: [
+      { icon: Settings2, label: "Settings", path: "/studio/settings" },
+      { icon: Palette, label: "Brand", path: "/studio/brand" },
+      { icon: FileText, label: "Public pages", path: "/studio/pages" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { icon: ShieldCheck, label: "Capabilities", path: "/studio/capabilities" },
+      { icon: ScrollText, label: "Audit log", path: "/studio/audit" },
+      { icon: Download, label: "Export", path: "/studio/export" },
+      { icon: KeyRound, label: "API tokens", path: "/studio/api-tokens" },
+    ],
+  },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -132,12 +178,12 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === pathname);
+  const activeMenuItem = menuGroups.flatMap(group => group.items).find(item => item.path === pathname);
   const isMobile = useIsMobile();
   const { data: publication } = trpc.blog.publication.useQuery();
   const { data: bootstrap } = trpc.studio.bootstrap.useQuery();
   const studioName = `${publication?.name || "CodeReport Global"} Studio`;
-  const visibleMenuItems = menuItems.filter(item => !item.adminOnly || bootstrap?.actor.role === "admin");
+  const visibleMenuGroups = menuGroups.map(group => ({ ...group, items: group.items.filter(item => !item.adminOnly || bootstrap?.actor.role === "admin") })).filter(group => group.items.length);
 
   useEffect(() => {
     if (isCollapsed) {
@@ -203,26 +249,33 @@ function DashboardLayoutContent({
           </SidebarHeader>
 
           <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
-              {visibleMenuItems.map(item => {
-                const isActive = pathname === item.path;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => router.push(item.path)}
-                      tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
-                    >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            {visibleMenuGroups.map(group => (
+              <SidebarGroup key={group.label}>
+                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu className="px-2">
+                    {group.items.map(item => {
+                      const isActive = pathname === item.path;
+                      return (
+                        <SidebarMenuItem key={item.path}>
+                          <SidebarMenuButton
+                            isActive={isActive}
+                            onClick={() => router.push(item.path)}
+                            tooltip={item.label}
+                            className={`h-10 transition-all font-normal`}
+                          >
+                            <item.icon
+                              className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                            />
+                            <span>{item.label}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      );
+                    })}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ))}
           </SidebarContent>
 
           <SidebarFooter className="p-3">
