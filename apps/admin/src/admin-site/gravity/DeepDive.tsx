@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -91,8 +91,13 @@ export function DeepDive(props: DeepDiveProps) {
   const [addOpen, setAddOpen] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
   const viewportRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const zoom = useEditorStore(state => state.zoom);
   const setZoom = useEditorStore(state => state.setZoom);
   const addBlock = useEditorStore(state => state.addBlock);
@@ -110,6 +115,8 @@ export function DeepDive(props: DeepDiveProps) {
   const selectedBlock = blocks.find(
     block => selected.length === 1 && block.id === selected[0]
   );
+
+  if (!mounted) return null;
 
   const addOptions = [
     { type: "text", label: "Text", icon: Type },
@@ -526,7 +533,7 @@ export function DeepDive(props: DeepDiveProps) {
           type="button"
           size="sm"
           variant="outline"
-          className={`${dockButton} max-sm:px-2`}
+          className={`${dockButton} hidden max-sm:px-2 sm:flex`}
           onClick={() => setMouseEnabled(value => !value)}
         >
           <MousePointer2 className="h-4 w-4" />
