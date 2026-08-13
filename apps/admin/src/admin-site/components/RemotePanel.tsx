@@ -49,13 +49,21 @@ const isValidWsUrl = (value: string) => {
   }
 };
 
+const SAVED_KEY = "vnc.url.v2";
+
 const initialVnc = () => {
   if (typeof window === "undefined")
     return { url: defaultUrl(), saved: false, derived: false };
-  const saved = localStorage.getItem("vnc.url");
-  if (saved && isValidWsUrl(saved))
-    return { url: saved.trim(), saved: true, derived: false };
-  if (saved) localStorage.removeItem("vnc.url");
+  localStorage.removeItem("vnc.url");
+  const saved = localStorage.getItem(SAVED_KEY);
+  if (saved && isValidWsUrl(saved)) {
+    let sameHost = false;
+    try {
+      sameHost = new URL(saved.trim()).host === window.location.host;
+    } catch {}
+    if (!sameHost) return { url: saved.trim(), saved: true, derived: false };
+  }
+  localStorage.removeItem(SAVED_KEY);
   return { url: defaultUrl(), saved: false, derived: isRemoteHost() };
 };
 
@@ -333,6 +341,7 @@ export function RemotePanel() {
       return;
     }
     rfbRef.current?.disconnect();
+    rfbRef.current = null;
     observerRef.current?.disconnect();
     observerRef.current = null;
     host.replaceChildren();
@@ -373,6 +382,7 @@ export function RemotePanel() {
       setupCanvas();
     });
     rfb.addEventListener("disconnect", event => {
+      rfbRef.current = null;
       setStatus("disconnected");
       setMessage(event.detail.clean ? "Disconnected." : "Connection lost.");
     });
@@ -432,9 +442,9 @@ export function RemotePanel() {
 
   useEffect(() => {
     if (isValidWsUrl(url) && url !== defaultUrl()) {
-      localStorage.setItem("vnc.url", url);
+      localStorage.setItem(SAVED_KEY, url);
     } else {
-      localStorage.removeItem("vnc.url");
+      localStorage.removeItem(SAVED_KEY);
     }
     localStorage.setItem("vnc.trackpad", trackpad ? "1" : "0");
   }, [url, trackpad]);

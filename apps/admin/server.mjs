@@ -25,6 +25,7 @@ server.on("upgrade", (req, socket, head) => {
     return;
   }
   if (pathname !== "/websockify") return;
+  console.log(`[admin] /websockify upgrade from ${req.headers.origin ?? "?"}`);
 
   try {
     relay.handleUpgrade(req, socket, head, ws => {
