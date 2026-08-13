@@ -506,7 +506,7 @@ export function GravityCanvas({
           ts.boxStart = null;
           setBox(null);
         }}
-        className={`gravity-artboard overflow-auto p-8 ${fullHeight ? "h-full" : "h-[72vh]"}`}
+        className={`gravity-artboard overflow-auto p-3 sm:p-8 ${fullHeight ? "h-full" : "h-[72vh]"}`}
         style={{ touchAction: "none", userSelect: "none" }}
       >
         <div

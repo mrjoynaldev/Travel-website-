@@ -34,11 +34,17 @@ import {
   type PostSettingsPanelProps,
 } from "./PostSettingsPanel";
 import { GravityPreview } from "./Preview";
-import { RemotePanel } from "@/admin-site/components/RemotePanel";
 import { useEditorStore } from "./store";
 import { TemplatesDialog } from "./TemplatesDialog";
 import { offsetTemplate, type Template, CANVAS_WIDTH } from "./templates";
 import { StatusPill } from "@/admin-site/pages/Studio";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/useMobile";
 import { toast } from "sonner";
 
 type DeepDiveProps = PostSettingsPanelProps & {
@@ -78,6 +84,7 @@ export function DeepDive(props: DeepDiveProps) {
   const [addOpen, setAddOpen] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
+  const isMobile = useIsMobile();
   const viewportRef = useRef<HTMLDivElement>(null);
   const zoom = useEditorStore(state => state.zoom);
   const setZoom = useEditorStore(state => state.setZoom);
@@ -90,12 +97,24 @@ export function DeepDive(props: DeepDiveProps) {
     block => selected.length === 1 && block.id === selected[0]
   );
 
+  const addOptions = [
+    { type: "text", label: "Text", icon: Type },
+    { type: "image", label: "Image", icon: ImagePlus },
+    { type: "video", label: "Video", icon: Video },
+    { type: "audio", label: "Audio", icon: Music2 },
+    { type: "button", label: "Button", icon: SquareMousePointer },
+  ] as const;
+
   const fitZoom = () => {
     if (viewportRef.current)
       setZoom(
         Math.max(
           0.15,
-          Math.min(1, (viewportRef.current.clientWidth - 64) / CANVAS_WIDTH)
+          Math.min(
+            1,
+            (viewportRef.current.clientWidth - (isMobile ? 40 : 64)) /
+              CANVAS_WIDTH
+          )
         )
       );
   };
@@ -143,10 +162,91 @@ export function DeepDive(props: DeepDiveProps) {
   const dockButton =
     "h-10 gap-1.5 border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white";
 
+  const settingsBody = (
+    <div className="space-y-5">
+      <section className="rounded-xl border border-white/10 bg-white/5 p-4">
+        <p className="font-label text-[10px] text-primary">Workflow</p>
+        <div className="mt-3 space-y-2">
+          {!postId ? (
+            <Button
+              className="w-full gap-2"
+              disabled={createPending}
+              onClick={onCreate}
+            >
+              <Plus className="h-4 w-4" />
+              Create draft
+            </Button>
+          ) : (
+            <Button
+              className="w-full gap-2"
+              disabled={savePending}
+              onClick={onSave}
+            >
+              <Type className="h-4 w-4" />
+              Save changes
+            </Button>
+          )}
+          {postId && status === "draft" && (
+            <Button
+              variant="secondary"
+              className="w-full gap-2"
+              disabled={transitionPending}
+              onClick={() => onTransition("review")}
+            >
+              <Send className="h-4 w-4" />
+              Submit for review
+            </Button>
+          )}
+          {postId && status === "review" && canPublish && (
+            <Button
+              className="w-full"
+              disabled={transitionPending}
+              onClick={() => onTransition("published")}
+            >
+              Approve & publish
+            </Button>
+          )}
+          {postId && status === "review" && canPublish && (
+            <Button
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white"
+              disabled={transitionPending}
+              onClick={() => onTransition("draft")}
+            >
+              Return to draft
+            </Button>
+          )}
+          {postId && status === "published" && canPublish && (
+            <Button
+              variant="outline"
+              className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white"
+              disabled={transitionPending}
+              onClick={() => onTransition("archived")}
+            >
+              Archive
+            </Button>
+          )}
+          {postId && canPublish && (
+            <Button
+              variant="destructive"
+              className="w-full"
+              disabled={deletePending}
+              onClick={onDelete}
+            >
+              <Trash2 className="h-4 w-4" />
+              Delete post
+            </Button>
+          )}
+        </div>
+      </section>
+      <PostSettingsPanel {...props} />
+    </div>
+  );
+
   return createPortal(
     <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0c10] text-white">
-      <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-white/10 px-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-3 sm:gap-3 sm:px-4">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={onClose}
@@ -165,20 +265,23 @@ export function DeepDive(props: DeepDiveProps) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {postId && <StatusPill state={status} />}
+          <span className="hidden sm:block">
+            {postId && <StatusPill state={status} />}
+          </span>
           <button
             type="button"
             onClick={() => setSettingsOpen(value => !value)}
-            className={`flex h-9 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-sm font-medium ${settingsOpen ? "bg-white/15 text-white" : "bg-white/5 text-white/80"} hover:bg-white/10 hover:text-white`}
+            aria-label="Settings"
+            className={`flex h-9 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 text-sm font-medium sm:px-3 ${settingsOpen ? "bg-white/15 text-white" : "bg-white/5 text-white/80"} hover:bg-white/10 hover:text-white`}
           >
             <Settings className="h-4 w-4" />
-            Settings
+            <span className="hidden sm:inline">Settings</span>
           </button>
           <button
             type="button"
             onClick={onSave}
             disabled={savePending || createPending}
-            className="flex h-9 items-center gap-1.5 rounded-lg bg-emerald-500 px-3 text-sm font-semibold text-black transition-colors hover:bg-emerald-400 disabled:opacity-50"
+            className="flex h-9 items-center gap-1.5 rounded-lg bg-emerald-500 px-2.5 text-sm font-semibold text-black transition-colors hover:bg-emerald-400 disabled:opacity-50 sm:px-3"
           >
             {savePending ? "Saving…" : postId ? "Save changes" : "Create draft"}
           </button>
@@ -186,114 +289,95 @@ export function DeepDive(props: DeepDiveProps) {
       </header>
 
       <div className="relative flex-1 overflow-hidden">
-        <div className="relative flex h-full min-w-0">
-          <div className="relative min-w-0 flex-1 overflow-hidden">
-            {previewMode ? (
-              <div className="h-full overflow-auto">
-                <div className="mx-auto max-w-3xl p-8">
-                  <GravityPreview />
-                </div>
+        <div className="relative h-full min-w-0 overflow-hidden">
+          {previewMode ? (
+            <div className="h-full overflow-auto">
+              <div className="mx-auto max-w-3xl p-8">
+                <GravityPreview />
               </div>
-            ) : (
-              <GravityCanvas viewportRef={viewportRef} hideZoomBar fullHeight />
-            )}
-            {mouseEnabled && !previewMode && (
-              <MousePad viewportRef={viewportRef} />
-            )}
-            {showLayers && !previewMode && (
-              <aside className="absolute left-4 top-4 z-20 h-[calc(100%-8rem)] w-56 overflow-hidden rounded-xl border border-white/10 bg-white text-slate-900 shadow-2xl">
-                <LayersPanel />
-              </aside>
-            )}
-            {showInspector && !previewMode && (
-              <aside className="absolute right-4 top-4 z-20 max-h-[calc(100%-8rem)] w-60 overflow-y-auto rounded-xl border border-white/10 bg-white text-slate-900 shadow-2xl">
-                <InspectorPanel block={selectedBlock} />
-              </aside>
-            )}
-          </div>
-          <RemotePanel />
+            </div>
+          ) : (
+            <GravityCanvas viewportRef={viewportRef} hideZoomBar fullHeight />
+          )}
+          {mouseEnabled && !previewMode && (
+            <MousePad viewportRef={viewportRef} />
+          )}
+          {showLayers && !previewMode && !isMobile && (
+            <aside className="absolute left-4 top-4 z-20 h-[calc(100%-8rem)] w-56 overflow-hidden rounded-xl border border-white/10 bg-white text-slate-900 shadow-2xl">
+              <LayersPanel />
+            </aside>
+          )}
+          {showInspector && !previewMode && !isMobile && (
+            <aside className="absolute right-4 top-4 z-20 max-h-[calc(100%-8rem)] w-60 overflow-y-auto rounded-xl border border-white/10 bg-white text-slate-900 shadow-2xl">
+              <InspectorPanel block={selectedBlock} />
+            </aside>
+          )}
         </div>
+
+        {isMobile && showLayers && !previewMode && (
+          <Drawer open onOpenChange={setShowLayers}>
+            <DrawerContent className="border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white">
+              <DrawerHeader>
+                <DrawerTitle className="text-white">Layers</DrawerTitle>
+              </DrawerHeader>
+              <div className="max-h-[55vh] overflow-y-auto px-4 pb-6">
+                <LayersPanel />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
+        {isMobile && showInspector && !previewMode && (
+          <Drawer open onOpenChange={setShowInspector}>
+            <DrawerContent className="border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white">
+              <DrawerHeader>
+                <DrawerTitle className="text-white">Inspector</DrawerTitle>
+              </DrawerHeader>
+              <div className="max-h-[60vh] overflow-y-auto px-4 pb-6">
+                <InspectorPanel block={selectedBlock} />
+              </div>
+            </DrawerContent>
+          </Drawer>
+        )}
       </div>
 
-      <footer className="flex h-16 shrink-0 items-center gap-2 overflow-x-auto border-t border-white/10 px-4">
+      <footer className="flex h-16 shrink-0 items-center gap-1.5 overflow-x-auto border-t border-white/10 px-3 max-md:pb-[env(safe-area-inset-bottom)] sm:gap-2 sm:px-4">
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className={dockButton}
+          className={`${dockButton} max-sm:px-2`}
           onClick={() => setTemplatesOpen(true)}
         >
           <LayoutTemplate className="h-4 w-4" />
-          Templates
+          <span className="hidden sm:inline">Templates</span>
         </Button>
         <div className="relative">
           <Button
             type="button"
             size="sm"
             variant="outline"
-            className={dockButton}
+            className={`${dockButton} max-sm:px-2`}
             onClick={() => setAddOpen(value => !value)}
           >
             <Plus className="h-4 w-4" />
-            Add block
+            <span className="hidden sm:inline">Add block</span>
           </Button>
-          {addOpen && (
+          {!isMobile && addOpen && (
             <div className="absolute bottom-12 left-0 z-30 flex gap-1 rounded-xl border border-white/10 bg-[#10131a] p-1.5 shadow-2xl">
-              <button
-                type="button"
-                onClick={() => {
-                  addBlock("text");
-                  setAddOpen(false);
-                }}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <Type className="h-3.5 w-3.5" />
-                Text
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addBlock("image");
-                  setAddOpen(false);
-                }}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <ImagePlus className="h-3.5 w-3.5" />
-                Image
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addBlock("video");
-                  setAddOpen(false);
-                }}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <Video className="h-3.5 w-3.5" />
-                Video
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addBlock("audio");
-                  setAddOpen(false);
-                }}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <Music2 className="h-3.5 w-3.5" />
-                Audio
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  addBlock("button");
-                  setAddOpen(false);
-                }}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <SquareMousePointer className="h-3.5 w-3.5" />
-                Button
-              </button>
+              {addOptions.map(option => (
+                <button
+                  key={option.type}
+                  type="button"
+                  onClick={() => {
+                    addBlock(option.type);
+                    setAddOpen(false);
+                  }}
+                  className="flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs text-white/80 hover:bg-white/10 hover:text-white"
+                >
+                  <option.icon className="h-3.5 w-3.5" />
+                  {option.label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -302,51 +386,53 @@ export function DeepDive(props: DeepDiveProps) {
           type="button"
           size="sm"
           variant="outline"
-          className={dockButton}
+          className={`${dockButton} max-sm:px-2`}
           onClick={() => setShowLayers(value => !value)}
         >
           <Layers className="h-4 w-4" />
-          Layers
+          <span className="hidden sm:inline">Layers</span>
         </Button>
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className={dockButton}
+          className={`${dockButton} max-sm:px-2`}
           onClick={() => setShowInspector(value => !value)}
         >
           <PanelRight className="h-4 w-4" />
-          Inspector
+          <span className="hidden sm:inline">Inspector</span>
         </Button>
         <Button
           type="button"
           size="sm"
           variant={previewMode ? "secondary" : "outline"}
-          className={dockButton}
+          className={`${dockButton} max-sm:px-2`}
           onClick={() => setPreviewMode(value => !value)}
         >
           <Eye className="h-4 w-4" />
-          Preview
+          <span className="hidden sm:inline">Preview</span>
         </Button>
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className={dockButton}
+          className={`${dockButton} max-sm:px-2`}
           onClick={() => setMouseEnabled(value => !value)}
         >
           <MousePointer2 className="h-4 w-4" />
-          {mouseEnabled ? "Trackpad on" : "Trackpad"}
+          <span className="hidden sm:inline">
+            {mouseEnabled ? "Trackpad on" : "Trackpad"}
+          </span>
         </Button>
         <Button
           type="button"
           size="sm"
           variant="outline"
-          className={dockButton}
+          className={`${dockButton} max-sm:px-2`}
           onClick={runDoctorNow}
         >
           <Stethoscope className="h-4 w-4" />
-          Doctor
+          <span className="hidden sm:inline">Doctor</span>
         </Button>
         <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
         <button
@@ -386,94 +472,54 @@ export function DeepDive(props: DeepDiveProps) {
         <button
           type="button"
           onClick={onOpenPreview}
-          className="ml-auto flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white"
+          className="ml-auto flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white sm:px-3"
         >
           <Eye className="h-4 w-4" />
-          Open published preview
+          <span className="hidden sm:inline">Open published preview</span>
         </button>
       </footer>
 
-      {settingsOpen && (
+      {isMobile && addOpen && (
+        <Drawer open onOpenChange={setAddOpen}>
+          <DrawerContent className="border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white">
+            <DrawerHeader>
+              <DrawerTitle className="text-white">Add block</DrawerTitle>
+            </DrawerHeader>
+            <div className="grid grid-cols-2 gap-2 px-4 pb-6">
+              {addOptions.map(option => (
+                <button
+                  key={option.type}
+                  type="button"
+                  onClick={() => {
+                    addBlock(option.type);
+                    setAddOpen(false);
+                  }}
+                  className="flex h-14 items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                  <option.icon className="h-4 w-4" />
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      )}
+
+      {settingsOpen && !isMobile && (
         <aside className="absolute bottom-16 right-0 top-14 z-40 w-[22rem] max-w-full overflow-y-auto border-l border-white/10 bg-[#10131a] p-4 shadow-2xl">
-          <div className="space-y-5">
-            <section className="rounded-xl border border-white/10 bg-white/5 p-4">
-              <p className="font-label text-[10px] text-primary">Workflow</p>
-              <div className="mt-3 space-y-2">
-                {!postId ? (
-                  <Button
-                    className="w-full gap-2"
-                    disabled={createPending}
-                    onClick={onCreate}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Create draft
-                  </Button>
-                ) : (
-                  <Button
-                    className="w-full gap-2"
-                    disabled={savePending}
-                    onClick={onSave}
-                  >
-                    <Type className="h-4 w-4" />
-                    Save changes
-                  </Button>
-                )}
-                {postId && status === "draft" && (
-                  <Button
-                    variant="secondary"
-                    className="w-full gap-2"
-                    disabled={transitionPending}
-                    onClick={() => onTransition("review")}
-                  >
-                    <Send className="h-4 w-4" />
-                    Submit for review
-                  </Button>
-                )}
-                {postId && status === "review" && canPublish && (
-                  <Button
-                    className="w-full"
-                    disabled={transitionPending}
-                    onClick={() => onTransition("published")}
-                  >
-                    Approve & publish
-                  </Button>
-                )}
-                {postId && status === "review" && canPublish && (
-                  <Button
-                    variant="outline"
-                    className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white"
-                    disabled={transitionPending}
-                    onClick={() => onTransition("draft")}
-                  >
-                    Return to draft
-                  </Button>
-                )}
-                {postId && status === "published" && canPublish && (
-                  <Button
-                    variant="outline"
-                    className="w-full border-white/20 text-white hover:bg-white/10 hover:text-white"
-                    disabled={transitionPending}
-                    onClick={() => onTransition("archived")}
-                  >
-                    Archive
-                  </Button>
-                )}
-                {postId && canPublish && (
-                  <Button
-                    variant="destructive"
-                    className="w-full"
-                    disabled={deletePending}
-                    onClick={onDelete}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete post
-                  </Button>
-                )}
-              </div>
-            </section>
-            <PostSettingsPanel {...props} />
-          </div>
+          {settingsBody}
         </aside>
+      )}
+
+      {settingsOpen && isMobile && (
+        <Drawer open onOpenChange={setSettingsOpen}>
+          <DrawerContent className="max-h-[85vh] overflow-y-auto border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white">
+            <DrawerHeader>
+              <DrawerTitle className="text-white">Settings</DrawerTitle>
+            </DrawerHeader>
+            <div className="px-4 pb-6">{settingsBody}</div>
+          </DrawerContent>
+        </Drawer>
       )}
 
       <TemplatesDialog

@@ -8,9 +8,7 @@
     "build": "next build",
     "start": "NODE_ENV=production next start -p ${PORT:-4000}",
     "check": "tsc --noEmit",
-    "test": "vitest run",
-    "vnc": "node scripts/vnc-desktop.mjs",
-    "vnc:stop": "node scripts/vnc-stop.mjs"
+    "test": "vitest run"
   },
   "dependencies": {
     "@fieldnote/contracts": "workspace:*",
@@ -25,7 +23,6 @@
     "react-dom": "^19.2.1",
     "sanitize-html": "^2.17.6",
     "superjson": "^1.13.3",
-    "ws": "^8.21.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
