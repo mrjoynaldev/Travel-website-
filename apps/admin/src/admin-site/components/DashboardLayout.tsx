@@ -42,7 +42,6 @@ import {
   LogOut,
   Mail,
   MessageSquare,
-  Monitor,
   Palette,
   PanelLeft,
   ScrollText,
@@ -84,7 +83,6 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
       { icon: Boxes, label: "Gravity editor", path: "/studio/gravity" },
       { icon: Images, label: "Media", path: "/studio/media" },
       { icon: Tags, label: "Categories & tags", path: "/studio/taxonomy" },
-      { icon: Monitor, label: "Remote desktop", path: "/studio/remote" },
       {
         icon: LayoutTemplate,
         label: "Homepage",

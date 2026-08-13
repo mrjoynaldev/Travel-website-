@@ -15,7 +15,6 @@ import {
 import { StudioEditor } from "@/admin-site/pages/StudioEditor";
 import { GravityEditor } from "@/admin-site/pages/GravityEditor";
 import StudioPreview from "@/admin-site/pages/StudioPreview";
-import { StudioRemote } from "@/admin-site/pages/StudioRemote";
 import {
   StudioAnalytics,
   StudioAudit,
@@ -43,8 +42,6 @@ function resolveStudioView(pathname: string) {
       return GravityEditor;
     case "preview":
       return StudioPreview;
-    case "remote":
-      return StudioRemote;
     case "media":
       return StudioMedia;
     case "taxonomy":
