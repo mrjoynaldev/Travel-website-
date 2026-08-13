@@ -6,8 +6,8 @@ function publicContext(): TrpcContext {
   return {
     user: null,
     apiToken: null,
-    req: { protocol: "https", headers: {} } as TrpcContext["req"],
-    res: {} as TrpcContext["res"],
+    req: new Request("http://localhost"),
+    resHeaders: new Headers(),
   };
 }
 

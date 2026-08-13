@@ -21,7 +21,7 @@ export const appRouter = router({
         try {
           const user = await signInWithPassword(input.email, input.password);
           const token = await createSessionToken({ openId: user.id, name: user.name, email: user.email });
-          setSessionCookie(ctx.res, ctx.req, token);
+          setSessionCookie(ctx.req, ctx.resHeaders, token);
           return { success: true as const, user };
         } catch (error) {
           if (error instanceof SupabaseAuthError) {
@@ -37,7 +37,7 @@ export const appRouter = router({
           const result = await signUp(input.email, input.password, input.name || undefined);
           if (result.session) {
             const token = await createSessionToken({ openId: result.session.id, name: result.session.name, email: result.session.email });
-            setSessionCookie(ctx.res, ctx.req, token);
+            setSessionCookie(ctx.req, ctx.resHeaders, token);
             return { success: true as const, confirmationRequired: false, user: result.session };
           }
           return { success: true as const, confirmationRequired: true, user: null as null };
@@ -49,7 +49,7 @@ export const appRouter = router({
         }
       }),
     logout: publicProcedure.mutation(({ ctx }) => {
-      clearSessionCookie(ctx.res, ctx.req);
+      clearSessionCookie(ctx.req, ctx.resHeaders);
       return {
         success: true,
       } as const;

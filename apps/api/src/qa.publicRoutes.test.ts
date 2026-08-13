@@ -37,7 +37,8 @@ describe("QA public discovery routes", () => {
     // or CI without `pnpm dev` running.
     let serverReachable = true;
     try {
-      await fetch(baseUrl, { signal: AbortSignal.timeout(3000) });
+      const probe = await fetch(baseUrl, { signal: AbortSignal.timeout(3000) });
+      if (probe.status !== 200) serverReachable = false;
     } catch {
       serverReachable = false;
     }

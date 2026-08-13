@@ -1,4 +1,3 @@
-import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { resolveApiToken, type ApiTokenContext } from "./apiTokens";
 import { authenticateRequest } from "./session";
 
@@ -15,15 +14,18 @@ export type AuthUser = {
 };
 
 export type TrpcContext = {
-  req: CreateExpressContextOptions["req"];
-  res: CreateExpressContextOptions["res"];
+  /** The incoming fetch Request (headers, cookies, url). */
+  req: Request;
+  /**
+   * Mutable response headers — everything appended here (e.g. `Set-Cookie`)
+   * is merged into the HTTP response by the tRPC fetch adapter.
+   */
+  resHeaders: Headers;
   user: AuthUser | null;
   apiToken: ApiTokenContext | null;
 };
 
-export async function createContext(
-  opts: CreateExpressContextOptions
-): Promise<TrpcContext> {
+export async function createContext(opts: { req: Request; resHeaders: Headers }): Promise<TrpcContext> {
   let user: AuthUser | null = null;
   let apiToken: ApiTokenContext | null = null;
 
@@ -31,7 +33,7 @@ export async function createContext(
     user = await authenticateRequest(opts.req);
   } catch {
     // Session cookie/header did not authenticate. Try an API access token.
-    const authHeader = opts.req.headers.authorization;
+    const authHeader = opts.req.headers.get("authorization");
     if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
       const resolved = await resolveApiToken(authHeader.slice(7));
       if (resolved) {
@@ -44,7 +46,7 @@ export async function createContext(
 
   return {
     req: opts.req,
-    res: opts.res,
+    resHeaders: opts.resHeaders,
     user,
     apiToken,
   };

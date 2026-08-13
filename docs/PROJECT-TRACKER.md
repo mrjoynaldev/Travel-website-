@@ -20,8 +20,8 @@
 
 **CodeReport Global** is an enterprise-grade, multi-tenant, AI-native publishing platform (rebranded from "Fieldnote"). It combines a public reader website, an authenticated editorial Studio, and a unified backend, deployed as:
 
-- **Public website** → Vercel (`apps/web`, server-rendered React)
-- **Admin Studio** → Vercel (`apps/studio`, authenticated SPA)
+- **Public website** → Vercel (`apps/website`, Next.js server-rendered React)
+- **Admin Studio** → Vercel (`apps/admin`, Next.js authenticated app)
 - **Unified API** → Render (`apps/api`, Express + tRPC)
 - **Database + Auth + Storage** → Supabase (Postgres, RLS, S3)
 

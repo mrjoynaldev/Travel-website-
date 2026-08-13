@@ -1,7 +1,6 @@
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import { ForbiddenError } from "@shared/errors";
-import { parse as parseCookieHeader } from "cookie";
-import type { Request, Response } from "express";
+import { parse as parseCookieHeader, serialize as serializeCookie, type SerializeOptions } from "cookie";
 import { SignJWT, jwtVerify } from "jose";
 import type { AuthUser } from "./context";
 import { getSessionCookieOptions } from "./cookies";
@@ -67,13 +66,13 @@ function buildUser(claims: SessionClaims): AuthUser {
 }
 
 export async function authenticateRequest(req: Request): Promise<AuthUser> {
-  const cookies = parseCookieHeader(req.headers.cookie ?? "");
+  const cookies = parseCookieHeader(req.headers.get("cookie") ?? "");
   let token = cookies[COOKIE_NAME];
 
   // Header fallback mirrors the cookie for browsers that block cookie storage
   // (Safari ITP, private browsing, WebView).
   if (!token) {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers.get("authorization");
     if (typeof authHeader === "string" && authHeader.startsWith("Bearer ")) {
       token = authHeader.slice(7);
     }
@@ -84,12 +83,14 @@ export async function authenticateRequest(req: Request): Promise<AuthUser> {
   return buildUser(claims);
 }
 
-export function setSessionCookie(res: Response, req: Request, token: string): void {
-  const options = getSessionCookieOptions(req);
-  res.cookie(COOKIE_NAME, token, { ...options, maxAge: SESSION_LIFETIME_MS });
+function cookieOptions(req: Request, maxAge: number): SerializeOptions {
+  return { ...getSessionCookieOptions(req), maxAge };
 }
 
-export function clearSessionCookie(res: Response, req: Request): void {
-  const options = getSessionCookieOptions(req);
-  res.clearCookie(COOKIE_NAME, { ...options, maxAge: -1 });
+export function setSessionCookie(req: Request, resHeaders: Headers, token: string): void {
+  resHeaders.append("Set-Cookie", serializeCookie(COOKIE_NAME, token, cookieOptions(req, SESSION_LIFETIME_MS / 1000)));
+}
+
+export function clearSessionCookie(req: Request, resHeaders: Headers): void {
+  resHeaders.append("Set-Cookie", serializeCookie(COOKIE_NAME, "", cookieOptions(req, -1)));
 }

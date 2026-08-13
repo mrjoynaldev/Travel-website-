@@ -7,7 +7,7 @@ const templateRoot = path.resolve(import.meta.dirname);
 export default defineConfig({
   resolve: {
     alias: [
-      { find: "@/admin-site", replacement: path.resolve(templateRoot, "apps/studio/src/admin-site") },
+      { find: "@/admin-site", replacement: path.resolve(templateRoot, "apps/admin/src/admin-site") },
       { find: "@shared", replacement: path.resolve(templateRoot, "packages/contracts/src") },
       { find: "@", replacement: path.resolve(templateRoot, "packages/client-common/src") },
     ],
@@ -25,8 +25,8 @@ export default defineConfig({
     include: [
       "apps/api/src/**/*.test.ts",
       "apps/api/src/**/*.spec.ts",
-      "apps/studio/src/**/*.test.ts",
-      "apps/studio/src/**/*.spec.ts",
+      "apps/admin/src/**/*.test.ts",
+      "apps/admin/src/**/*.spec.ts",
     ],
   },
 });
