@@ -27,6 +27,19 @@ const wrapLink = (html: string, block: GravityBlock) => {
   return `<a class="gravity-block-link" href="${escapeHtml(block.link)}">${html}</a>`;
 };
 
+function renderRuns(block: GravityBlock) {
+  const runs = block.runs && block.runs.length ? block.runs : block.content ? [{ text: block.content }] : [];
+  return runs.map(run => {
+    let inner = escapeHtml(run.text);
+    if (run.link) {
+      const cls = run.button ? "cta-button cta-link" : "gravity-inline-link";
+      inner = `<a class="${cls}" href="${escapeHtml(run.link)}">${inner}</a>`;
+    }
+    if (run.mark && !run.button) inner = `<mark>${inner}</mark>`;
+    return inner;
+  }).join("");
+}
+
 function blockMarkup(block: GravityBlock) {
   if (block.type === "image") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
@@ -42,7 +55,7 @@ function blockMarkup(block: GravityBlock) {
   }
   if (block.type === "text") {
     const tag = block.level === "h2" ? "h2" : "p";
-    return wrapLink(`<${tag} class="gravity-text">${escapeHtml(block.content || "")}</${tag}>`, block);
+    return wrapLink(`<${tag} class="gravity-text">${renderRuns(block)}</${tag}>`, block);
   }
   if (block.type === "button") {
     const href = escapeHtml(block.link || "#");

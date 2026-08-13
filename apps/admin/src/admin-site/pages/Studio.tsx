@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Download, Film, Loader2, Music2, Plus, ScrollText, Settings2, ShieldCheck, UploadCloud, UsersRound } from "lucide-react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { Boxes, Download, Film, Folder, FolderOpen, Image as ImageIcon, Loader2, Music2, PenLine, Plus, ScrollText, Settings2, ShieldCheck, Tags, UploadCloud, UsersRound } from "lucide-react";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
@@ -25,9 +25,107 @@ export function StudioOverview() {
   return <Frame title="Editorial overview" eyebrow="Your publication, at a glance" actions={<Link href="/studio/posts/new"><Button className="gap-2"><Plus className="h-4 w-4" />New post</Button></Link>}><div className="grid gap-4 md:grid-cols-4">{counts.map(item => <div key={item.status} className="rounded-xl border border-border bg-white p-5 shadow-sm"><p className="font-label text-[10px] text-muted-foreground">{item.status}</p><p className="mt-3 font-display text-4xl font-semibold">{item.count}</p></div>)}</div><div className="mt-7 grid gap-6 lg:grid-cols-[1.15fr_.85fr]"><section className="rounded-xl border border-border bg-white p-6 shadow-sm"><div className="flex items-center justify-between"><div><p className="font-label text-[10px] text-primary">Review queue</p><h2 className="mt-2 font-display text-2xl font-semibold">Awaiting an editorial decision</h2></div><Link href="/studio/posts" className="text-sm font-medium text-primary">View all</Link></div><div className="mt-5 divide-y divide-border">{current.filter(post => post.status === "review").slice(0, 5).map(post => <Link key={post.id} href={`/studio/posts/${post.id}`} className="flex items-center justify-between gap-4 py-4 hover:text-primary"><div><p className="font-medium">{post.title}</p><p className="mt-1 text-xs text-muted-foreground">Submitted {post.submitted_at ? new Date(post.submitted_at).toLocaleDateString() : "recently"}</p></div><StatusPill state={post.status} /></Link>)}{!current.some(post => post.status === "review") && <p className="py-10 text-center text-sm text-muted-foreground">Nothing is waiting for review.</p>}</div></section><section className="rounded-xl bg-[#1b382d] p-6 text-[#edf4ea]"><p className="font-label text-[10px] text-[#abc8b2]">Last 30 days</p><p className="mt-3 font-display text-5xl font-semibold">{analytics.data?.totalViews ?? 0}</p><p className="mt-1 text-sm text-[#c6d5ca]">Measured page views</p><div className="mt-8 border-t border-[#396550] pt-5"><p className="text-sm font-medium">{analytics.data?.engagementRate ?? 0}% engagement rate</p><p className="mt-1 text-xs leading-5 text-[#abc8b2]">Engagement is calculated from meaningful reading, scroll, comment, and subscription events.</p></div></section></div></Frame>;
 }
 
+type PostFolder = { kind: "all" } | { kind: "category"; id: string } | { kind: "tag"; id: string };
 export function StudioPosts() {
-  const [status, setStatus] = useState<string>("all"); const [search, setSearch] = useState(""); const list = trpc.studio.posts.list.useQuery({ status: status === "all" ? undefined : status as "draft" | "review" | "published" | "archived", search: search || undefined });
-  return <Frame title="Posts" eyebrow="Plan, write, review, publish" actions={<Link href="/studio/posts/new"><Button className="gap-2"><Plus className="h-4 w-4" />New post</Button></Link>}><div className="mb-5 flex flex-col gap-3 sm:flex-row"><Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search your posts" className="max-w-md bg-white" /><Select value={status} onValueChange={setStatus}><SelectTrigger className="w-full bg-white sm:w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All states</SelectItem><SelectItem value="draft">Draft</SelectItem><SelectItem value="review">Review</SelectItem><SelectItem value="published">Published</SelectItem><SelectItem value="archived">Archived</SelectItem></SelectContent></Select></div><div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm"><div className="hidden grid-cols-[1fr_130px_140px] gap-4 border-b border-border bg-[#fbfcfa] px-5 py-3 font-label text-[10px] text-muted-foreground md:grid"><span>Story</span><span>Status</span><span>Updated</span></div>{list.isLoading ? <div className="grid min-h-48 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div> : list.data?.length ? list.data.map(post => <Link key={post.id} href={`/studio/posts/${post.id}`} className="grid gap-3 border-b border-border px-5 py-4 last:border-b-0 hover:bg-[#fbfcfa] md:grid-cols-[1fr_130px_140px] md:items-center"><div><p className="font-medium">{post.title}</p><p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{post.excerpt || "No excerpt yet"}</p></div><div><StatusPill state={post.status} /></div><time className="text-xs text-muted-foreground">{new Date(post.updated_at).toLocaleDateString()}</time></Link>) : <p className="p-12 text-center text-sm text-muted-foreground">No posts match these filters.</p>}</div></Frame>;
+  const [status, setStatus] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [folder, setFolder] = useState<PostFolder>({ kind: "all" });
+  const all = trpc.studio.posts.list.useQuery({});
+  const folders = useMemo(() => {
+    const cats = new Map<string, { name: string; count: number }>();
+    const tags = new Map<string, { name: string; count: number }>();
+    for (const post of all.data ?? []) {
+      for (const cat of post.categories ?? []) cats.set(cat.id, { name: cat.name, count: (cats.get(cat.id)?.count ?? 0) + 1 });
+      for (const tag of post.tags ?? []) tags.set(tag.id, { name: tag.name, count: (tags.get(tag.id)?.count ?? 0) + 1 });
+    }
+    return {
+      cats: Array.from(cats.entries()).map(([id, value]) => ({ id, ...value })).sort((a, b) => b.count - a.count),
+      tags: Array.from(tags.entries()).map(([id, value]) => ({ id, ...value })).sort((a, b) => b.count - a.count),
+    };
+  }, [all.data]);
+  const filtered = useMemo(() => (all.data ?? []).filter(post =>
+    (status === "all" || post.status === status) &&
+    (search.trim() === "" || post.title.toLowerCase().includes(search.trim().toLowerCase())) &&
+    (folder.kind === "all" || (folder.kind === "category" ? (post.categories ?? []).some(cat => cat.id === folder.id) : (post.tags ?? []).some(tag => tag.id === folder.id))),
+  ), [all.data, status, search, folder]);
+  const isActive = (item: PostFolder) => {
+    if (folder.kind !== item.kind) return false;
+    if (item.kind === "all") return true;
+    return folder.kind !== "all" && folder.id === item.id;
+  };
+  const FolderButton = ({ item, icon, label, count }: { item: PostFolder; icon: React.ReactNode; label: string; count: number }) => (
+    <button type="button" onClick={() => setFolder(item)} className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors ${isActive(item) ? "bg-primary font-medium text-primary-foreground" : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"}`}>
+      <span className="flex min-w-0 items-center gap-2"><span className="shrink-0">{icon}</span><span className="truncate">{label}</span></span>
+      <span className={`shrink-0 text-xs ${isActive(item) ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{count}</span>
+    </button>
+  );
+  return (
+    <Frame title="Posts" eyebrow="Plan, write, review, publish" actions={<Link href="/studio/posts/new"><Button className="gap-2"><Plus className="h-4 w-4" />New post</Button></Link>}>
+      <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
+        <aside className="h-fit rounded-xl border border-border bg-white p-4 shadow-sm">
+          <div className="space-y-1">
+            <FolderButton item={{ kind: "all" }} icon={<FolderOpen className="h-4 w-4" />} label="All posts" count={all.data?.length ?? 0} />
+          </div>
+          <p className="mt-5 mb-2 font-label text-[10px] text-muted-foreground">Categories</p>
+          <div className="space-y-1">
+            {folders.cats.map(cat => <FolderButton key={cat.id} item={{ kind: "category", id: cat.id }} icon={<Folder className="h-4 w-4" />} label={cat.name} count={cat.count} />)}
+            {!folders.cats.length && <p className="px-3 py-2 text-xs text-muted-foreground">No categories yet.</p>}
+          </div>
+          <p className="mt-5 mb-2 font-label text-[10px] text-muted-foreground">Tags</p>
+          <div className="space-y-1">
+            {folders.tags.map(tag => <FolderButton key={tag.id} item={{ kind: "tag", id: tag.id }} icon={<Tags className="h-4 w-4" />} label={`#${tag.name}`} count={tag.count} />)}
+            {!folders.tags.length && <p className="px-3 py-2 text-xs text-muted-foreground">No tags yet.</p>}
+          </div>
+          <div className="mt-5 border-t border-border pt-4 text-xs text-muted-foreground"><p>Categories and tags are managed under <Link href="/studio/taxonomy" className="font-medium text-primary">Taxonomy</Link>.</p></div>
+        </aside>
+        <section>
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row">
+            <Input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search your posts" className="max-w-md bg-white" />
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-full bg-white sm:w-40"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All states</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="review">Review</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+            <div className="grid grid-cols-[64px_minmax(0,1fr)_150px] gap-4 border-b border-border bg-[#fbfcfa] px-5 py-3 font-label text-[10px] text-muted-foreground">
+              <span>Cover</span><span>Story</span><span className="text-right">Actions</span>
+            </div>
+            {all.isLoading ? <div className="grid min-h-48 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div> : filtered.length ? filtered.map(post => {
+              const thumb = post.featuredMedia?.url || post.og_image_url || null;
+              return (
+                <div key={post.id} className="grid grid-cols-[64px_minmax(0,1fr)_150px] gap-4 border-b border-border px-5 py-4 last:border-b-0 hover:bg-[#fbfcfa]">
+                  <Link href={`/studio/posts/${post.id}`} className="block h-12 overflow-hidden rounded-lg bg-secondary" aria-label={`Open ${post.title}`}>
+                    {thumb ? <img src={thumb} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center"><ImageIcon className="h-4 w-4 text-muted-foreground/50" /></span>}
+                  </Link>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/studio/posts/${post.id}`} className="font-medium hover:text-primary"><span className="truncate">{post.title}</span></Link>
+                      {(post.categories ?? []).slice(0, 2).map(cat => <span key={cat.id} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">{cat.name}</span>)}
+                    </div>
+                    <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{post.excerpt || "No excerpt yet"}</p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <StatusPill state={post.status} />
+                      <time className="text-xs text-muted-foreground">Updated {new Date(post.updated_at).toLocaleDateString()}</time>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Link href={`/studio/posts/${post.id}`}><Button size="sm" variant="outline" className="gap-1.5"><PenLine className="h-3.5 w-3.5" />Edit</Button></Link>
+                    <Link href={`/studio/gravity/${post.id}`}><Button size="sm" className="gap-1.5"><Boxes className="h-3.5 w-3.5" />Advanced</Button></Link>
+                  </div>
+                </div>
+              );
+            }) : <p className="p-12 text-center text-sm text-muted-foreground">No posts match these filters.</p>}
+          </div>
+        </section>
+      </div>
+    </Frame>
+  );
 }
 
 const fileToBase64 = (file: File) => new Promise<string>((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(String(reader.result)); reader.onerror = () => reject(new Error("Could not read the file.")); reader.readAsDataURL(file); });

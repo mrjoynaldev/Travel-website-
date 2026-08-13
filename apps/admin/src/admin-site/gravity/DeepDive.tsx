@@ -3,8 +3,9 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Eye, ImagePlus, Layers, LayoutTemplate, Maximize, Minus, Minimize2, MousePointer2, Music2, PanelRight, Plus, Send, Settings, SquareMousePointer, Trash2, Type, Video } from "lucide-react";
+import { Eye, ImagePlus, Layers, LayoutTemplate, Maximize, Minus, Minimize2, MousePointer2, Music2, PanelRight, Plus, Send, Settings, SquareMousePointer, Stethoscope, Trash2, Type, Video } from "lucide-react";
 import { GravityCanvas } from "./GravityCanvas";
+import { runDoctor } from "./doctor";
 import { InspectorPanel } from "./Inspector";
 import { LayersPanel } from "./LayersPanel";
 import { MousePad } from "./MousePad";
@@ -49,6 +50,14 @@ export function DeepDive(props: DeepDiveProps) {
   const selectedBlock = blocks.find(block => selected.length === 1 && block.id === selected[0]);
 
   const fitZoom = () => { if (viewportRef.current) setZoom(Math.max(0.15, Math.min(1, (viewportRef.current.clientWidth - 64) / CANVAS_WIDTH))); };
+
+  const runDoctorNow = () => {
+    const state = useEditorStore.getState();
+    const healed = runDoctor(state.blocks, state.sections);
+    if (!healed.fixes.length) { toast.success("The background doctor checked the layout and found everything in place."); return; }
+    state.loadDoc({ type: "gravity", version: 1, sections: healed.sections, blocks: healed.blocks });
+    toast.info(`The background doctor fixed ${healed.fixes.length} issue${healed.fixes.length === 1 ? "" : "s"}: ${healed.fixes.join(", ")}`);
+  };
 
   const useTemplate = (template: Template) => { loadDoc(offsetTemplate(template, 0, 0)); setTemplatesOpen(false); toast.success(`${template.name} layout loaded.`); };
   const appendTemplate = (template: Template) => {
@@ -96,6 +105,7 @@ export function DeepDive(props: DeepDiveProps) {
         <Button type="button" size="sm" variant="outline" className={dockButton} onClick={() => setShowInspector(value => !value)}><PanelRight className="h-4 w-4" />Inspector</Button>
         <Button type="button" size="sm" variant={previewMode ? "secondary" : "outline"} className={dockButton} onClick={() => setPreviewMode(value => !value)}><Eye className="h-4 w-4" />Preview</Button>
         <Button type="button" size="sm" variant="outline" className={dockButton} onClick={() => setMouseEnabled(value => !value)}><MousePointer2 className="h-4 w-4" />{mouseEnabled ? "Trackpad on" : "Trackpad"}</Button>
+        <Button type="button" size="sm" variant="outline" className={dockButton} onClick={runDoctorNow}><Stethoscope className="h-4 w-4" />Doctor</Button>
         <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
         <button type="button" aria-label="Zoom out" className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10" onClick={() => setZoom(value => Math.max(0.15, Math.round((value - 0.1) * 100) / 100))}><Minus className="h-4 w-4" /></button>
         <span className="w-12 shrink-0 text-center text-xs tabular-nums text-white/60">{Math.round(zoom * 100)}%</span>

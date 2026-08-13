@@ -2,6 +2,7 @@
 
 import DashboardLayout from "@/admin-site/components/DashboardLayout";
 import { DeepDive } from "@/admin-site/gravity/DeepDive";
+import { runDoctor } from "@/admin-site/gravity/doctor";
 import { PostSettingsPanel, type PostDraft } from "@/admin-site/gravity/PostSettingsPanel";
 import { blocksToDoc, blocksToHtml, parseGravityDoc } from "@/admin-site/gravity/serialize";
 import { useEditorStore } from "@/admin-site/gravity/store";
@@ -30,9 +31,11 @@ export function GravityEditor() {
   useEffect(() => {
     if (post.data) {
       const parsed = parseGravityDoc(post.data.content_json);
-      loadDoc({ type: "gravity", version: 1, sections: parsed.sections, blocks: parsed.blocks });
+      const healed = runDoctor(parsed.blocks, parsed.sections);
+      loadDoc({ type: "gravity", version: 1, sections: healed.sections, blocks: healed.blocks });
+      if (healed.fixes.length) toast.info(`Background doctor tidied the layout: ${healed.fixes.length} fix${healed.fixes.length === 1 ? "" : "es"} applied automatically.`);
       const nextDraft = { title: post.data.title, slug: post.data.slug, excerpt: post.data.excerpt || "", metaTitle: post.data.meta_title || "", metaDescription: post.data.meta_description || "", canonicalUrl: post.data.canonical_url || "", ogImageUrl: post.data.og_image_url || "", featuredMediaId: post.data.featured_media_id || null, categoryIds: post.data.categoryIds || [], tagIds: post.data.tagIds || [] };
-      lastSavedHash.current = JSON.stringify({ ...nextDraft, blocks: parsed.blocks, sections: parsed.sections });
+      lastSavedHash.current = JSON.stringify({ ...nextDraft, blocks: healed.blocks, sections: healed.sections });
       setDraft(nextDraft); setFeatured(Boolean((post.data as any).featured)); setScheduledAt((post.data as any).scheduled_at ? String((post.data as any).scheduled_at).slice(0, 16) : ""); setReady(true);
     }
   }, [post.data, loadDoc]);

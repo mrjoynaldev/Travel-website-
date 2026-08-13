@@ -1,5 +1,12 @@
 export type BlockType = "text" | "image" | "video" | "audio" | "button";
 
+export type TextRun = {
+  text: string;
+  mark?: boolean;
+  link?: string;
+  button?: boolean;
+};
+
 export type GravityBlock = {
   id: string;
   type: BlockType;
@@ -7,6 +14,7 @@ export type GravityBlock = {
   y: number;
   width: number;
   content?: string;
+  runs?: TextRun[];
   level?: "h2" | "p";
   url?: string;
   caption?: string;

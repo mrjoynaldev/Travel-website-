@@ -56,16 +56,45 @@ export const studioRouter = router({
   }),
 
   posts: router({
-    list: protectedProcedure.input(z.object({ status: z.enum(POST_STATUSES).optional(), search: z.string().trim().max(100).optional() })).query(async ({ ctx, input }) => {
+    list: protectedProcedure.input(z.object({ status: z.enum(POST_STATUSES).optional(), search: z.string().trim().max(100).optional(), categoryId: z.string().uuid().optional(), tagId: z.string().uuid().optional() })).query(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const db = getSupabase();
       await publishScheduled(actor.siteId);
-      let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, scheduled_at, featured, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).is("deleted_at", null).order("updated_at", { ascending: false });
+      let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, scheduled_at, featured, featured_media_id, og_image_url, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).is("deleted_at", null).order("updated_at", { ascending: false });
       if (actor.role === "author") query = query.eq("author_id", actor.profileId);
       if (input.status) query = query.eq("status", input.status);
       if (input.search) query = query.ilike("title", `%${input.search.replace(/[,%]/g, "")}%`);
-      const { data, error } = await query.limit(100);
+      const { data, error } = await query.limit(500);
       if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load posts." });
-      return data ?? [];
+      const posts = data ?? [];
+      if (!posts.length) return [];
+      const postIds = posts.map(post => post.id);
+      const mediaIds = Array.from(new Set(posts.map(post => post.featured_media_id).filter(Boolean) as string[]));
+      const [postCat, postTag, media] = await Promise.all([
+        db.from("post_categories").select("post_id, category_id").in("post_id", postIds),
+        db.from("post_tags").select("post_id, tag_id").in("post_id", postIds),
+        mediaIds.length ? db.from("media_assets").select("id, url, alt_text, filename").in("id", mediaIds) : Promise.resolve({ data: [], error: null }),
+      ]);
+      const catIds = Array.from(new Set((postCat.data ?? []).map(row => row.category_id))) as string[];
+      const tagIds = Array.from(new Set((postTag.data ?? []).map(row => row.tag_id))) as string[];
+      const [cats, tags] = await Promise.all([
+        catIds.length ? db.from("categories").select("id, name, slug").in("id", catIds) : Promise.resolve({ data: [], error: null }),
+        tagIds.length ? db.from("tags").select("id, name, slug").in("id", tagIds) : Promise.resolve({ data: [], error: null }),
+      ]);
+      if (postCat.error || postTag.error || media.error || cats.error || tags.error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load post details." });
+      const catMap = new Map((cats.data ?? []).map(item => [item.id, item]));
+      const tagMap = new Map((tags.data ?? []).map(item => [item.id, item]));
+      const mediaMap = new Map((media.data ?? []).map(item => [item.id, item]));
+      const catByPost = new Map<string, Array<{ id: string; name: string; slug: string }>>();
+      const tagByPost = new Map<string, Array<{ id: string; name: string; slug: string }>>();
+      for (const row of postCat.data ?? []) { const cat = catMap.get(row.category_id); if (cat) catByPost.set(row.post_id, [...(catByPost.get(row.post_id) ?? []), cat]); }
+      for (const row of postTag.data ?? []) { const tag = tagMap.get(row.tag_id); if (tag) tagByPost.set(row.post_id, [...(tagByPost.get(row.post_id) ?? []), tag]); }
+      let result = posts.map(post => {
+        const asset = post.featured_media_id ? mediaMap.get(post.featured_media_id) : undefined;
+        return { ...post, categories: catByPost.get(post.id) ?? [], tags: tagByPost.get(post.id) ?? [], featuredMedia: asset ? { url: asset.url, alt_text: asset.alt_text ?? null } : null };
+      });
+      if (input.categoryId) result = result.filter(post => post.categories.some(cat => cat.id === input.categoryId));
+      if (input.tagId) result = result.filter(post => post.tags.some(tag => tag.id === input.tagId));
+      return result;
     }),
     get: protectedProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const { post } = await assertCanEditPost(actor, input.id);

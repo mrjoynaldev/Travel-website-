@@ -1,8 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Combine, Eraser, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, SquareMousePointer, Trash2, Type, Ungroup, Video } from "lucide-react";
+import { Combine, Eraser, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, SquareMousePointer, Stethoscope, Trash2, Type, Ungroup, Video } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { runDoctor } from "./doctor";
 import { useEditorStore } from "./store";
 
 export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, showLayers, onToggleLayers, showInspector, onToggleInspector, onEnterDeepDive }: {
@@ -25,6 +27,14 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, s
   const clearSelection = useEditorStore(state => state.clearSelection);
   const [armClear, setArmClear] = useState(false);
 
+  const runDoctorNow = () => {
+    const state = useEditorStore.getState();
+    const healed = runDoctor(state.blocks, state.sections);
+    if (!healed.fixes.length) { toast.success("The background doctor checked the layout and found everything in place."); return; }
+    state.loadDoc({ type: "gravity", version: 1, sections: healed.sections, blocks: healed.blocks });
+    toast.info(`The background doctor fixed ${healed.fixes.length} issue${healed.fixes.length === 1 ? "" : "s"}: ${healed.fixes.join(", ")}`);
+  };
+
   const buttonClass = "h-9 gap-2";
 
   return (
@@ -46,6 +56,7 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, s
       <Button type="button" size="sm" variant={showLayers ? "secondary" : "outline"} className={buttonClass} onClick={() => onToggleLayers(!showLayers)}><Layers className="h-4 w-4" />Layers</Button>
       <Button type="button" size="sm" variant={showInspector ? "secondary" : "outline"} className={buttonClass} onClick={() => onToggleInspector(!showInspector)}><PanelRight className="h-4 w-4" />Inspector</Button>
       <Button type="button" size="sm" variant={previewing ? "secondary" : "outline"} className={buttonClass} onClick={() => onTogglePreview(!previewing)}>Preview layout</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={runDoctorNow}><Stethoscope className="h-4 w-4" />Doctor</Button>
       {onEnterDeepDive && <span className="mx-1 h-5 w-px bg-border" />}
       {onEnterDeepDive && <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onEnterDeepDive}><Maximize2 className="h-4 w-4" />Deep dive</Button>}
     </div>

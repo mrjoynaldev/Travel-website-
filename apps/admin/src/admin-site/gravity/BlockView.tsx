@@ -4,13 +4,31 @@ import type { DraggableAttributes, useDraggable } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImagePlus, Link2, Music2, Pencil, Trash2, Video, Youtube } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { MediaPicker, type MediaKind } from "./MediaPicker";
 import { youtubeId } from "./serialize";
 import { useEditorStore } from "./store";
+import { TextRunsEditor } from "./TextRunsEditor";
 import type { GravityBlock } from "./types";
 
 type DraggableListeners = ReturnType<typeof useDraggable>["listeners"];
+
+function TextRuns({ block }: { block: GravityBlock }) {
+  const runs = block.runs && block.runs.length ? block.runs : block.content ? [{ text: block.content }] : [];
+  return (
+    <>
+      {runs.map((run, index) => {
+        let node: React.ReactNode = <span key={index}>{run.text}</span>;
+        if (run.link) {
+          const className = run.button ? "inline-block rounded-md bg-[#2563eb] px-3 py-1 text-sm font-semibold text-white no-underline" : "font-medium text-[#2563eb] underline underline-offset-2";
+          node = <a key={index} href={run.link} className={className} onClick={event => event.preventDefault()}>{run.text}</a>;
+        }
+        if (run.mark && !run.button) node = <mark key={index} className="rounded bg-amber-200 px-0.5">{run.text}</mark>;
+        return node;
+      })}
+    </>
+  );
+}
 
 export function BlockView({ block, selected, isDragging, listeners, attributes }: { block: GravityBlock; selected: boolean; isDragging?: boolean; listeners?: DraggableListeners; attributes?: DraggableAttributes }) {
   const updateBlock = useEditorStore(state => state.updateBlock);
@@ -18,16 +36,8 @@ export function BlockView({ block, selected, isDragging, listeners, attributes }
   const editingId = useEditorStore(state => state.editingId);
   const setEditing = useEditorStore(state => state.setEditing);
   const [editOpen, setEditOpen] = useState(false);
-  const [text, setText] = useState(block.content || "");
-  const textRef = useRef<HTMLTextAreaElement>(null);
   const textEditing = block.type === "text" && editingId === block.id;
 
-  useEffect(() => {
-    if (textEditing) { setText(block.content || ""); textRef.current?.focus(); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [textEditing]);
-
-  const commitText = () => { updateBlock(block.id, { content: text }); setEditing(null); };
   const shell = block.type === "button" ? "group relative rounded-xl border-2 border-dashed border-border bg-transparent p-1.5 transition-shadow" : "group relative rounded-xl border bg-white p-3 shadow-sm transition-shadow";
 
   return (
@@ -35,7 +45,7 @@ export function BlockView({ block, selected, isDragging, listeners, attributes }
       {...(attributes || {})}
       {...(listeners || {})}
       onDoubleClick={event => {
-        if (block.type === "text") { event.stopPropagation(); setText(block.content || ""); setEditing(block.id); }
+        if (block.type === "text") { event.stopPropagation(); setEditing(block.id); }
       }}
       className={`${shell} ${selected ? "border-primary ring-2 ring-primary/30" : ""} ${isDragging ? "opacity-60" : ""}`}
       style={{ width: block.width }}
@@ -45,15 +55,15 @@ export function BlockView({ block, selected, isDragging, listeners, attributes }
         <Button type="button" size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-destructive" aria-label="Delete block" onClick={event => { event.stopPropagation(); deleteBlocks([block.id]); }}><Trash2 className="h-3 w-3" /></Button>
       </div>
       {block.type === "text" && (textEditing ? (
-        <div className="space-y-2">
+        <div className="space-y-2" onPointerDown={event => event.stopPropagation()}>
           <div className="flex gap-1" onPointerDown={event => event.stopPropagation()}>
             {(["h2", "p"] as const).map(level => <button key={level} type="button" onClick={event => { event.stopPropagation(); updateBlock(block.id, { level }); }} className={`rounded-md px-2 py-1 text-[10px] font-medium ${block.level === level ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{level === "h2" ? "Heading" : "Paragraph"}</button>)}
           </div>
-          <textarea ref={textRef} value={text} onChange={event => setText(event.target.value)} onBlur={commitText} rows={4} className="w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" onPointerDown={event => event.stopPropagation()} />
+          <TextRunsEditor initialText={block.content || ""} initialRuns={block.runs} onCommit={(text, runs) => { updateBlock(block.id, { content: text, runs: runs ?? undefined }); setEditing(null); }} />
           <Input value={block.link || ""} onChange={event => updateBlock(block.id, { link: event.target.value })} placeholder="Optional link trigger, e.g. https://…" className="h-8 text-xs" onPointerDown={event => event.stopPropagation()} />
         </div>
       ) : (
-        <p className={`whitespace-pre-wrap leading-relaxed text-foreground ${block.level === "h2" ? "font-display text-xl font-semibold" : "text-sm"}`}>{block.content || "Empty text block"}</p>
+        <p className={`whitespace-pre-wrap leading-relaxed text-foreground ${block.level === "h2" ? "font-display text-xl font-semibold" : "text-sm"}`}>{block.content ? <TextRuns block={block} /> : "Empty text block"}</p>
       ))}
       {block.type === "button" && (
         <div className="grid place-items-center">
