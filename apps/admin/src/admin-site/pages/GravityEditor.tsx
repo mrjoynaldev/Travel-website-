@@ -19,7 +19,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Eye, Loader2, Save, Send, Trash2 } from "lucide-react";
+import {
+  Archive,
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  Loader2,
+  Save,
+  Send,
+  Trash2,
+  Undo2,
+} from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -314,7 +324,7 @@ export function GravityEditor() {
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 flex flex-col gap-4 border-b border-border pb-5 xl:flex-row xl:items-center xl:justify-between">
+        <header className="mb-5 flex flex-col gap-4 border-b border-border pb-4 xl:mb-6 xl:flex-row xl:items-center xl:justify-between xl:pb-5">
           <div className="flex items-center gap-3">
             <Link href="/studio/posts">
               <Button variant="ghost" size="icon" aria-label="Back to posts">
@@ -326,14 +336,14 @@ export function GravityEditor() {
                 Gravity editor
               </p>
               <div className="mt-1 flex items-center gap-3">
-                <h1 className="font-display text-3xl font-semibold">
+                <h1 className="font-display text-2xl font-semibold xl:text-3xl">
                   {postId ? "Edit gravity draft" : "New gravity draft"}
                 </h1>
                 {postId && <StatusPill state={status} />}
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
               className="gap-2"
@@ -343,7 +353,7 @@ export function GravityEditor() {
               disabled={!postId}
             >
               <Eye className="h-4 w-4" />
-              Preview
+              <span className="hidden md:inline">Preview</span>
             </Button>
             <Button
               onClick={save}
@@ -351,7 +361,11 @@ export function GravityEditor() {
               className="gap-2"
             >
               <Save className="h-4 w-4" />
-              {postId ? "Save changes" : "Create draft"}
+              {postId ? (
+                <span className="hidden md:inline">Save changes</span>
+              ) : (
+                "Create draft"
+              )}
             </Button>
             {postId && status === "draft" && (
               <Button
@@ -363,7 +377,7 @@ export function GravityEditor() {
                 className="gap-2"
               >
                 <Send className="h-4 w-4" />
-                Submit for review
+                <span className="hidden md:inline">Submit for review</span>
               </Button>
             )}
             {postId && status === "review" && canPublish && (
@@ -372,8 +386,10 @@ export function GravityEditor() {
                 onClick={() =>
                   transition.mutate({ id: postId, status: "published" })
                 }
+                className="gap-2"
               >
-                Approve & publish
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="hidden md:inline">Approve & publish</span>
               </Button>
             )}
             {postId && status === "review" && canPublish && (
@@ -383,8 +399,10 @@ export function GravityEditor() {
                 onClick={() =>
                   transition.mutate({ id: postId, status: "draft" })
                 }
+                className="gap-2"
               >
-                Return to draft
+                <Undo2 className="h-4 w-4" />
+                <span className="hidden md:inline">Return to draft</span>
               </Button>
             )}
             {postId && status === "published" && canPublish && (
@@ -394,8 +412,10 @@ export function GravityEditor() {
                 onClick={() =>
                   transition.mutate({ id: postId, status: "archived" })
                 }
+                className="gap-2"
               >
-                Archive
+                <Archive className="h-4 w-4" />
+                <span className="hidden md:inline">Archive</span>
               </Button>
             )}
             {postId && canPublish && (
@@ -412,7 +432,7 @@ export function GravityEditor() {
                 }}
               >
                 <Trash2 className="h-4 w-4" />
-                Delete
+                <span className="hidden md:inline">Delete</span>
               </Button>
             )}
           </div>

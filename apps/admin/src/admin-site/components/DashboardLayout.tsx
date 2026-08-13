@@ -142,6 +142,13 @@ const DEFAULT_WIDTH = 280;
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 480;
 
+const bottomNavItems = [
+  { icon: LayoutDashboard, label: "Overview", path: "/studio" },
+  { icon: FileText, label: "Posts", path: "/studio/posts" },
+  { icon: Boxes, label: "Gravity", path: "/studio/gravity" },
+  { icon: Images, label: "Media", path: "/studio/media" },
+] as const;
+
 export default function DashboardLayout({
   children,
 }: {
@@ -382,8 +389,42 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <main className="flex-1 p-4 pb-24 sm:pb-4">{children}</main>
       </SidebarInset>
+
+      {isMobile && (
+        <nav
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:backdrop-blur sm:hidden"
+          aria-label="Main navigation"
+        >
+          <div className="grid h-14 grid-cols-5">
+            {bottomNavItems.map(item => {
+              const isActive = pathname === item.path;
+              return (
+                <button
+                  key={item.path}
+                  type="button"
+                  onClick={() => router.push(item.path)}
+                  className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="flex flex-col items-center justify-center gap-1 text-[10px] font-medium text-muted-foreground transition-colors"
+            >
+              <PanelLeft className="h-5 w-5" />
+              <span>More</span>
+            </button>
+          </div>
+        </nav>
+      )}
     </>
   );
 }

@@ -3,31 +3,282 @@
 import DashboardLayout from "@/admin-site/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Copy, KeyRound, Loader2, Plus, Trash2, UsersRound } from "lucide-react";
+import {
+  Copy,
+  KeyRound,
+  Loader2,
+  Plus,
+  Trash2,
+  UsersRound,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-function Workspace({ title, eyebrow, children }: { title: string; eyebrow: string; children: React.ReactNode }) {
-  return <DashboardLayout><div className="mx-auto max-w-5xl"><header className="mb-7 border-b border-border pb-6"><p className="font-label text-[10px] text-primary">{eyebrow}</p><h1 className="mt-2 font-display text-4xl font-semibold tracking-tight">{title}</h1></header>{children}</div></DashboardLayout>;
+function Workspace({
+  title,
+  eyebrow,
+  children,
+}: {
+  title: string;
+  eyebrow: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <DashboardLayout>
+      <div className="mx-auto max-w-5xl">
+        <header className="mb-5 border-b border-border pb-5 sm:mb-7 sm:pb-6">
+          <p className="font-label text-[10px] text-primary">{eyebrow}</p>
+          <h1 className="mt-2 font-display text-2xl font-semibold tracking-tight sm:text-4xl">
+            {title}
+          </h1>
+        </header>
+        {children}
+      </div>
+    </DashboardLayout>
+  );
 }
 
 export function StudioApiTokens() {
   const tokens = trpc.studio.apiTokens.list.useQuery();
-  const create = trpc.studio.apiTokens.create.useMutation({ onSuccess: () => { tokens.refetch(); toast.success("Access token created."); }, onError: error => toast.error(error.message) });
-  const revoke = trpc.studio.apiTokens.revoke.useMutation({ onSuccess: () => { tokens.refetch(); toast.success("Access token revoked."); }, onError: error => toast.error(error.message) });
+  const create = trpc.studio.apiTokens.create.useMutation({
+    onSuccess: () => {
+      tokens.refetch();
+      toast.success("Access token created.");
+    },
+    onError: error => toast.error(error.message),
+  });
+  const revoke = trpc.studio.apiTokens.revoke.useMutation({
+    onSuccess: () => {
+      tokens.refetch();
+      toast.success("Access token revoked.");
+    },
+    onError: error => toast.error(error.message),
+  });
   const [name, setName] = useState("");
   const [scopes, setScopes] = useState<"read" | "write">("write");
   const [newToken, setNewToken] = useState<string | null>(null);
-  const submit = () => { if (!name.trim()) { toast.error("Give the token a name."); return; } const chosen: ("read" | "write")[] = scopes === "write" ? ["read", "write"] : ["read"]; create.mutate({ name: name.trim(), scopes: chosen }, { onSuccess: data => { setNewToken(data.token); setName(""); } }); };
-  const copyToken = () => { if (!newToken) return; navigator.clipboard.writeText(newToken).then(() => toast.success("Token copied to clipboard.")); };
-  return <Workspace title="API access tokens" eyebrow="Developer · headless access"><p className="mb-5 max-w-2xl text-sm text-muted-foreground">Access tokens let the command-line tool and scripts manage this publication through the same role-scoped API as the Studio. The full token is shown <strong>only once</strong> when created.</p>{newToken && <section className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-5"><p className="font-label text-[10px] text-amber-800">Copy this token now — it will not be shown again</p><div className="mt-3 flex items-center gap-2"><code className="flex-1 truncate rounded-lg bg-white px-3 py-2 font-mono text-xs">{newToken}</code><Button size="sm" variant="outline" onClick={copyToken}><Copy className="mr-1 h-3.5 w-3.5" />Copy</Button></div><p className="mt-2 text-xs text-amber-800">Store it in an environment variable, e.g. <code>CRG_TOKEN</code>, and use it with the CLI.</p></section>}<section className="rounded-xl border border-border bg-white p-6 shadow-sm"><div className="flex items-center gap-3"><KeyRound className="h-5 w-5 text-primary" /><div><h2 className="font-display text-2xl font-semibold">Create a token</h2><p className="mt-1 text-sm text-muted-foreground">Scopes: read-only tokens cannot make changes.</p></div></div><div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end"><div className="flex-1"><label className="text-xs font-medium text-muted-foreground">Token name</label><Input value={name} onChange={event => setName(event.target.value)} placeholder="e.g. CI publisher" className="mt-1.5" /></div><div><label className="text-xs font-medium text-muted-foreground">Scope</label><Select value={scopes} onValueChange={value => setScopes(value as "read" | "write")}><SelectTrigger className="mt-1.5 h-10 w-full bg-white sm:w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="write">Read & write</SelectItem><SelectItem value="read">Read only</SelectItem></SelectContent></Select></div><Button onClick={submit} disabled={create.isPending} className="gap-2"><Plus className="h-4 w-4" />Create token</Button></div></section><section className="mt-6 overflow-hidden rounded-xl border border-border bg-white shadow-sm">{tokens.isLoading ? <div className="grid min-h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : tokens.data?.length ? tokens.data.map(token => <div key={token.id} className="flex flex-col gap-3 border-b border-border p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-medium">{token.name}</p><p className="mt-1 text-xs text-muted-foreground"><code>{token.token_prefix}…</code> · {token.scopes.join(", ")}</p><p className="mt-1 text-[11px] text-muted-foreground">{token.revoked_at ? "Revoked" : token.expires_at ? `Expires ${new Date(token.expires_at).toLocaleDateString()}` : "No expiry"}{token.last_used_at ? ` · last used ${new Date(token.last_used_at).toLocaleDateString()}` : ""}</p></div>{!token.revoked_at && <Button size="sm" variant="outline" onClick={() => { if (window.confirm(`Revoke "${token.name}"? This immediately stops it from working.`)) revoke.mutate({ id: token.id, confirmed: true }); }}><Trash2 className="mr-1 h-3.5 w-3.5" />Revoke</Button>}</div>) : <p className="p-12 text-center text-sm text-muted-foreground">No access tokens yet. Create one to use the CLI.</p>}</section></Workspace>;
+  const submit = () => {
+    if (!name.trim()) {
+      toast.error("Give the token a name.");
+      return;
+    }
+    const chosen: ("read" | "write")[] =
+      scopes === "write" ? ["read", "write"] : ["read"];
+    create.mutate(
+      { name: name.trim(), scopes: chosen },
+      {
+        onSuccess: data => {
+          setNewToken(data.token);
+          setName("");
+        },
+      }
+    );
+  };
+  const copyToken = () => {
+    if (!newToken) return;
+    navigator.clipboard
+      .writeText(newToken)
+      .then(() => toast.success("Token copied to clipboard."));
+  };
+  return (
+    <Workspace title="API access tokens" eyebrow="Developer · headless access">
+      <p className="mb-5 max-w-2xl text-sm text-muted-foreground">
+        Access tokens let the command-line tool and scripts manage this
+        publication through the same role-scoped API as the Studio. The full
+        token is shown <strong>only once</strong> when created.
+      </p>
+      {newToken && (
+        <section className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-5">
+          <p className="font-label text-[10px] text-amber-800">
+            Copy this token now — it will not be shown again
+          </p>
+          <div className="mt-3 flex items-center gap-2">
+            <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 font-mono text-xs">
+              {newToken}
+            </code>
+            <Button size="sm" variant="outline" onClick={copyToken}>
+              <Copy className="mr-1 h-3.5 w-3.5" />
+              Copy
+            </Button>
+          </div>
+          <p className="mt-2 text-xs text-amber-800">
+            Store it in an environment variable, e.g. <code>CRG_TOKEN</code>,
+            and use it with the CLI.
+          </p>
+        </section>
+      )}
+      <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="flex items-center gap-3">
+          <KeyRound className="h-5 w-5 text-primary" />
+          <div>
+            <h2 className="font-display text-2xl font-semibold">
+              Create a token
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Scopes: read-only tokens cannot make changes.
+            </p>
+          </div>
+        </div>
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex-1">
+            <label className="text-xs font-medium text-muted-foreground">
+              Token name
+            </label>
+            <Input
+              value={name}
+              onChange={event => setName(event.target.value)}
+              placeholder="e.g. CI publisher"
+              className="mt-1.5"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground">
+              Scope
+            </label>
+            <Select
+              value={scopes}
+              onValueChange={value => setScopes(value as "read" | "write")}
+            >
+              <SelectTrigger className="mt-1.5 h-10 w-full bg-white sm:w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="write">Read & write</SelectItem>
+                <SelectItem value="read">Read only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            onClick={submit}
+            disabled={create.isPending}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create token
+          </Button>
+        </div>
+      </section>
+      <section className="mt-6 overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        {tokens.isLoading ? (
+          <div className="grid min-h-32 place-items-center">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          </div>
+        ) : tokens.data?.length ? (
+          tokens.data.map(token => (
+            <div
+              key={token.id}
+              className="flex flex-col gap-3 border-b border-border p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div>
+                <p className="font-medium">{token.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  <code>{token.token_prefix}…</code> · {token.scopes.join(", ")}
+                </p>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {token.revoked_at
+                    ? "Revoked"
+                    : token.expires_at
+                      ? `Expires ${new Date(token.expires_at).toLocaleDateString()}`
+                      : "No expiry"}
+                  {token.last_used_at
+                    ? ` · last used ${new Date(token.last_used_at).toLocaleDateString()}`
+                    : ""}
+                </p>
+              </div>
+              {!token.revoked_at && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Revoke "${token.name}"? This immediately stops it from working.`
+                      )
+                    )
+                      revoke.mutate({ id: token.id, confirmed: true });
+                  }}
+                >
+                  <Trash2 className="mr-1 h-3.5 w-3.5" />
+                  Revoke
+                </Button>
+              )}
+            </div>
+          ))
+        ) : (
+          <p className="p-12 text-center text-sm text-muted-foreground">
+            No access tokens yet. Create one to use the CLI.
+          </p>
+        )}
+      </section>
+    </Workspace>
+  );
 }
 
 export function StudioSubscribers() {
   const subscribers = trpc.studio.subscribers.list.useQuery();
-  const remove = trpc.studio.subscribers.remove.useMutation({ onSuccess: () => { subscribers.refetch(); toast.success("Subscriber removed."); }, onError: error => toast.error(error.message) });
+  const remove = trpc.studio.subscribers.remove.useMutation({
+    onSuccess: () => {
+      subscribers.refetch();
+      toast.success("Subscriber removed.");
+    },
+    onError: error => toast.error(error.message),
+  });
   const total = subscribers.data?.length ?? 0;
-  return <Workspace title="Subscribers" eyebrow="Audience · newsletter"><p className="mb-5 text-sm text-muted-foreground">{total} subscriber{total === 1 ? "" : "s"} on record. Subscribers are captured through the public newsletter form and the privacy policy link.</p><section className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">{subscribers.isLoading ? <div className="grid min-h-32 place-items-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div> : subscribers.data?.length ? subscribers.data.map(subscriber => <div key={subscriber.id} className="flex flex-col gap-3 border-b border-border p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><UsersRound className="h-5 w-5 text-primary" /><div><p className="font-medium">{subscriber.email}</p><p className="mt-1 text-xs text-muted-foreground">Subscribed {new Date(subscriber.consented_at).toLocaleDateString()} · <span className="capitalize">{subscriber.status}</span></p></div></div><Button size="sm" variant="outline" onClick={() => { if (window.confirm(`Remove ${subscriber.email}?`)) remove.mutate({ id: subscriber.id }); }}><Trash2 className="mr-1 h-3.5 w-3.5" />Remove</Button></div>) : <p className="p-12 text-center text-sm text-muted-foreground">No subscribers yet.</p>}</section></Workspace>;
+  return (
+    <Workspace title="Subscribers" eyebrow="Audience · newsletter">
+      <p className="mb-5 text-sm text-muted-foreground">
+        {total} subscriber{total === 1 ? "" : "s"} on record. Subscribers are
+        captured through the public newsletter form and the privacy policy link.
+      </p>
+      <section className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        {subscribers.isLoading ? (
+          <div className="grid min-h-32 place-items-center">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          </div>
+        ) : subscribers.data?.length ? (
+          subscribers.data.map(subscriber => (
+            <div
+              key={subscriber.id}
+              className="flex flex-col gap-3 border-b border-border p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <UsersRound className="h-5 w-5 text-primary" />
+                <div>
+                  <p className="font-medium">{subscriber.email}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Subscribed{" "}
+                    {new Date(subscriber.consented_at).toLocaleDateString()} ·{" "}
+                    <span className="capitalize">{subscriber.status}</span>
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  if (window.confirm(`Remove ${subscriber.email}?`))
+                    remove.mutate({ id: subscriber.id });
+                }}
+              >
+                <Trash2 className="mr-1 h-3.5 w-3.5" />
+                Remove
+              </Button>
+            </div>
+          ))
+        ) : (
+          <p className="p-12 text-center text-sm text-muted-foreground">
+            No subscribers yet.
+          </p>
+        )}
+      </section>
+    </Workspace>
+  );
 }
