@@ -1,6 +1,6 @@
 "use client";
 
-import RFB from "@novnc/novnc";
+import type RFB from "@novnc/novnc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -277,7 +277,7 @@ export function VNCViewer() {
     return () => observer.disconnect();
   }, [applyTransform, clampPan, moveCursor]);
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     const host = hostRef.current;
     if (!host || !url.trim()) return;
     rfbRef.current?.disconnect();
@@ -300,7 +300,8 @@ export function VNCViewer() {
 
     let rfb: RFB;
     try {
-      rfb = new RFB(host, url.trim(), options);
+      const { default: RFBClass } = await import("@novnc/novnc");
+      rfb = new RFBClass(host, url.trim(), options);
     } catch (error) {
       setStatus("disconnected");
       setMessage(
