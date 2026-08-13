@@ -30,6 +30,38 @@ type Status = "idle" | "connecting" | "connected" | "disconnected";
 
 const DEFAULT_URL = "ws://localhost:6080/websockify";
 
+const isValidWsUrl = (value: string) => {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "ws:" || parsed.protocol === "wss:";
+  } catch {
+    return false;
+  }
+};
+
+const cloudShellVncUrl = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    if (window.location.protocol !== "https:") return null;
+    const m = window.location.hostname.match(/^(\d+)-(.*)$/);
+    return m ? `wss://6080-${m[2]}/websockify` : null;
+  } catch {
+    return null;
+  }
+};
+
+const initialVnc = () => {
+  if (typeof window === "undefined")
+    return { url: DEFAULT_URL, saved: false, derived: false };
+  const saved = localStorage.getItem("vnc.url");
+  if (saved && isValidWsUrl(saved))
+    return { url: saved.trim(), saved: true, derived: false };
+  if (saved) localStorage.removeItem("vnc.url");
+  const derived = cloudShellVncUrl();
+  if (derived) return { url: derived, saved: false, derived: true };
+  return { url: DEFAULT_URL, saved: false, derived: false };
+};
+
 const SENS = 1.5;
 const TAP_MS = 260;
 const LONG_MS = 520;
@@ -78,13 +110,9 @@ export function RemotePanel() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const screenRef = useRef<HTMLDivElement | null>(null);
   const observerRef = useRef<ResizeObserver | null>(null);
-  const autoConnected = useRef(false);
 
-  const [url, setUrl] = useState(() =>
-    typeof window === "undefined"
-      ? DEFAULT_URL
-      : localStorage.getItem("vnc.url") || DEFAULT_URL
-  );
+  const [vncInit] = useState(initialVnc);
+  const [url, setUrl] = useState(() => vncInit.url);
   const [password, setPassword] = useState(() =>
     typeof window === "undefined"
       ? ""
@@ -108,11 +136,11 @@ export function RemotePanel() {
   const [clipboardOpen, setClipboardOpen] = useState(false);
   const [remoteClip, setRemoteClip] = useState("");
   const [localClip, setLocalClip] = useState("");
-  const [panelOpen, setPanelOpen] = useState(() =>
-    typeof window === "undefined" ? false : !!localStorage.getItem("vnc.url")
+  const [panelOpen, setPanelOpen] = useState(
+    () => vncInit.saved || vncInit.derived
   );
-  const [showSetup, setShowSetup] = useState(() =>
-    typeof window === "undefined" ? true : !localStorage.getItem("vnc.url")
+  const [showSetup, setShowSetup] = useState(
+    () => !vncInit.saved && !vncInit.derived
   );
 
   const tp = useRef({
@@ -297,7 +325,16 @@ export function RemotePanel() {
 
   const connect = useCallback(async () => {
     const host = hostRef.current;
-    if (!host || !url.trim()) return;
+    const target = url.trim();
+    if (!host || !target) return;
+    if (!isValidWsUrl(target)) {
+      setStatus("disconnected");
+      setMessage(
+        "Invalid WebSocket URL. Use ws:// or wss:// followed by a host, e.g. wss://host:6080/websockify."
+      );
+      setShowSetup(true);
+      return;
+    }
     rfbRef.current?.disconnect();
     observerRef.current?.disconnect();
     observerRef.current = null;
@@ -319,7 +356,7 @@ export function RemotePanel() {
     let rfb: RFB;
     try {
       const { default: RFBClass } = await import("@novnc/novnc");
-      rfb = new RFBClass(host, url.trim(), options);
+      rfb = new RFBClass(host, target, options);
     } catch (error) {
       setStatus("disconnected");
       setMessage(
@@ -392,13 +429,12 @@ export function RemotePanel() {
   useEffect(() => () => disconnect(), [disconnect]);
 
   useEffect(() => {
-    if (autoConnected.current) return;
-    autoConnected.current = true;
-    connect();
-  }, [connect]);
+    if (panelOpen) connect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelOpen]);
 
   useEffect(() => {
-    if (url && url !== DEFAULT_URL) {
+    if (isValidWsUrl(url) && url !== DEFAULT_URL) {
       localStorage.setItem("vnc.url", url);
     } else {
       localStorage.removeItem("vnc.url");
@@ -619,6 +655,9 @@ export function RemotePanel() {
   }, [remoteClip]);
 
   const connected = status === "connected";
+  const previewUrl = vncInit.derived
+    ? `https://${new URL(vncInit.url).host}/`
+    : null;
   const statusColor =
     status === "connected"
       ? "bg-emerald-500"
@@ -739,6 +778,20 @@ export function RemotePanel() {
               <p className="text-sm text-white/80">
                 {message || "Disconnected."}
               </p>
+              {previewUrl && (
+                <p className="mx-auto mt-3 max-w-64 text-center text-[11px] leading-relaxed text-white/50">
+                  Cloud Shell needs the VNC port authorized once.{" "}
+                  <a
+                    href={previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-primary underline underline-offset-2"
+                  >
+                    Open port preview
+                  </a>{" "}
+                  in a new tab, then reconnect.
+                </p>
+              )}
               <div className="mt-4 flex justify-center gap-2">
                 <Button size="sm" className="gap-2" onClick={connect}>
                   <Power className="h-4 w-4" />
