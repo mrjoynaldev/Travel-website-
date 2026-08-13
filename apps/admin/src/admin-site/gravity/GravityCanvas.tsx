@@ -13,7 +13,7 @@ function DraggableBlock({ block, selected }: { block: GravityBlock; selected: bo
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: block.id });
   const selectBlock = useEditorStore(state => state.selectBlock);
   return (
-    <div ref={setNodeRef} onClick={event => { event.stopPropagation(); selectBlock(block.id, event.metaKey || event.ctrlKey || event.shiftKey); }} style={{ position: "absolute", left: block.x, top: block.y, zIndex: selected ? 20 : 10, transform: CSS.Translate.toString(transform), touchAction: "none" }}>
+    <div ref={setNodeRef} data-block-id={block.id} onClick={event => { event.stopPropagation(); selectBlock(block.id, event.metaKey || event.ctrlKey || event.shiftKey); }} style={{ position: "absolute", left: block.x, top: block.y, zIndex: selected ? 20 : 10, transform: CSS.Translate.toString(transform), touchAction: "none" }}>
       <BlockView block={block} selected={selected} isDragging={isDragging} listeners={listeners} attributes={attributes} />
     </div>
   );
@@ -36,7 +36,7 @@ function SectionOverlay({ section, blocks }: { section: GravitySection; blocks: 
   );
 }
 
-export function GravityCanvas() {
+export function GravityCanvas({ viewportRef, hideZoomBar, fullHeight }: { viewportRef?: { current: HTMLDivElement | null }; hideZoomBar?: boolean; fullHeight?: boolean }) {
   const blocks = useEditorStore(state => state.blocks);
   const sections = useEditorStore(state => state.sections);
   const selected = useEditorStore(state => state.selected);
@@ -45,14 +45,16 @@ export function GravityCanvas() {
   const moveBlock = useEditorStore(state => state.moveBlock);
   const setBounds = useEditorStore(state => state.setBounds);
   const addBlockAt = useEditorStore(state => state.addBlockAt);
+  const zoom = useEditorStore(state => state.zoom);
+  const setZoom = useEditorStore(state => state.setZoom);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const [zoom, setZoom] = useState(0.85);
+  const ownViewport = useRef<HTMLDivElement>(null);
+  const innerViewport = viewportRef ?? ownViewport;
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const contentHeight = useMemo(() => Math.max(760, ...blocks.map(block => block.y + 200)), [blocks]);
   const fitZoom = () => {
-    const el = viewportRef.current;
+    const el = innerViewport.current;
     if (el) setZoom(Math.max(0.15, Math.min(1, (el.clientWidth - 64) / CANVAS_WIDTH)));
   };
 
@@ -69,13 +71,13 @@ export function GravityCanvas() {
   const sectionGroups = sections.map(section => ({ section, blocks: blocks.filter(block => block.parentId === section.id) }));
 
   return (
-    <div className="relative rounded-xl border border-border bg-[#f2f2f0]">
-      <div ref={viewportRef} onPointerDown={() => clearSelection()} onDoubleClick={event => {
+    <div className={`relative border border-white/10 bg-[#0e1116] ${fullHeight ? "h-full rounded-none" : "rounded-xl border-border bg-[#f2f2f0]"}`}>
+      <div ref={innerViewport} onPointerDown={() => clearSelection()} onDoubleClick={event => {
         if (event.target === event.currentTarget || (event.target as HTMLElement).classList.contains("gravity-artboard")) {
-          const rect = viewportRef.current?.getBoundingClientRect();
+          const rect = innerViewport.current?.getBoundingClientRect();
           if (rect) addBlockAt("text", (event.clientX - rect.left) / zoom, (event.clientY - rect.top) / zoom);
         }
-      }} className="gravity-artboard h-[72vh] overflow-auto p-8">
+      }} className={`gravity-artboard overflow-auto p-8 ${fullHeight ? "h-full" : "h-[72vh]"}`}>
         <div className="flex justify-center" style={{ width: CANVAS_WIDTH * zoom, height: contentHeight * zoom }}>
           <div className="gravity-artboard relative rounded-lg border border-border bg-white shadow-sm" style={{ width: CANVAS_WIDTH, height: contentHeight, transform: `scale(${zoom})`, transformOrigin: "top left" }}>
             {!blocks.length && <div className="grid h-full place-items-center"><div className="text-center"><p className="font-display text-xl font-semibold text-muted-foreground">Empty canvas</p><p className="mt-1 text-sm text-muted-foreground">Pick a template, drag blocks from the toolbar, or double-click the artboard to add text.</p></div></div>}
@@ -98,13 +100,13 @@ export function GravityCanvas() {
           </div>
         </div>
       </div>
-      <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-lg border border-border bg-white p-1 shadow-sm">
+      {!hideZoomBar && <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-lg border border-border bg-white p-1 shadow-sm">
         <button type="button" aria-label="Zoom out" className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-muted" onClick={() => setZoom(value => Math.max(0.15, Math.round((value - 0.1) * 100) / 100))}><Minus className="h-3.5 w-3.5" /></button>
         <span className="w-12 text-center text-xs tabular-nums text-muted-foreground">{Math.round(zoom * 100)}%</span>
         <button type="button" aria-label="Zoom in" className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-muted" onClick={() => setZoom(value => Math.min(2, Math.round((value + 0.1) * 100) / 100))}><Plus className="h-3.5 w-3.5" /></button>
         <button type="button" aria-label="Fit to view" className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-muted" onClick={fitZoom}><Maximize className="h-3.5 w-3.5" /></button>
         <button type="button" aria-label="Reset to 100%" className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-muted" onClick={() => setZoom(1)}><MousePointer2 className="h-3.5 w-3.5" /></button>
-      </div>
+      </div>}
     </div>
   );
 }

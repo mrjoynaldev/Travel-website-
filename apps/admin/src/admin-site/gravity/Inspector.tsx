@@ -3,11 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MousePointerClick, Trash2 } from "lucide-react";
+import { Link2, MousePointerClick, Trash2 } from "lucide-react";
+import { MediaPicker, type MediaKind } from "./MediaPicker";
 import { useEditorStore } from "./store";
 import type { GravityBlock } from "./types";
 
-const TYPE_LABEL: Record<GravityBlock["type"], string> = { text: "Text", image: "Image", video: "Video", audio: "Audio" };
+const TYPE_LABEL: Record<GravityBlock["type"], string> = { text: "Text", image: "Image", video: "Video", audio: "Audio", button: "Button" };
 
 export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
   const updateBlock = useEditorStore(state => state.updateBlock);
@@ -34,12 +35,22 @@ export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
             <div className={field}><Label className="text-[10px] text-muted-foreground">Content</Label><textarea value={block.content || ""} onChange={event => updateBlock(block.id, { content: event.target.value })} rows={4} className="mt-1 w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
           </>
         )}
+        {block.type === "button" && (
+          <>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">Label</Label><Input value={block.content || ""} onChange={event => updateBlock(block.id, { content: event.target.value })} placeholder="e.g. Learn more" className="mt-1 h-8 text-xs" /></div>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">Link trigger</Label><Input value={block.link || ""} onChange={event => updateBlock(block.id, { link: event.target.value })} placeholder="https://…" className="mt-1 h-8 text-xs" /></div>
+          </>
+        )}
         {(block.type === "image" || block.type === "video" || block.type === "audio") && (
           <>
-            <div className={field}><Label className="text-[10px] text-muted-foreground">{block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"} URL</Label><Input value={block.url || ""} onChange={event => updateBlock(block.id, { url: event.target.value })} className="mt-1 h-8 text-xs" /></div>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">{block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"}</Label><div className="mt-1"><MediaPicker kind={block.type as MediaKind} url={block.url} onChange={url => updateBlock(block.id, { url })} /></div></div>
             <div className={field}><Label className="text-[10px] text-muted-foreground">Caption</Label><Input value={block.caption || ""} onChange={event => updateBlock(block.id, { caption: event.target.value })} className="mt-1 h-8 text-xs" /></div>
           </>
         )}
+        {block.type !== "button" && (
+          <div className={field}><Label className="text-[10px] text-muted-foreground">Link trigger</Label><Input value={block.link || ""} onChange={event => updateBlock(block.id, { link: event.target.value })} placeholder="Wraps this block as a click target" className="mt-1 h-8 text-xs" /></div>
+        )}
+        {block.link && <p className="mt-1.5 flex items-center gap-1 text-[10px] text-primary"><Link2 className="h-3 w-3" />Will link to {block.link}</p>}
         <Button type="button" variant="outline" size="sm" className="mt-4 w-full gap-2 text-destructive hover:text-destructive" onClick={() => deleteBlocks([block.id])}><Trash2 className="h-3.5 w-3.5" />Delete block</Button>
       </div>
     </div>

@@ -8,6 +8,7 @@ const text = (id: string, x: number, y: number, width: number, content: string, 
 const image = (id: string, x: number, y: number, width: number, url: string, caption?: string, parentId?: string): GravityBlock => ({ id, type: "image", x, y, width, url, caption, parentId });
 const video = (id: string, x: number, y: number, width: number, url: string, caption?: string, parentId?: string): GravityBlock => ({ id, type: "video", x, y, width, url, caption, parentId });
 const audio = (id: string, x: number, y: number, width: number, url: string, caption?: string, parentId?: string): GravityBlock => ({ id, type: "audio", x, y, width, url, caption, parentId });
+const button = (id: string, x: number, y: number, width: number, content: string, link: string, parentId?: string): GravityBlock => ({ id, type: "button", x, y, width, content, link, parentId });
 const section = (id: string, label: string): GravitySection => ({ id, label });
 
 const img = (seed: string) => `https://picsum.photos/seed/${seed}/1000/700`;
@@ -107,6 +108,7 @@ const productAnnouncement: Template = {
     image("b2", 32, 120, 560, img("product"), "Hand-woven, weather-proof"),
     text("b3", 608, 120, 540, "Everything we ship is grown, packed, and delivered within a day's drive.", "p", "s1"),
     text("b4", 230, 520, 720, "Closing paragraph. Announcements end on the next step: order, subscribe, or come visit the stand."),
+    button("b5", 230, 640, 220, "Learn more", "https://example.com"),
   ],
 };
 

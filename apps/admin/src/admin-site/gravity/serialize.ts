@@ -3,30 +3,50 @@ import type { GravityBlock, GravityDoc, GravitySection } from "./types";
 const escapeHtml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+export function youtubeId(url: string) {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{6,})/);
+  return match ? match[1] : null;
+}
+
 function videoEmbed(url: string) {
-  const youtube = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]{6,})/);
-  if (youtube) return `<iframe width="560" height="315" src="https://www.youtube.com/embed/${youtube[1]}" title="Embedded video" frameborder="0" allowfullscreen></iframe>`;
+  const youtube = youtubeId(url);
+  if (youtube) return `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/${youtube}" title="Embedded video" frameborder="0" allowfullscreen></iframe>`;
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
   if (vimeo) return `<iframe src="https://player.vimeo.com/video/${vimeo[1]}" title="Embedded video" frameborder="0" allowfullscreen></iframe>`;
   return `<video controls preload="metadata"><source src="${escapeHtml(url)}"></video>`;
 }
 
+function audioEmbed(url: string) {
+  const id = youtubeId(url);
+  if (id) return `<iframe class="gravity-audio-youtube" src="https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1" title="Audio" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+  return `<audio controls preload="metadata" src="${escapeHtml(url)}">Your browser does not support audio playback.</audio>`;
+}
+
+const wrapLink = (html: string, block: GravityBlock) => {
+  if (!block.link) return html;
+  return `<a class="gravity-block-link" href="${escapeHtml(block.link)}">${html}</a>`;
+};
+
 function blockMarkup(block: GravityBlock) {
   if (block.type === "image") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
-    return `<figure class="gravity-media"><img src="${escapeHtml(block.url || "")}" alt="${escapeHtml(block.caption || "")}" loading="lazy">${caption}</figure>`;
+    return wrapLink(`<figure class="gravity-media"><img src="${escapeHtml(block.url || "")}" alt="${escapeHtml(block.caption || "")}" loading="lazy">${caption}</figure>`, block);
   }
   if (block.type === "video") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
-    return `<figure class="gravity-media">${videoEmbed(block.url || "")}${caption}</figure>`;
+    return wrapLink(`<figure class="gravity-media">${videoEmbed(block.url || "")}${caption}</figure>`, block);
   }
   if (block.type === "audio") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
-    return `<figure class="gravity-media"><audio controls preload="metadata" src="${escapeHtml(block.url || "")}">Your browser does not support audio playback.</audio>${caption}</figure>`;
+    return wrapLink(`<figure class="gravity-media${youtubeId(block.url || "") ? " gravity-audio-strip" : ""}">${audioEmbed(block.url || "")}${caption}</figure>`, block);
   }
   if (block.type === "text") {
     const tag = block.level === "h2" ? "h2" : "p";
-    return `<${tag} class="gravity-text">${escapeHtml(block.content || "")}</${tag}>`;
+    return wrapLink(`<${tag} class="gravity-text">${escapeHtml(block.content || "")}</${tag}>`, block);
+  }
+  if (block.type === "button") {
+    const href = escapeHtml(block.link || "#");
+    return `<p class="gravity-button-wrap"><a class="cta-button cta-primary" href="${href}">${escapeHtml(block.content || "Button")}</a></p>`;
   }
   return "";
 }

@@ -12,7 +12,7 @@ import { TemplatesDialog } from "./TemplatesDialog";
 import { offsetTemplate, type Template } from "./templates";
 import { GravityToolbar } from "./Toolbar";
 
-export function GravityWorkbench() {
+export function GravityWorkbench({ onEnterDeepDive }: { onEnterDeepDive?: () => void }) {
   const [view, setView] = useState<"design" | "preview">("design");
   const [showLayers, setShowLayers] = useState(true);
   const [showInspector, setShowInspector] = useState(true);
@@ -38,7 +38,7 @@ export function GravityWorkbench() {
 
   return (
     <div className="space-y-4">
-      <GravityToolbar previewing={view === "preview"} onTogglePreview={open => setView(open ? "preview" : "design")} onOpenTemplates={() => setTemplatesOpen(true)} showLayers={showLayers} onToggleLayers={setShowLayers} showInspector={showInspector} onToggleInspector={setShowInspector} />
+      <GravityToolbar previewing={view === "preview"} onTogglePreview={open => setView(open ? "preview" : "design")} onOpenTemplates={() => setTemplatesOpen(true)} showLayers={showLayers} onToggleLayers={setShowLayers} showInspector={showInspector} onToggleInspector={setShowInspector} onEnterDeepDive={onEnterDeepDive} />
       <p className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground"><Compass className="h-3.5 w-3.5" />Start from a template, then drag blocks on the artboard. Snap guides align nearby blocks; Shift/Ctrl-click to multi-select, then merge into a section. Double-click text to edit, or use the inspector.</p>
       {view === "preview" ? (
         <GravityPreview />

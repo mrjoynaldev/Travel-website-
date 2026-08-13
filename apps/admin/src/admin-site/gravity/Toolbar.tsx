@@ -1,11 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Combine, Eraser, ImagePlus, Layers, LayoutTemplate, MousePointer2, Music2, PanelRight, Trash2, Type, Ungroup, Video } from "lucide-react";
+import { Combine, Eraser, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, SquareMousePointer, Trash2, Type, Ungroup, Video } from "lucide-react";
 import { useState } from "react";
 import { useEditorStore } from "./store";
 
-export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, showLayers, onToggleLayers, showInspector, onToggleInspector }: {
+export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, showLayers, onToggleLayers, showInspector, onToggleInspector, onEnterDeepDive }: {
   previewing: boolean;
   onTogglePreview: (previewing: boolean) => void;
   onOpenTemplates: () => void;
@@ -13,6 +13,7 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, s
   onToggleLayers: (show: boolean) => void;
   showInspector: boolean;
   onToggleInspector: (show: boolean) => void;
+  onEnterDeepDive?: () => void;
 }) {
   const addBlock = useEditorStore(state => state.addBlock);
   const selected = useEditorStore(state => state.selected);
@@ -33,6 +34,7 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, s
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("image")}><ImagePlus className="h-4 w-4" />Image</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("video")}><Video className="h-4 w-4" />Video</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("audio")}><Music2 className="h-4 w-4" />Audio</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("button")}><SquareMousePointer className="h-4 w-4" />Button</Button>
       <span className="mx-1 h-5 w-px bg-border" />
       <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onOpenTemplates}><LayoutTemplate className="h-4 w-4" />Templates</Button>
       <span className="mx-1 h-5 w-px bg-border" />
@@ -44,6 +46,8 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, s
       <Button type="button" size="sm" variant={showLayers ? "secondary" : "outline"} className={buttonClass} onClick={() => onToggleLayers(!showLayers)}><Layers className="h-4 w-4" />Layers</Button>
       <Button type="button" size="sm" variant={showInspector ? "secondary" : "outline"} className={buttonClass} onClick={() => onToggleInspector(!showInspector)}><PanelRight className="h-4 w-4" />Inspector</Button>
       <Button type="button" size="sm" variant={previewing ? "secondary" : "outline"} className={buttonClass} onClick={() => onTogglePreview(!previewing)}>Preview layout</Button>
+      {onEnterDeepDive && <span className="mx-1 h-5 w-px bg-border" />}
+      {onEnterDeepDive && <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onEnterDeepDive}><Maximize2 className="h-4 w-4" />Deep dive</Button>}
     </div>
   );
 }

@@ -29,7 +29,11 @@ type EditorState = {
   sections: GravitySection[];
   selected: string[];
   bounds?: CanvasBounds;
+  zoom: number;
+  editingId: string | null;
   loadDoc: (doc: GravityDoc) => void;
+  setZoom: (zoom: number | ((current: number) => number)) => void;
+  setEditing: (id: string | null) => void;
   addBlock: (type: BlockType) => void;
   addBlockAt: (type: BlockType, x: number, y: number) => void;
   updateBlock: (id: string, patch: Partial<GravityBlock>) => void;
@@ -54,8 +58,8 @@ const addBlockAt = (state: EditorState, type: BlockType, x?: number, y?: number)
     type,
     x: x ?? 32 + cascade,
     y: y ?? 40 + cascade,
-    width: type === "text" ? 240 : type === "image" ? 260 : type === "video" ? 320 : 420,
-    content: type === "text" ? "Double-click to edit this text block." : undefined,
+    width: type === "text" ? 240 : type === "image" ? 260 : type === "video" ? 320 : type === "button" ? 200 : 420,
+    content: type === "text" ? "Double-click to edit this text block." : type === "button" ? "Button" : undefined,
   };
   return { blocks: [...state.blocks, block], selected: [block.id] };
 };
@@ -64,7 +68,11 @@ export const useEditorStore = create<EditorState>(set => ({
   blocks: [],
   sections: [],
   selected: [],
-  loadDoc: doc => set({ blocks: doc.blocks, sections: doc.sections, selected: [] }),
+  zoom: 1,
+  editingId: null,
+  setZoom: zoom => set(state => ({ zoom: typeof zoom === "function" ? zoom(state.zoom) : zoom })),
+  setEditing: editingId => set({ editingId }),
+  loadDoc: doc => set({ blocks: doc.blocks, sections: doc.sections, selected: [], editingId: null }),
   addBlock: type => set(state => addBlockAt(state, type)),
   addBlockAt: (type, x, y) => set(state => addBlockAt(state, type, x, y)),
   updateBlock: (id, patch) => set(state => ({ blocks: state.blocks.map(block => (block.id === id ? { ...block, ...patch } : block)) })),
@@ -112,5 +120,5 @@ export const useEditorStore = create<EditorState>(set => ({
         selected: state.selected.filter(id => !ids.includes(id)),
       };
     }),
-  clearAll: () => set({ blocks: [], sections: [], selected: [] }),
+  clearAll: () => set({ blocks: [], sections: [], selected: [], editingId: null }),
 }));
