@@ -4,6 +4,11 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Combine,
+  Copy,
   Eye,
   ImagePlus,
   Layers,
@@ -14,6 +19,7 @@ import {
   MousePointer2,
   Music2,
   PanelRight,
+  Pencil,
   Plus,
   Send,
   Settings,
@@ -21,6 +27,7 @@ import {
   Stethoscope,
   Trash2,
   Type,
+  Unlink,
   Video,
 } from "lucide-react";
 import { GravityCanvas } from "./GravityCanvas";
@@ -93,6 +100,13 @@ export function DeepDive(props: DeepDiveProps) {
   const sections = useEditorStore(state => state.sections);
   const blocks = useEditorStore(state => state.blocks);
   const selected = useEditorStore(state => state.selected);
+  const editingId = useEditorStore(state => state.editingId);
+  const setEditing = useEditorStore(state => state.setEditing);
+  const mergeSelection = useEditorStore(state => state.mergeSelection);
+  const detachSelection = useEditorStore(state => state.detachSelection);
+  const alignSelection = useEditorStore(state => state.alignSelection);
+  const duplicateBlocks = useEditorStore(state => state.duplicateBlocks);
+  const deleteBlocks = useEditorStore(state => state.deleteBlocks);
   const selectedBlock = blocks.find(
     block => selected.length === 1 && block.id === selected[0]
   );
@@ -161,6 +175,12 @@ export function DeepDive(props: DeepDiveProps) {
 
   const dockButton =
     "h-10 gap-1.5 border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white";
+
+  const contextButton =
+    "grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/5 text-white/90 transition-colors hover:bg-white/10 hover:text-white disabled:pointer-events-none disabled:opacity-35";
+  const inSection = blocks.some(
+    block => selected.includes(block.id) && block.parentId
+  );
 
   const settingsBody = (
     <div className="space-y-5">
@@ -244,7 +264,7 @@ export function DeepDive(props: DeepDiveProps) {
   );
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0c10] text-white">
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#0a0c10] pt-[env(safe-area-inset-top)] text-white">
       <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-white/10 px-3 sm:gap-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           <button
@@ -297,7 +317,12 @@ export function DeepDive(props: DeepDiveProps) {
               </div>
             </div>
           ) : (
-            <GravityCanvas viewportRef={viewportRef} hideZoomBar fullHeight />
+            <GravityCanvas
+              viewportRef={viewportRef}
+              hideZoomBar
+              fullHeight
+              mobileDocked={isMobile}
+            />
           )}
           {mouseEnabled && !previewMode && (
             <MousePad viewportRef={viewportRef} />
@@ -339,6 +364,91 @@ export function DeepDive(props: DeepDiveProps) {
           </Drawer>
         )}
       </div>
+
+      {isMobile && !previewMode && selected.length > 0 && !editingId && (
+        <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-t border-white/10 bg-[#0d1016] px-3 py-2">
+          <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white/60">
+            {selected.length === 1 ? "Block" : `${selected.length} selected`}
+          </span>
+          {selected.length === 1 && (
+            <button
+              type="button"
+              className={contextButton}
+              disabled={selectedBlock?.type !== "text"}
+              title="Edit text"
+              onClick={() => selectedBlock && setEditing(selectedBlock.id)}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            type="button"
+            className={contextButton}
+            title="Duplicate"
+            onClick={() => duplicateBlocks(selected)}
+          >
+            <Copy className="h-4 w-4" />
+          </button>
+          {selected.length > 1 && (
+            <button
+              type="button"
+              className={contextButton}
+              title="Merge into section"
+              onClick={mergeSelection}
+            >
+              <Combine className="h-4 w-4" />
+            </button>
+          )}
+          {inSection && (
+            <button
+              type="button"
+              className={contextButton}
+              title="Detach from section"
+              onClick={detachSelection}
+            >
+              <Unlink className="h-4 w-4" />
+            </button>
+          )}
+          {selected.length > 1 && (
+            <>
+              <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
+              <button
+                type="button"
+                className={contextButton}
+                title="Align left"
+                onClick={() => alignSelection("left")}
+              >
+                <AlignLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className={contextButton}
+                title="Align center"
+                onClick={() => alignSelection("center")}
+              >
+                <AlignCenter className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                className={contextButton}
+                title="Align right"
+                onClick={() => alignSelection("right")}
+              >
+                <AlignRight className="h-4 w-4" />
+              </button>
+            </>
+          )}
+          <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
+          <button
+            type="button"
+            className={`${contextButton} bg-rose-500/15 text-rose-300 hover:bg-rose-500/25`}
+            title="Delete"
+            onClick={() => deleteBlocks(selected)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
 
       <footer className="flex h-16 shrink-0 items-center gap-1.5 overflow-x-auto border-t border-white/10 px-3 max-md:pb-[env(safe-area-inset-bottom)] sm:gap-2 sm:px-4">
         <Button

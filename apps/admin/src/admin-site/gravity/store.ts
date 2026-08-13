@@ -17,6 +17,7 @@ export const TEXT_HEIGHT = 92;
 export type CanvasBounds = { maxX: number; maxY: number };
 
 export const blockHeight = (block: GravityBlock) => {
+  if (block.height) return block.height;
   switch (block.type) {
     case "text":
       return TEXT_HEIGHT;
@@ -92,11 +93,20 @@ type EditorState = {
   addBlockAt: (type: BlockType, x: number, y: number) => void;
   updateBlock: (id: string, patch: Partial<GravityBlock>) => void;
   moveBlock: (id: string, x: number, y: number, snapEnabled: boolean) => void;
+  resizeBlock: (
+    id: string,
+    x: number,
+    y: number,
+    width: number,
+    height?: number
+  ) => void;
+  rotateBlock: (id: string, rotation: number) => void;
   setBounds: (bounds: CanvasBounds) => void;
   selectBlock: (id: string, additive: boolean) => void;
   clearSelection: () => void;
   selectAll: () => void;
   mergeSelection: () => void;
+  mergeBlocks: (ids: string[]) => void;
   detachSelection: () => void;
   duplicateBlocks: (ids: string[]) => void;
   alignSelection: (alignment: "left" | "center" | "right") => void;
@@ -179,6 +189,28 @@ export const useEditorStore = create<EditorState>(set => ({
         return { ...block, ...next };
       }),
     })),
+  resizeBlock: (id, x, y, width, height) =>
+    set(state => ({
+      blocks: state.blocks.map(block => {
+        if (block.id !== id) return block;
+        const w = Math.max(48, Math.round(width));
+        const h =
+          height === undefined
+            ? blockHeight(block)
+            : Math.max(24, Math.round(height));
+        const left = Math.max(0, Math.min(Math.round(x), CANVAS_WIDTH - w));
+        const top = Math.max(0, Math.round(y));
+        return { ...block, x: left, y: top, width: w, height: h };
+      }),
+    })),
+  rotateBlock: (id, rotation) =>
+    set(state => ({
+      blocks: state.blocks.map(block =>
+        block.id === id
+          ? { ...block, rotation: ((rotation % 360) + 360) % 360 }
+          : block
+      ),
+    })),
   setBounds: bounds => set({ bounds }),
   selectBlock: (id, additive) =>
     set(state =>
@@ -214,6 +246,28 @@ export const useEditorStore = create<EditorState>(set => ({
         ),
         sections: [...state.sections, section],
         selected: chosen,
+      };
+    }),
+  mergeBlocks: ids =>
+    set(state => {
+      const eligible = ids.filter(id =>
+        state.blocks.some(
+          block => block.id === id && block.parentId === undefined
+        )
+      );
+      if (eligible.length < 2) return state;
+      const section: GravitySection = {
+        id: uid("section"),
+        label: `Section ${state.sections.length + 1}`,
+      };
+      return {
+        blocks: state.blocks.map(block =>
+          eligible.includes(block.id)
+            ? { ...block, parentId: section.id }
+            : block
+        ),
+        sections: [...state.sections, section],
+        selected: [...new Set([...state.selected, ...eligible])],
       };
     }),
   detachSelection: () =>

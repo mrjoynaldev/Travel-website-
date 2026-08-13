@@ -13,6 +13,8 @@ export type GravityBlock = {
   x: number;
   y: number;
   width: number;
+  height?: number;
+  rotation?: number;
   content?: string;
   runs?: TextRun[];
   level?: "h2" | "p";
@@ -34,4 +36,5 @@ export type GravityDoc = {
   blocks: GravityBlock[];
 };
 
-export const uid = (prefix: string) => `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+export const uid = (prefix: string) =>
+  `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
