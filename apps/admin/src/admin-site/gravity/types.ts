@@ -1,4 +1,4 @@
-export type BlockType = "text" | "image" | "video";
+export type BlockType = "text" | "image" | "video" | "audio";
 
 export type GravityBlock = {
   id: string;
@@ -7,6 +7,7 @@ export type GravityBlock = {
   y: number;
   width: number;
   content?: string;
+  level?: "h2" | "p";
   url?: string;
   caption?: string;
   parentId?: string;

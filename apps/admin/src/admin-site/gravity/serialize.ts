@@ -20,7 +20,15 @@ function blockMarkup(block: GravityBlock) {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
     return `<figure class="gravity-media">${videoEmbed(block.url || "")}${caption}</figure>`;
   }
-  return `<p class="gravity-text">${escapeHtml(block.content || "")}</p>`;
+  if (block.type === "audio") {
+    const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
+    return `<figure class="gravity-media"><audio controls preload="metadata" src="${escapeHtml(block.url || "")}">Your browser does not support audio playback.</audio>${caption}</figure>`;
+  }
+  if (block.type === "text") {
+    const tag = block.level === "h2" ? "h2" : "p";
+    return `<${tag} class="gravity-text">${escapeHtml(block.content || "")}</${tag}>`;
+  }
+  return "";
 }
 
 const rowsOverlap = (a: GravityBlock, b: GravityBlock, gap = 24) => Math.min(a.y + 90, b.y + 90) - Math.max(a.y, b.y) > -gap;

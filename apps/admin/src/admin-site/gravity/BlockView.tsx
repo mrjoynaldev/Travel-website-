@@ -4,7 +4,7 @@ import type { DraggableAttributes, useDraggable } from "@dnd-kit/core";
 import { MediaUploadButton } from "@/admin-site/components/MediaUploadButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ImagePlus, Pencil, Trash2, Video } from "lucide-react";
+import { ImagePlus, Music2, Pencil, Trash2, Video } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useEditorStore } from "./store";
 import type { GravityBlock } from "./types";
@@ -39,9 +39,14 @@ export function BlockView({ block, selected, isDragging, listeners, attributes }
         <Button type="button" size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-destructive" aria-label="Delete block" onClick={event => { event.stopPropagation(); deleteBlocks([block.id]); }}><Trash2 className="h-3 w-3" /></Button>
       </div>
       {block.type === "text" && (editOpen ? (
-        <textarea ref={textRef} value={text} onChange={event => setText(event.target.value)} onBlur={commitText} rows={4} className="w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" onPointerDown={event => event.stopPropagation()} />
+        <div className="space-y-2">
+          <div className="flex gap-1" onPointerDown={event => event.stopPropagation()}>
+            {(["h2", "p"] as const).map(level => <button key={level} type="button" onClick={event => { event.stopPropagation(); updateBlock(block.id, { level }); }} className={`rounded-md px-2 py-1 text-[10px] font-medium ${block.level === level ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{level === "h2" ? "Heading" : "Paragraph"}</button>)}
+          </div>
+          <textarea ref={textRef} value={text} onChange={event => setText(event.target.value)} onBlur={commitText} rows={4} className="w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" onPointerDown={event => event.stopPropagation()} />
+        </div>
       ) : (
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{block.content || "Empty text block"}</p>
+        <p className={`whitespace-pre-wrap leading-relaxed text-foreground ${block.level === "h2" ? "font-display text-xl font-semibold" : "text-sm"}`}>{block.content || "Empty text block"}</p>
       ))}
       {block.type === "image" && (block.url ? (
         <>
@@ -59,11 +64,20 @@ export function BlockView({ block, selected, isDragging, listeners, attributes }
       ) : (
         <div className="grid h-32 place-items-center rounded-lg border border-dashed border-border bg-muted/40"><Video className="h-5 w-5 text-muted-foreground" /></div>
       ))}
+      {block.type === "audio" && (block.url ? (
+        <>
+          <audio src={block.url} controls preload="metadata" className="h-10 w-full" />
+          {block.caption && <p className="mt-1.5 text-xs text-muted-foreground">{block.caption}</p>}
+        </>
+      ) : (
+        <div className="grid h-14 place-items-center rounded-lg border border-dashed border-border bg-muted/40"><Music2 className="h-5 w-5 text-muted-foreground" /></div>
+      ))}
       {editOpen && block.type !== "text" && (
         <div className="mt-3 space-y-2 border-t border-border pt-3" onPointerDown={event => event.stopPropagation()}>
-          <Input value={block.url || ""} onChange={event => updateBlock(block.id, { url: event.target.value })} placeholder={block.type === "image" ? "Image URL" : "YouTube, Vimeo or video URL"} className="h-8 text-xs" />
+          <Input value={block.url || ""} onChange={event => updateBlock(block.id, { url: event.target.value })} placeholder={block.type === "image" ? "Image URL" : block.type === "audio" ? "Audio file or stream URL" : "YouTube, Vimeo or video URL"} className="h-8 text-xs" />
           <Input value={block.caption || ""} onChange={event => updateBlock(block.id, { caption: event.target.value })} placeholder="Caption" className="h-8 text-xs" />
           {block.type === "image" && <MediaUploadButton accept="image/jpeg,image/png,image/webp,image/gif" folder="library" label="Upload image" className="h-8 w-full" onUploaded={asset => updateBlock(block.id, { url: asset.url })} />}
+          {block.type === "audio" && <MediaUploadButton accept="audio/mpeg,audio/wav,audio/mp4,audio/ogg,audio/webm" folder="library" label="Upload audio" className="h-8 w-full" onUploaded={asset => updateBlock(block.id, { url: asset.url })} />}
         </div>
       )}
     </div>

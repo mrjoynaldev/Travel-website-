@@ -54,7 +54,7 @@ const addBlockAt = (state: EditorState, type: BlockType, x?: number, y?: number)
     type,
     x: x ?? 32 + cascade,
     y: y ?? 40 + cascade,
-    width: type === "text" ? 240 : type === "image" ? 260 : 320,
+    width: type === "text" ? 240 : type === "image" ? 260 : type === "video" ? 320 : 420,
     content: type === "text" ? "Double-click to edit this text block." : undefined,
   };
   return { blocks: [...state.blocks, block], selected: [block.id] };

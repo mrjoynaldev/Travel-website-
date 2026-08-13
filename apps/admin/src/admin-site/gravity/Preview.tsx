@@ -13,7 +13,7 @@ export function GravityPreview() {
     <div className="min-h-[70vh] rounded-xl border border-border bg-white p-6 shadow-sm">
       {html ? (
         <div
-          className="space-y-4 [&_img]:max-w-full [&_img]:rounded-lg [&_video]:w-full [&_video]:rounded-lg [&_iframe]:max-w-full [&_iframe]:rounded-lg [&_figure]:space-y-2 [&_figcaption]:text-xs [&_figcaption]:text-muted-foreground [&_p]:text-sm [&_p]:leading-7 [&_.gravity-grid]:grid [&_.gravity-grid]:gap-4 [&_.gravity-cell]:min-w-0"
+          className="space-y-4 [&_img]:max-w-full [&_img]:rounded-lg [&_video]:w-full [&_video]:rounded-lg [&_audio]:w-full [&_iframe]:max-w-full [&_iframe]:rounded-lg [&_figure]:space-y-2 [&_figcaption]:text-xs [&_figcaption]:text-muted-foreground [&_p]:text-sm [&_p]:leading-7 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:font-semibold [&_.gravity-grid]:grid [&_.gravity-grid]:gap-4 [&_.gravity-cell]:min-w-0"
           dangerouslySetInnerHTML={{ __html: html }}
         />
       ) : (
