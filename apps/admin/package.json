@@ -13,6 +13,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@fieldnote/client-common": "workspace:*",
     "@fieldnote/contracts": "workspace:*",
+    "@novnc/novnc": "^1.7.0",
     "@tanstack/react-query": "^5.90.2",
     "@tiptap/core": "^3.30.0",
     "@tiptap/extension-character-count": "^3.30.0",

@@ -27,13 +27,43 @@ import {
 import { startLogin } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { trpc } from "@/lib/trpc";
-import { BarChart3, Bell, Bot, Boxes, Cpu, Download, FileText, Images, KeyRound, LayoutDashboard, LayoutTemplate, LogOut, Mail, MessageSquare, Palette, PanelLeft, ScrollText, Settings2, ShieldCheck, Tags, UploadCloud, Users, type LucideIcon } from "lucide-react";
+import {
+  BarChart3,
+  Bell,
+  Bot,
+  Boxes,
+  Cpu,
+  Download,
+  FileText,
+  Images,
+  KeyRound,
+  LayoutDashboard,
+  LayoutTemplate,
+  LogOut,
+  Mail,
+  MessageSquare,
+  Monitor,
+  Palette,
+  PanelLeft,
+  ScrollText,
+  Settings2,
+  ShieldCheck,
+  Tags,
+  UploadCloud,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
-import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { Button } from "@/components/ui/button";
 
-type MenuItem = { icon: LucideIcon; label: string; path: string; adminOnly?: boolean };
+type MenuItem = {
+  icon: LucideIcon;
+  label: string;
+  path: string;
+  adminOnly?: boolean;
+};
 const menuGroups: { label: string; items: MenuItem[] }[] = [
   {
     label: "Start",
@@ -54,7 +84,13 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
       { icon: Boxes, label: "Gravity editor", path: "/studio/gravity" },
       { icon: Images, label: "Media", path: "/studio/media" },
       { icon: Tags, label: "Categories & tags", path: "/studio/taxonomy" },
-      { icon: LayoutTemplate, label: "Homepage", path: "/studio/sections", adminOnly: true },
+      { icon: Monitor, label: "Remote desktop", path: "/studio/remote" },
+      {
+        icon: LayoutTemplate,
+        label: "Homepage",
+        path: "/studio/sections",
+        adminOnly: true,
+      },
       { icon: MessageSquare, label: "Moderation", path: "/studio/moderation" },
     ],
   },
@@ -91,7 +127,11 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
   {
     label: "System",
     items: [
-      { icon: ShieldCheck, label: "Capabilities", path: "/studio/capabilities" },
+      {
+        icon: ShieldCheck,
+        label: "Capabilities",
+        path: "/studio/capabilities",
+      },
       { icon: ScrollText, label: "Audit log", path: "/studio/audit" },
       { icon: Download, label: "Export", path: "/studio/export" },
       { icon: KeyRound, label: "API tokens", path: "/studio/api-tokens" },
@@ -120,7 +160,7 @@ export default function DashboardLayout({
   }, [sidebarWidth]);
 
   if (loading) {
-    return <DashboardLayoutSkeleton />
+    return <DashboardLayoutSkeleton />;
   }
 
   if (!user) {
@@ -132,7 +172,8 @@ export default function DashboardLayout({
               Sign in to continue
             </h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
-              Access to this dashboard requires authentication. Sign in with your publication account.
+              Access to this dashboard requires authentication. Sign in with
+              your publication account.
             </p>
           </div>
           <Button
@@ -178,12 +219,21 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuGroups.flatMap(group => group.items).find(item => item.path === pathname);
+  const activeMenuItem = menuGroups
+    .flatMap(group => group.items)
+    .find(item => item.path === pathname);
   const isMobile = useIsMobile();
   const { data: publication } = trpc.blog.publication.useQuery();
   const { data: bootstrap } = trpc.studio.bootstrap.useQuery();
   const studioName = `${publication?.name || "CodeReport Global"} Studio`;
-  const visibleMenuGroups = menuGroups.map(group => ({ ...group, items: group.items.filter(item => !item.adminOnly || bootstrap?.actor.role === "admin") })).filter(group => group.items.length);
+  const visibleMenuGroups = menuGroups
+    .map(group => ({
+      ...group,
+      items: group.items.filter(
+        item => !item.adminOnly || bootstrap?.actor.role === "admin"
+      ),
+    }))
+    .filter(group => group.items.length);
 
   useEffect(() => {
     if (isCollapsed) {
@@ -240,8 +290,8 @@ function DashboardLayoutContent({
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-semibold tracking-tight truncate">
-                        {studioName}
+                  <span className="font-semibold tracking-tight truncate">
+                    {studioName}
                   </span>
                 </div>
               ) : null}

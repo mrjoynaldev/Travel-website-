@@ -8,10 +8,14 @@ import AgentWorkspace from "@/admin-site/pages/AgentWorkspace";
 import { StudioBranding, StudioPages } from "@/admin-site/pages/SiteManagement";
 import StudioSections from "@/admin-site/pages/SiteSections";
 import { StudioAIProviders } from "@/admin-site/pages/StudioAI";
-import { StudioApiTokens, StudioSubscribers } from "@/admin-site/pages/StudioDeveloper";
+import {
+  StudioApiTokens,
+  StudioSubscribers,
+} from "@/admin-site/pages/StudioDeveloper";
 import { StudioEditor } from "@/admin-site/pages/StudioEditor";
 import { GravityEditor } from "@/admin-site/pages/GravityEditor";
 import StudioPreview from "@/admin-site/pages/StudioPreview";
+import { StudioRemote } from "@/admin-site/pages/StudioRemote";
 import {
   StudioAnalytics,
   StudioAudit,
@@ -39,6 +43,8 @@ function resolveStudioView(pathname: string) {
       return GravityEditor;
     case "preview":
       return StudioPreview;
+    case "remote":
+      return StudioRemote;
     case "media":
       return StudioMedia;
     case "taxonomy":
