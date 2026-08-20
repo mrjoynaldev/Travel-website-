@@ -609,7 +609,7 @@ export function GravityCanvas({
   useEffect(() => () => cancelAnimationFrame(inertiaRef.current), []);
 
   useEffect(() => {
-    setBounds({ maxX: CANVAS_WIDTH - 40, maxY: contentHeight - 40 });
+    setBounds({ maxX: CANVAS_WIDTH, maxY: contentHeight });
   }, [contentHeight, setBounds]);
 
   useEffect(() => () => window.clearTimeout(touchState.current.timer), []);
@@ -858,10 +858,11 @@ export function GravityCanvas({
         }}
       >
         <div
-          className="flex justify-center"
           style={{
             width: CANVAS_WIDTH * zoom,
             height: contentHeight * zoom,
+            marginLeft: "auto",
+            marginRight: "auto",
             touchAction: "none",
           }}
         >

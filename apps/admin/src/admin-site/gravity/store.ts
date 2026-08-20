@@ -73,8 +73,14 @@ function snap(
     }
   }
   if (bounds) {
-    bestX = Math.max(0, Math.min(bestX, Math.max(0, bounds.maxX - 60)));
-    bestY = Math.max(0, Math.min(bestY, Math.max(0, bounds.maxY - 40)));
+    bestX = Math.max(
+      0,
+      Math.min(bestX, Math.max(0, bounds.maxX - block.width))
+    );
+    bestY = Math.max(
+      0,
+      Math.min(bestY, Math.max(0, bounds.maxY - blockHeight(block)))
+    );
   }
   return { x: bestX, y: bestY };
 }
@@ -129,21 +135,30 @@ const addBlockAt = (
   y?: number
 ): Partial<EditorState> => {
   const cascade = (state.blocks.length * 18) % 120;
+  const width =
+    type === "text"
+      ? 240
+      : type === "image"
+        ? 260
+        : type === "video"
+          ? 320
+          : type === "button"
+            ? 200
+            : 420;
+  const bx = Math.max(
+    0,
+    Math.min(x ?? 32 + cascade, CANVAS_WIDTH - width)
+  );
+  const by = Math.max(
+    0,
+    Math.min(y ?? 40 + cascade, Math.max(0, (state.bounds?.maxY ?? 2000) - 200))
+  );
   const block: GravityBlock = {
     id: uid("block"),
     type,
-    x: x ?? 32 + cascade,
-    y: y ?? 40 + cascade,
-    width:
-      type === "text"
-        ? 240
-        : type === "image"
-          ? 260
-          : type === "video"
-            ? 320
-            : type === "button"
-              ? 200
-              : 420,
+    x: bx,
+    y: by,
+    width,
     content:
       type === "text"
         ? "Double-click to edit this text block."
@@ -199,7 +214,13 @@ export const useEditorStore = create<EditorState>(set => ({
             ? blockHeight(block)
             : Math.max(24, Math.round(height));
         const left = Math.max(0, Math.min(Math.round(x), CANVAS_WIDTH - w));
-        const top = Math.max(0, Math.round(y));
+        const top = Math.max(
+          0,
+          Math.min(
+            Math.round(y),
+            Math.max(0, (state.bounds?.maxY ?? 2000) - h)
+          )
+        );
         return { ...block, x: left, y: top, width: w, height: h };
       }),
     })),
