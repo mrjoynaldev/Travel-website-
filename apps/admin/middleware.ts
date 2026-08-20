@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     return new Response(res.body, {
       status: res.status,
       statusText: res.statusText,
-      headers: new Headers(res.headers),
+      headers: new Headers([...res.headers.entries(), ["x-proxy", "middleware"]]),
     });
   }
   return NextResponse.json({ error: "upstream unavailable" }, { status: 502 });

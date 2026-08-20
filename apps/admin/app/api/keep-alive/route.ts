@@ -21,6 +21,6 @@ export async function GET() {
   }
   return NextResponse.json(
     { ok: status < 500, status },
-    { status: status < 500 ? 200 : 502 }
+    { status: status < 500 ? 200 : 502, headers: { "x-keep-alive-source": "route" } }
   );
 }
