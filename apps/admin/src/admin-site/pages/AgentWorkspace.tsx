@@ -119,8 +119,8 @@ export default function AgentWorkspace() {
             </p>
           </div>
         </header>
-        <div className="grid gap-6 xl:grid-cols-[250px_minmax(0,1fr)_330px]">
-          <aside className="order-2 rounded-xl border border-border bg-white p-4 shadow-sm xl:order-1">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[250px_minmax(0,1fr)_330px]">
+          <aside className="order-2 min-w-0 rounded-xl border border-border bg-white p-4 shadow-sm xl:order-1">
             <p className="font-label text-[10px] text-primary">
               Your conversations
             </p>
@@ -155,7 +155,7 @@ export default function AgentWorkspace() {
               )}
             </div>
           </aside>
-          <section className="order-1 flex min-h-[600px] flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm xl:order-2">
+          <section className="order-1 min-w-0 flex min-h-[600px] flex-col overflow-hidden rounded-xl border border-border bg-white shadow-sm xl:order-2">
             <div className="border-b border-border p-5">
               <div className="flex items-center gap-3">
                 <Bot className="h-5 w-5 text-primary" />
@@ -234,7 +234,7 @@ export default function AgentWorkspace() {
               </div>
             </div>
           </section>
-          <aside className="order-3 space-y-6">
+          <aside className="order-3 min-w-0 space-y-6">
             <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
               <div className="flex gap-3">
                 <ShieldAlert className="h-5 w-5 text-primary" />

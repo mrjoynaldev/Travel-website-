@@ -344,8 +344,8 @@ export function StudioPosts() {
         </div>
       }
     >
-      <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <aside className="order-2 h-fit rounded-xl border border-border bg-white p-4 shadow-sm lg:order-1">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
+        <aside className="order-2 min-w-0 h-fit rounded-xl border border-border bg-white p-4 shadow-sm lg:order-1">
           <div className="space-y-1">
             <FolderButton
               item={{ kind: "all" }}
@@ -461,7 +461,7 @@ export function StudioPosts() {
             )}
           </div>
         </aside>
-        <section className="order-1 lg:order-2">
+        <section className="order-1 min-w-0 lg:order-2">
           <div
             className="mb-3 flex snap-x gap-2 overflow-x-auto pb-1 sm:hidden"
             role="tablist"
@@ -504,7 +504,7 @@ export function StudioPosts() {
               value={search}
               onChange={event => setSearch(event.target.value)}
               placeholder="Search your posts"
-              className="max-w-md bg-white"
+              className="w-full max-w-md bg-white"
             />
             <Select value={status} onValueChange={setStatus}>
               <SelectTrigger className="w-full bg-white sm:w-40">
