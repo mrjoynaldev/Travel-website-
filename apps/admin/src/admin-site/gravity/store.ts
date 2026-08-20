@@ -100,8 +100,8 @@ type EditorState = {
   loadDoc: (doc: GravityDoc) => void;
   setZoom: (zoom: number | ((current: number) => number)) => void;
   setEditing: (id: string | null) => void;
-  addBlock: (type: BlockType) => void;
-  addBlockAt: (type: BlockType, x: number, y: number) => void;
+  addBlock: (type: BlockType, level?: "h2" | "h3" | "p" | "quote" | "list") => void;
+  addBlockAt: (type: BlockType, x: number, y: number, level?: "h2" | "h3" | "p" | "quote" | "list") => void;
   appendBlock: (type: BlockType) => void;
   reorderUnits: (order: string[]) => void;
   moveUnit: (id: string, direction: -1 | 1) => void;
@@ -145,7 +145,8 @@ const addBlockAt = (
   state: EditorState,
   type: BlockType,
   x?: number,
-  y?: number
+  y?: number,
+  level?: "h2" | "h3" | "p" | "quote" | "list"
 ): Partial<EditorState> => {
   const cascade = (state.blocks.length * 18) % 120;
   const width =
@@ -178,10 +179,15 @@ const addBlockAt = (
     width,
     content:
       type === "text"
-        ? "Double-click to edit this text block."
+        ? level === "quote"
+          ? "Pull quote — double-click to edit."
+          : level === "list"
+            ? "First point\nSecond point"
+            : "Double-click to edit this text block."
         : type === "button"
           ? "Button"
           : undefined,
+    level: type === "text" ? (level ?? "p") : undefined,
   };
   return { blocks: [...state.blocks, block], selected: [block.id] };
 };
@@ -235,8 +241,8 @@ export const useEditorStore = create<EditorState>(set => ({
       selected: [],
       editingId: null,
     }),
-  addBlock: type => set(state => addBlockAt(state, type)),
-  addBlockAt: (type, x, y) => set(state => addBlockAt(state, type, x, y)),
+  addBlock: (type, level) => set(state => addBlockAt(state, type, undefined, undefined, level)),
+  addBlockAt: (type, x, y, level) => set(state => addBlockAt(state, type, x, y, level)),
   appendBlock: type =>
     set(state => {
       const units = flowOrder(state.blocks, state.sections);

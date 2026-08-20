@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import HomeView from "@web/components/HomeView";
 import { serverTrpc } from "@web/lib/trpc-server";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "CodeReport Global — Developer-first AI news and practical guides",
+  description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
+  alternates: { canonical: "/" },
+  openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: "/" },
+  twitter: { card: "summary_large_image" },
+};
 
 type SearchParams = { search?: string | string[]; category?: string | string[]; page?: string | string[] };
 

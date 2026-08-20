@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
 import { Highlighter, Link2, Link2Off, MousePointerClick } from "lucide-react";
 import { useRef, useState } from "react";
 import type { TextRun } from "./types";
@@ -68,6 +69,7 @@ const normalizeHref = (value: string) => {
   const trimmed = value.trim();
   if (!trimmed) return "";
   if (trimmed.startsWith("//")) return `https:${trimmed}`;
+  if (trimmed.startsWith("/")) return trimmed;
   if (/^[a-z][a-z0-9+.-]*:/i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
 };
@@ -84,6 +86,10 @@ export function TextRunsEditor({ initialText, initialRuns, onCommit }: {
   const [linkUrl, setLinkUrl] = useState("");
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const suppressBlur = useRef(false);
+  const publishedSearch = trpc.studio.posts.list.useQuery(
+    { status: "published", search: linkUrl.trim() || undefined },
+    { enabled: linkOpen }
+  );
 
   const captureSelection = () => {
     const element = document.querySelector<HTMLTextAreaElement>("textarea[data-gravity-text]");
@@ -147,16 +153,33 @@ export function TextRunsEditor({ initialText, initialRuns, onCommit }: {
         <span className="ml-1 text-[10px] text-muted-foreground">Select text, then highlight, link, or turn it into a button</span>
       </div>
       {linkOpen && (
-        <div className="flex gap-1.5">
-          <input
-            autoFocus
-            value={linkUrl}
-            onChange={event => setLinkUrl(event.target.value)}
-            onKeyDown={event => { if (event.key === "Enter") applyLink(); if (event.key === "Escape") setLinkOpen(false); }}
-            placeholder={linkMode === "button" ? "Button target URL, e.g. /pricing" : "Link URL, e.g. https://…"}
-            className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
-          />
-          <Button type="button" size="sm" className="h-8" onClick={applyLink}>Apply</Button>
+        <div className="space-y-1.5">
+          <div className="flex gap-1.5">
+            <input
+              autoFocus
+              value={linkUrl}
+              onChange={event => setLinkUrl(event.target.value)}
+              onKeyDown={event => { if (event.key === "Enter") applyLink(); if (event.key === "Escape") setLinkOpen(false); }}
+              placeholder={linkMode === "button" ? "Button target URL, e.g. /pricing" : "Link URL, e.g. https://… or /articles/…"}
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <Button type="button" size="sm" className="h-8" onClick={applyLink}>Apply</Button>
+          </div>
+          {publishedSearch.data && publishedSearch.data.length > 0 && (
+            <div className="max-h-32 overflow-y-auto rounded-md border border-border bg-background">
+              <p className="border-b border-border px-2 py-1 text-[10px] font-medium text-muted-foreground">Link to a published story</p>
+              {publishedSearch.data.slice(0, 6).map(post => (
+                <button
+                  key={post.id}
+                  type="button"
+                  className="block w-full px-2 py-1.5 text-left text-xs hover:bg-muted"
+                  onClick={() => setLinkUrl(`/articles/${post.slug}`)}
+                >
+                  {post.title}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
       <textarea

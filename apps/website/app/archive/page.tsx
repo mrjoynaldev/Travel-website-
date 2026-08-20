@@ -5,7 +5,13 @@ import { serverTrpc } from "@web/lib/trpc-server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Publication archive", description: "A chronological map of every published CodeReport Global story." };
+export const metadata: Metadata = {
+  title: "Publication archive",
+  description: "A chronological map of every published CodeReport Global story.",
+  alternates: { canonical: "/archive" },
+  openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: "/archive" },
+  twitter: { card: "summary_large_image" },
+};
 
 export default async function ArchivePage() {
   let archives: { year: number; count: number }[] = [];

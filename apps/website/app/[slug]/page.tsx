@@ -12,7 +12,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const page = await serverTrpc.blog.pageBySlug.query({ slug });
-    return { title: page.meta_title?.trim() || page.title, description: page.meta_description?.trim() || undefined };
+    const title = page.meta_title?.trim() || page.title;
+    return {
+      title,
+      description: page.meta_description?.trim() || undefined,
+      alternates: { canonical: `/${page.slug}` },
+      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `/${page.slug}`, title },
+      twitter: { card: "summary_large_image", title },
+    };
   } catch {
     return {};
   }

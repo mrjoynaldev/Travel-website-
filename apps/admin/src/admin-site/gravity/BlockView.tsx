@@ -160,7 +160,7 @@ export function BlockView({
               className="flex gap-1"
               onPointerDown={event => event.stopPropagation()}
             >
-              {(["h2", "p"] as const).map(level => (
+              {([["h2", "Heading"], ["h3", "Subheading"], ["p", "Paragraph"], ["quote", "Quote"], ["list", "List"]] as const).map(([level, label]) => (
                 <button
                   key={level}
                   type="button"
@@ -170,7 +170,7 @@ export function BlockView({
                   }}
                   className={`rounded-md px-2 py-1 text-[10px] font-medium ${block.level === level ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}
                 >
-                  {level === "h2" ? "Heading" : "Paragraph"}
+                  {label}
                 </button>
               ))}
             </div>
@@ -197,7 +197,7 @@ export function BlockView({
           </div>
         ) : (
           <p
-            className={`whitespace-pre-wrap leading-relaxed text-foreground ${block.level === "h2" ? "font-display text-xl font-semibold" : "text-sm"}`}
+            className={`whitespace-pre-wrap leading-relaxed text-foreground ${block.level === "h2" ? "font-display text-xl font-semibold" : block.level === "h3" ? "font-display text-lg font-semibold" : block.level === "quote" ? "border-l-4 border-primary pl-3 text-sm italic text-muted-foreground" : "text-sm"}`}
           >
             {block.content ? <TextRuns block={block} /> : "Empty text block"}
           </p>

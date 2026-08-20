@@ -22,28 +22,33 @@ async function latestPosts() {
     .limit(1)
     .maybeSingle();
   if (siteError) throw siteError;
-  if (!site) return { site: null, posts: [] as any[], pages: [] as any[] };
-  const [
-    { data: posts, error: postError },
-    { data: pages, error: pageError },
-  ] = await Promise.all([
-    db
-      .from("posts")
-      .select("slug, title, excerpt, rendered_html, published_at, updated_at")
-      .eq("site_id", site.id)
-      .eq("status", "published")
-      .order("published_at", { ascending: false })
-      .limit(500),
-    db
-      .from("site_pages")
-      .select("slug, updated_at, published_at")
-      .eq("site_id", site.id)
-      .eq("status", "published")
-      .order("published_at", { ascending: false })
-      .limit(100),
+  if (!site) return { site: null, posts: [] as any[], pages: [] as any[], categories: [] as any[], tags: [] as any[], authors: [] as any[] };
+  const { data: posts, error: postError } = await db
+    .from("posts")
+    .select("slug, title, excerpt, rendered_html, author_id, published_at, updated_at")
+    .eq("site_id", site.id)
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("published_at", { ascending: false })
+    .limit(500);
+  if (postError) throw postError;
+  const [pagesResult, categoriesResult, tagsResult, authorsResult] = await Promise.all([
+    db.from("site_pages").select("slug, updated_at, published_at").eq("site_id", site.id).eq("status", "published").order("published_at", { ascending: false }).limit(100),
+    db.from("categories").select("slug").eq("site_id", site.id),
+    db.from("tags").select("slug").eq("site_id", site.id),
+    db.from("profiles").select("id").in("id", Array.from(new Set((posts ?? []).map((post: any) => post.author_id)))),
   ]);
-  if (postError || pageError) throw postError || pageError;
-  return { site, posts: posts ?? [], pages: pages ?? [] };
+  if (pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error) {
+    throw pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error;
+  }
+  return {
+    site,
+    posts: posts ?? [],
+    pages: pagesResult.data ?? [],
+    categories: categoriesResult.data ?? [],
+    tags: tagsResult.data ?? [],
+    authors: authorsResult.data ?? [],
+  };
 }
 
 export type FeedResult = { body: string; contentType: string; status: number };
@@ -56,13 +61,17 @@ export async function robotsTxt(): Promise<FeedResult> {
 
 export async function sitemapXml(): Promise<FeedResult> {
   try {
-    const { posts, pages } = await latestPosts();
+    const { posts, pages, categories, tags, authors } = await latestPosts();
     const base = origin();
     if (!base) return { body: "CANONICAL_ORIGIN must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
     const urls = [
       `<url><loc>${xmlEscape(`${base}/`)}</loc></url>`,
       ...posts.map(post => `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><lastmod>${new Date(post.updated_at || post.published_at).toISOString()}</lastmod></url>`),
       ...pages.map(page => `<url><loc>${xmlEscape(`${base}/${page.slug}`)}</loc><lastmod>${new Date(page.updated_at || page.published_at).toISOString()}</lastmod></url>`),
+      ...categories.map(category => `<url><loc>${xmlEscape(`${base}/topics/${category.slug}`)}</loc></url>`),
+      ...tags.map(tag => `<url><loc>${xmlEscape(`${base}/tags/${tag.slug}`)}</loc></url>`),
+      ...authors.map(author => `<url><loc>${xmlEscape(`${base}/authors/${author.id}`)}</loc></url>`),
+      `<url><loc>${xmlEscape(`${base}/archive`)}</loc></url>`,
     ].join("");
     return { body: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, contentType: "application/xml", status: 200 };
   } catch {

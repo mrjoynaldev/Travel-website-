@@ -62,7 +62,14 @@ function blockMarkup(block: GravityBlock) {
     return wrapLink(`<figure class="gravity-media${youtubeId(block.url || "") ? " gravity-audio-strip" : ""}">${audioEmbed(block.url || "")}${caption}</figure>`, block);
   }
   if (block.type === "text") {
-    const tag = block.level === "h2" ? "h2" : "p";
+    if (block.level === "list") {
+      const items = (block.content || "").split("\n").filter(line => line.trim()).map(line => `<li>${escapeHtml(line)}</li>`).join("");
+      return items ? `<ul class="gravity-list">${items}</ul>` : "";
+    }
+    if (block.level === "quote") {
+      return wrapLink(`<blockquote class="gravity-text gravity-quote">${renderRuns(block)}</blockquote>`, block);
+    }
+    const tag = block.level === "h2" ? "h2" : block.level === "h3" ? "h3" : "p";
     return wrapLink(`<${tag} class="gravity-text">${renderRuns(block)}</${tag}>`, block);
   }
   if (block.type === "button") {
@@ -215,8 +222,22 @@ function parseTextElement(el: Element): PartialBlock {
     if (tag === "script" || tag === "style") return;
     for (const c of Array.from(n.childNodes)) walk(c);
   };
+  const tag = el.tagName.toLowerCase();
+  if (tag === "ul" || tag === "ol") {
+    const items = Array.from(el.querySelectorAll(":scope > li"))
+      .map(li => (li.textContent || "").trim())
+      .filter(Boolean);
+    return { type: "text", content: items.join("\n"), runs: undefined, level: "list" };
+  }
   for (const c of Array.from(el.childNodes)) walk(c);
-  const level = el.tagName.toLowerCase() === "h2" ? "h2" : "p";
+  const level =
+    tag === "h2"
+      ? "h2"
+      : tag === "h1" || tag === "h3" || tag === "h4" || tag === "h5" || tag === "h6"
+        ? "h3"
+        : tag === "blockquote"
+          ? "quote"
+          : "p";
   return {
     type: "text",
     content: runs.map(r => r.text).join(""),
@@ -243,7 +264,7 @@ function elementToBlock(el: Element): PartialBlock | null {
       return { type: "button", content: a.textContent || "", link: link && link !== "#" ? link : undefined };
     }
   }
-  if (cls.includes("gravity-text") || ["p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "li"].includes(tag)) {
+  if (cls.includes("gravity-text") || ["p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "ul", "ol", "li"].includes(tag)) {
     return parseTextElement(el);
   }
   if (tag === "figure" && cls.includes("gravity-media")) {

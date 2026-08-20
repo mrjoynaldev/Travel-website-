@@ -31,7 +31,7 @@ export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
         </div>
         {block.type === "text" && (
           <>
-            <div className={field}><Label className="text-[10px] text-muted-foreground">Style</Label><div className="mt-1 flex gap-1">{(["h2", "p"] as const).map(level => <button key={level} type="button" onClick={() => updateBlock(block.id, { level })} className={`rounded-md px-2.5 py-1 text-xs font-medium ${block.level === level ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{level === "h2" ? "Heading" : "Paragraph"}</button>)}</div></div>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">Style</Label><div className="mt-1 flex flex-wrap gap-1">{([["h2", "Heading"], ["h3", "Subheading"], ["p", "Paragraph"], ["quote", "Quote"], ["list", "List"]] as const).map(([level, label]) => <button key={level} type="button" onClick={() => updateBlock(block.id, { level })} className={`rounded-md px-2.5 py-1 text-xs font-medium ${block.level === level ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{label}</button>)}</div></div>
             <div className={field}><Label className="text-[10px] text-muted-foreground">Content</Label><textarea value={block.content || ""} onChange={event => updateBlock(block.id, { content: event.target.value })} rows={4} className="mt-1 w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
           </>
         )}

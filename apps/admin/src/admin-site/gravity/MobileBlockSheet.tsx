@@ -72,19 +72,19 @@ export function MobileBlockSheet({
             <>
               <div>
                 <Label className="text-[10px] text-white/50">Style</Label>
-                <div className="mt-1.5 flex gap-2">
-                  {(["h2", "p"] as const).map(level => (
+                <div className="mt-1.5 flex flex-wrap gap-2">
+                  {([["h2", "Heading"], ["h3", "Subhead"], ["p", "Paragraph"], ["quote", "Quote"], ["list", "List"]] as const).map(([level, label]) => (
                     <button
                       key={level}
                       type="button"
                       onClick={() => updateBlock(block.id, { level })}
-                      className={`h-10 flex-1 rounded-lg text-sm font-medium transition-colors ${
+                      className={`h-10 flex-1 whitespace-nowrap rounded-lg px-2 text-sm font-medium transition-colors ${
                         block.level === level
                           ? "bg-white text-black"
                           : "bg-white/5 text-white/80 hover:bg-white/10"
                       }`}
                     >
-                      {level === "h2" ? "Heading" : "Paragraph"}
+                      {label}
                     </button>
                   ))}
                 </div>

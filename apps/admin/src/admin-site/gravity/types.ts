@@ -17,7 +17,7 @@ export type GravityBlock = {
   rotation?: number;
   content?: string;
   runs?: TextRun[];
-  level?: "h2" | "p";
+  level?: "h2" | "h3" | "p" | "quote" | "list";
   url?: string;
   caption?: string;
   link?: string;

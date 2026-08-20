@@ -42,6 +42,9 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, o
     <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-white p-2 shadow-sm">
       <span className="inline-flex items-center gap-1.5 px-2 font-label text-[10px] uppercase tracking-wide text-muted-foreground"><MousePointer2 className="h-3.5 w-3.5" />Blocks</span>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("text")}><Type className="h-4 w-4" />Text</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("text", "h3")}>H3</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("text", "quote")}>Quote</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("text", "list")}>List</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("image")}><ImagePlus className="h-4 w-4" />Image</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("video")}><Video className="h-4 w-4" />Video</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("audio")}><Music2 className="h-4 w-4" />Audio</Button>

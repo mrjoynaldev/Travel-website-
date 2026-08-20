@@ -173,8 +173,40 @@ export const blogRouter = router({
     if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load the article." });
     if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "Article not found." });
     const [post] = await hydratePosts([data]);
-    const { data: related } = await getSupabase().from("posts").select("*").eq("site_id", site.id).eq("status", "published").is("deleted_at", null).neq("id", data.id).order("published_at", { ascending: false }).limit(3);
-    return { post, related: await hydratePosts(related ?? []) };
+    const relatedIds = new Set<string>();
+    const catIds = (post.categories ?? []).map((category: { id: string }) => category.id);
+    const tagIds = (post.tags ?? []).map((tag: { id: string }) => tag.id);
+    if (catIds.length || tagIds.length) {
+      const [catRows, tagRows] = await Promise.all([
+        catIds.length ? getSupabase().from("post_categories").select("post_id").in("category_id", catIds) : Promise.resolve({ data: [] }),
+        tagIds.length ? getSupabase().from("post_tags").select("post_id").in("tag_id", tagIds) : Promise.resolve({ data: [] }),
+      ]);
+      for (const row of (catRows as any)?.data ?? []) relatedIds.add(row.post_id);
+      for (const row of (tagRows as any)?.data ?? []) relatedIds.add(row.post_id);
+      relatedIds.delete(data.id);
+    }
+    const baseRelated = getSupabase().from("posts").select("*").eq("site_id", site.id).eq("status", "published").is("deleted_at", null).neq("id", data.id).order("published_at", { ascending: false });
+    let relatedRows: any[] = [];
+    if (relatedIds.size) {
+      const [topical, latest] = await Promise.all([
+        baseRelated.in("id", Array.from(relatedIds)).limit(6),
+        baseRelated.limit(6),
+      ]);
+      relatedRows = (topical.data ?? []).slice(0, 3);
+      if (relatedRows.length < 3) {
+        const seen = new Set((topical.data ?? []).map((row: any) => row.id));
+        for (const row of latest.data ?? []) {
+          if (relatedRows.length >= 3) break;
+          if (seen.has(row.id)) continue;
+          seen.add(row.id);
+          relatedRows.push(row);
+        }
+      }
+    } else {
+      const latest = await baseRelated.limit(3);
+      relatedRows = latest.data ?? [];
+    }
+    return { post, related: await hydratePosts(relatedRows) };
   }),
 
   author: publicProcedure.input(z.object({ authorId: z.string().uuid() })).query(async ({ input }) => {
