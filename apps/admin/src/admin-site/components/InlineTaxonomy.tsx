@@ -14,7 +14,10 @@ export function InlineTaxonomy({ categoryIds, tagIds, onToggleCategory, onToggle
   onToggleCategory: (id: string) => void;
   onToggleTag: (id: string) => void;
 }) {
-  const taxonomy = trpc.studio.taxonomy.list.useQuery();
+  const taxonomy = trpc.studio.taxonomy.list.useQuery(undefined, {
+    retry: 4,
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10_000),
+  });
   const loading = taxonomy.isPending || taxonomy.isLoading;
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
