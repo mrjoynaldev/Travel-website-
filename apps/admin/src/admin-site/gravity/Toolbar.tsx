@@ -1,16 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Combine, Eraser, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, SquareMousePointer, Stethoscope, Trash2, Type, Ungroup, Video } from "lucide-react";
+import { Braces, Combine, Eraser, FileUp, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, SquareMousePointer, Stethoscope, Trash2, Type, Ungroup, Video } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { runDoctor } from "./doctor";
 import { useEditorStore } from "./store";
 
-export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, showLayers, onToggleLayers, showInspector, onToggleInspector, onEnterDeepDive }: {
+export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, onOpenImport, showLayers, onToggleLayers, showInspector, onToggleInspector, onEnterDeepDive }: {
   previewing: boolean;
   onTogglePreview: (previewing: boolean) => void;
   onOpenTemplates: () => void;
+  onOpenImport: () => void;
   showLayers: boolean;
   onToggleLayers: (show: boolean) => void;
   showInspector: boolean;
@@ -45,8 +46,10 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, s
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("video")}><Video className="h-4 w-4" />Video</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("audio")}><Music2 className="h-4 w-4" />Audio</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("button")}><SquareMousePointer className="h-4 w-4" />Button</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("code")}><Braces className="h-4 w-4" />Code</Button>
       <span className="mx-1 h-5 w-px bg-border" />
       <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onOpenTemplates}><LayoutTemplate className="h-4 w-4" />Templates</Button>
+      <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onOpenImport}><FileUp className="h-4 w-4" />Import HTML</Button>
       <span className="mx-1 h-5 w-px bg-border" />
       <Button type="button" size="sm" variant="outline" className={buttonClass} disabled={selected.length < 2} onClick={mergeSelection}><Combine className="h-4 w-4" />Merge section</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} disabled={!selected.length || !blocks.some(block => block.parentId && selected.includes(block.id))} onClick={() => { detachSelection(); clearSelection(); }}><Ungroup className="h-4 w-4" />Detach</Button>

@@ -29,6 +29,8 @@ export const blockHeight = (block: GravityBlock) => {
       return 56;
     case "button":
       return 60;
+    case "code":
+      return 150;
   }
 };
 
@@ -122,6 +124,11 @@ type EditorState = {
   alignSelection: (alignment: "left" | "center" | "right") => void;
   deleteBlocks: (ids: string[]) => void;
   clearAll: () => void;
+  importDoc: (
+    blocks: GravityBlock[],
+    sections: GravitySection[],
+    mode: "replace" | "append"
+  ) => void;
 };
 
 const pruneEmptySections = (
@@ -148,7 +155,9 @@ const addBlockAt = (
           ? 320
           : type === "button"
             ? 200
-            : 420;
+            : type === "code"
+              ? 460
+              : 420;
   const bx = Math.max(
     0,
     Math.min(x ?? 32 + cascade, CANVAS_WIDTH - width)
@@ -424,4 +433,15 @@ export const useEditorStore = create<EditorState>(set => ({
     }),
   clearAll: () =>
     set({ blocks: [], sections: [], selected: [], editingId: null }),
+  importDoc: (blocks, sections, mode) =>
+    set(state =>
+      mode === "replace"
+        ? { blocks, sections, selected: [], editingId: null }
+        : {
+            blocks: [...state.blocks, ...blocks],
+            sections: [...state.sections, ...sections],
+            selected: [],
+            editingId: null,
+          }
+    ),
 }));

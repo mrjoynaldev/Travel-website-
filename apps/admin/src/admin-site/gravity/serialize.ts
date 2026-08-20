@@ -1,17 +1,18 @@
-import type { GravityBlock, GravityDoc, GravitySection } from "./types";
+import { uid, type GravityBlock, type GravityDoc, type GravitySection, type TextRun } from "./types";
+import { CANVAS_WIDTH } from "./templates";
 
 const escapeHtml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export function youtubeId(url: string) {
-  const match = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{6,})/);
+  const match = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/|youtube-nocookie\.com\/embed\/)([\w-]{6,})/);
   return match ? match[1] : null;
 }
 
 function videoEmbed(url: string) {
   const youtube = youtubeId(url);
   if (youtube) return `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/${youtube}" title="Embedded video" frameborder="0" allowfullscreen></iframe>`;
-  const vimeo = url.match(/vimeo\.com\/(\d+)/);
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
   if (vimeo) return `<iframe src="https://player.vimeo.com/video/${vimeo[1]}" title="Embedded video" frameborder="0" allowfullscreen></iframe>`;
   return `<video controls preload="metadata"><source src="${escapeHtml(url)}"></video>`;
 }
@@ -40,6 +41,13 @@ function renderRuns(block: GravityBlock) {
   }).join("");
 }
 
+function codeBlockMarkup(block: GravityBlock) {
+  const code = block.content || "";
+  const lang = (block.language || "code").trim() || "code";
+  const copy = `var b=this,n=this.closest('.gravity-code');navigator.clipboard.writeText(n.dataset.code||'').then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)})`;
+  return `<div class="gravity-code" data-code="${escapeHtml(code)}" data-lang="${escapeHtml(lang)}"><div class="gravity-code-head"><span class="gravity-code-lang">${escapeHtml(lang)}</span><button type="button" class="gravity-code-copy" aria-label="Copy code" onclick="${copy}">Copy</button></div><pre><code>${escapeHtml(code)}</code></pre></div>`;
+}
+
 function blockMarkup(block: GravityBlock) {
   if (block.type === "image") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
@@ -60,6 +68,9 @@ function blockMarkup(block: GravityBlock) {
   if (block.type === "button") {
     const href = escapeHtml(block.link || "#");
     return `<p class="gravity-button-wrap"><a class="cta-button cta-primary" href="${href}">${escapeHtml(block.content || "Button")}</a></p>`;
+  }
+  if (block.type === "code") {
+    return codeBlockMarkup(block);
   }
   return "";
 }
@@ -134,4 +145,238 @@ export function flowOrder(
     return ys.length ? Math.min(...ys) : 0;
   };
   return units.sort((a, b) => topOf(a) - topOf(b));
+}
+
+const DEFAULT_WIDTH: Record<string, number> = {
+  text: 240,
+  image: 260,
+  video: 320,
+  audio: 320,
+  button: 200,
+  code: 460,
+};
+
+const flowHeight = (block: Pick<GravityBlock, "type" | "height">) => {
+  if (block.height) return block.height;
+  switch (block.type) {
+    case "text":
+      return 92;
+    case "image":
+    case "video":
+      return 160;
+    case "audio":
+      return 56;
+    case "button":
+      return 60;
+    case "code":
+      return 150;
+  }
+};
+
+type PartialBlock = Omit<GravityBlock, "id" | "x" | "y" | "width">;
+
+function parseTextElement(el: Element): PartialBlock {
+  const runs: TextRun[] = [];
+  const walk = (node: Node) => {
+    if (node.nodeType === 3) {
+      const t = node.textContent || "";
+      if (t.trim()) runs.push({ text: t });
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    const n = node as Element;
+    const tag = n.tagName.toLowerCase();
+    if (tag === "a") {
+      const href = n.getAttribute("href") || "";
+      const t = n.textContent || "";
+      if (t.trim())
+        runs.push({
+          text: t,
+          link: href && href !== "#" ? href : undefined,
+          button: n.className.includes("cta-link") || undefined,
+        });
+      return;
+    }
+    if (tag === "mark") {
+      const t = n.textContent || "";
+      if (t.trim()) runs.push({ text: t, mark: true });
+      return;
+    }
+    if (tag === "br") {
+      runs.push({ text: "\n" });
+      return;
+    }
+    if (tag === "script" || tag === "style") return;
+    for (const c of Array.from(n.childNodes)) walk(c);
+  };
+  for (const c of Array.from(el.childNodes)) walk(c);
+  const level = el.tagName.toLowerCase() === "h2" ? "h2" : "p";
+  return {
+    type: "text",
+    content: runs.map(r => r.text).join(""),
+    runs: runs.length ? runs : undefined,
+    level,
+  };
+}
+
+function elementToBlock(el: Element): PartialBlock | null {
+  const cls = typeof el.className === "string" ? el.className : "";
+  const tag = el.tagName.toLowerCase();
+  if (cls.includes("gravity-code") || tag === "pre") {
+    const codeEl = el.querySelector("code") || el;
+    const lang = (el.querySelector(".gravity-code-lang")?.textContent || "").trim();
+    return { type: "code", content: codeEl.textContent || "", language: lang || undefined };
+  }
+  if (cls.includes("gravity-button-wrap") || (cls.includes("cta-button") && tag === "a")) {
+    const a = tag === "a" ? el : el.querySelector("a.cta-button");
+    if (a) {
+      const link = a.getAttribute("href") || "";
+      return { type: "button", content: a.textContent || "", link: link && link !== "#" ? link : undefined };
+    }
+  }
+  if (cls.includes("gravity-text") || ["p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "li"].includes(tag)) {
+    return parseTextElement(el);
+  }
+  if (tag === "figure" && cls.includes("gravity-media")) {
+    const img = el.querySelector("img");
+    const video = el.querySelector("video");
+    const audio = el.querySelector("audio");
+    const iframe = el.querySelector("iframe");
+    const caption = el.querySelector("figcaption")?.textContent || "";
+    if (img) return { type: "image", url: img.getAttribute("src") || "", caption };
+    if (video) {
+      const src = video.querySelector("source")?.getAttribute("src") || video.getAttribute("src") || "";
+      return { type: "video", url: src, caption };
+    }
+    if (audio) return { type: "audio", url: audio.getAttribute("src") || "", caption };
+    if (iframe) {
+      const src = iframe.getAttribute("src") || "";
+      return cls.includes("gravity-audio-strip")
+        ? { type: "audio", url: src, caption }
+        : { type: "video", url: src, caption };
+    }
+  }
+  if (tag === "img") return { type: "image", url: el.getAttribute("src") || "" };
+  if (tag === "video") {
+    const src = el.querySelector("source")?.getAttribute("src") || el.getAttribute("src") || "";
+    return { type: "video", url: src };
+  }
+  if (tag === "audio") return { type: "audio", url: el.getAttribute("src") || "" };
+  if (tag === "iframe") return { type: "video", url: el.getAttribute("src") || "" };
+  return null;
+}
+
+function sanitizeJsonDoc(doc: GravityDoc): { blocks: GravityBlock[]; sections: GravitySection[] } {
+  const ids = new Set<string>();
+  const nid = () => {
+    let id = uid("block");
+    while (ids.has(id)) id = uid("block");
+    ids.add(id);
+    return id;
+  };
+  const idOf = (existing?: string) => {
+    if (existing && !ids.has(existing)) {
+      ids.add(existing);
+      return existing;
+    }
+    return nid();
+  };
+  const sections = (doc.sections || []).map(section => ({
+    id: idOf(section.id),
+    label: section.label || "Section",
+  }));
+  const blocks = (doc.blocks || []).map(block => ({
+    ...block,
+    id: idOf(block.id),
+    parentId: block.parentId ? idOf(block.parentId) : undefined,
+  }));
+  return { blocks, sections };
+}
+
+/**
+ * Accepts the exact HTML the published site understands (the CodeReport
+ * Gravity block format) OR a raw gravity JSON doc, and rebuilds blocks +
+ * sections laid out top-to-bottom in reading order. Used by the canvas
+ * "Import" dialog so agent-generated HTML becomes editable blocks.
+ */
+export function importHtml(html: string, startY = 40): { blocks: GravityBlock[]; sections: GravitySection[] } | null {
+  const text = (html || "").trim();
+  if (!text) return null;
+  if (text.startsWith("{")) {
+    try {
+      const doc = JSON.parse(text);
+      if (doc && doc.type === "gravity") return sanitizeJsonDoc(doc);
+    } catch {
+      /* fall through to HTML */
+    }
+  }
+  const parsed = new DOMParser().parseFromString(text, "text/html");
+  const body = parsed.body;
+  if (!body) return null;
+
+  const blocks: GravityBlock[] = [];
+  const sections: GravitySection[] = [];
+  const ids = new Set<string>();
+  const nid = (prefix: string) => {
+    let id = uid(prefix);
+    while (ids.has(id)) id = uid(prefix);
+    ids.add(id);
+    return id;
+  };
+  let y = startY;
+  const nextY = (height: number) => {
+    const current = y;
+    y += height + 24;
+    return current;
+  };
+  const placeBlock = (block: PartialBlock, width: number, parentId?: string) =>
+    ({
+      ...block,
+      id: nid("block"),
+      parentId,
+      x: Math.round((CANVAS_WIDTH - width) / 2),
+      y: nextY(flowHeight(block)),
+      width,
+    } as GravityBlock);
+
+  const topNodes = Array.from(body.children);
+  for (const el of topNodes) {
+    const cls = typeof el.className === "string" ? el.className : "";
+    const tag = el.tagName.toLowerCase();
+    if (cls.includes("gravity-section") && tag === "section") {
+      const label =
+        el.querySelector("h2, h3")?.textContent?.trim() ||
+        `Section ${sections.length + 1}`;
+      const cells = Array.from(el.querySelectorAll(":scope > .gravity-cell"));
+      const rawBlocks = cells.length
+        ? cells.map(cell => elementToBlock(cell)).filter(Boolean) as GravityBlock[]
+        : Array.from(el.children).map(child => elementToBlock(child)).filter(Boolean) as GravityBlock[];
+      if (!rawBlocks.length) continue;
+      const section: GravitySection = { id: nid("section"), label };
+      const isGrid = cls.includes("gravity-grid");
+      if (isGrid && rawBlocks.length > 1) {
+        const cellW = Math.round((CANVAS_WIDTH - 32) / rawBlocks.length);
+        const yy = nextY(Math.max(...rawBlocks.map(flowHeight)));
+        rawBlocks.forEach((child, index) => {
+          blocks.push(placeBlock(child, cellW, section.id));
+          const placed = blocks[blocks.length - 1];
+          placed.x = 16 + index * cellW;
+          placed.y = yy;
+        });
+      } else {
+        for (const child of rawBlocks) {
+          blocks.push(placeBlock(child, DEFAULT_WIDTH[child.type] ?? 240, section.id));
+        }
+      }
+      sections.push(section);
+      continue;
+    }
+    const block = elementToBlock(el);
+    if (block) {
+      blocks.push(placeBlock(block, DEFAULT_WIDTH[block.type] ?? 240));
+    }
+  }
+
+  if (!blocks.length) return null;
+  return { blocks, sections };
 }

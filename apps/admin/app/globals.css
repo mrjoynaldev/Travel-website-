@@ -113,6 +113,13 @@
   .article-prose u { text-decoration: underline; text-decoration-color: #e4a741; text-underline-offset: 3px; }
   .article-prose del { color: #9a8575; }
   .article-prose pre code.hljs, .editor-content pre code.hljs { color: #e6f0ea; }
+  .gravity-code, .article-prose .gravity-code { margin: 1.6em 0; overflow: hidden; border-radius: .75rem; background: #17271f; border: 1px solid rgba(255,255,255,.08); }
+  .gravity-code-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .9rem; background: rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.08); }
+  .gravity-code-lang { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: #8fa89c; }
+  .gravity-code-copy { font-family: "DM Sans", Arial, sans-serif; font-size: .72rem; font-weight: 600; color: #d8e6de; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: .4rem; padding: .3em .8em; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+  .gravity-code-copy:hover { background: rgba(255,255,255,.16); }
+  .gravity-code pre { margin: 0; border-radius: 0; background: transparent; padding: 1rem; overflow-x: auto; color: #e6f0ea; font-family: "DM Mono", monospace; font-size: .82rem; line-height: 1.6; }
+  .gravity-code pre code { font-family: inherit; }
   .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-section, .hljs-link { color: #9ccfd8; }
   .hljs-string, .hljs-title, .hljs-name, .hljs-type, .hljs-attribute, .hljs-symbol, .hljs-bullet, .hljs-addition { color: #c9e29a; }
   .hljs-comment, .hljs-quote, .hljs-meta, .hljs-deletion { color: #7fa08f; }

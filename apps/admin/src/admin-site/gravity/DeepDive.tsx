@@ -7,9 +7,11 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  Braces,
   Combine,
   Copy,
   Eye,
+  FileUp,
   ImagePlus,
   Layers,
   LayoutTemplate,
@@ -31,6 +33,7 @@ import {
   Video,
 } from "lucide-react";
 import { GravityCanvas } from "./GravityCanvas";
+import { ImportDialog } from "./ImportDialog";
 import { MobileFlow } from "./MobileFlow";
 import { runDoctor } from "./doctor";
 import { InspectorPanel } from "./Inspector";
@@ -89,6 +92,7 @@ export function DeepDive(props: DeepDiveProps) {
   const [mouseEnabled, setMouseEnabled] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [showLayers, setShowLayers] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
@@ -126,6 +130,7 @@ export function DeepDive(props: DeepDiveProps) {
     { type: "video", label: "Video", icon: Video },
     { type: "audio", label: "Audio", icon: Music2 },
     { type: "button", label: "Button", icon: SquareMousePointer },
+    { type: "code", label: "Code", icon: Braces },
   ] as const;
 
   const fitZoom = () => {
@@ -473,6 +478,16 @@ export function DeepDive(props: DeepDiveProps) {
           <LayoutTemplate className="h-4 w-4" />
           <span className="hidden sm:inline">Templates</span>
         </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className={`${dockButton} max-sm:px-2`}
+          onClick={() => setImportOpen(true)}
+        >
+          <FileUp className="h-4 w-4" />
+          <span className="hidden sm:inline">Import HTML</span>
+        </Button>
         <div className="relative">
           <Button
             type="button"
@@ -654,6 +669,7 @@ export function DeepDive(props: DeepDiveProps) {
         onUse={useTemplate}
         onAppend={appendTemplate}
       />
+      <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} />
     </div>,
     document.body
   );

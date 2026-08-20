@@ -1,4 +1,4 @@
-export type BlockType = "text" | "image" | "video" | "audio" | "button";
+export type BlockType = "text" | "image" | "video" | "audio" | "button" | "code";
 
 export type TextRun = {
   text: string;
@@ -21,6 +21,7 @@ export type GravityBlock = {
   url?: string;
   caption?: string;
   link?: string;
+  language?: string;
   parentId?: string;
 };
 

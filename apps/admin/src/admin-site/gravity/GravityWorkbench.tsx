@@ -4,6 +4,7 @@ import { Compass } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { GravityCanvas } from "./GravityCanvas";
+import { ImportDialog } from "./ImportDialog";
 import { InspectorPanel } from "./Inspector";
 import { LayersPanel } from "./LayersPanel";
 import { GravityPreview } from "./Preview";
@@ -17,6 +18,7 @@ export function GravityWorkbench({ onEnterDeepDive }: { onEnterDeepDive?: () => 
   const [showLayers, setShowLayers] = useState(true);
   const [showInspector, setShowInspector] = useState(true);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const blocks = useEditorStore(state => state.blocks);
   const sections = useEditorStore(state => state.sections);
   const selected = useEditorStore(state => state.selected);
@@ -38,7 +40,7 @@ export function GravityWorkbench({ onEnterDeepDive }: { onEnterDeepDive?: () => 
 
   return (
     <div className="space-y-4">
-      <GravityToolbar previewing={view === "preview"} onTogglePreview={open => setView(open ? "preview" : "design")} onOpenTemplates={() => setTemplatesOpen(true)} showLayers={showLayers} onToggleLayers={setShowLayers} showInspector={showInspector} onToggleInspector={setShowInspector} onEnterDeepDive={onEnterDeepDive} />
+      <GravityToolbar previewing={view === "preview"} onTogglePreview={open => setView(open ? "preview" : "design")} onOpenTemplates={() => setTemplatesOpen(true)} onOpenImport={() => setImportOpen(true)} showLayers={showLayers} onToggleLayers={setShowLayers} showInspector={showInspector} onToggleInspector={setShowInspector} onEnterDeepDive={onEnterDeepDive} />
       <p className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground"><Compass className="h-3.5 w-3.5" />Start from a template, then drag blocks on the artboard. Snap guides align nearby blocks; Shift/Ctrl-click to multi-select, then merge into a section. Double-click text to edit, or use the inspector.</p>
       {view === "preview" ? (
         <GravityPreview />
@@ -50,6 +52,7 @@ export function GravityWorkbench({ onEnterDeepDive }: { onEnterDeepDive?: () => 
         </div>
       )}
       <TemplatesDialog open={templatesOpen} onClose={() => setTemplatesOpen(false)} onUse={useTemplate} onAppend={appendTemplate} />
+      <ImportDialog open={importOpen} onClose={() => setImportOpen(false)} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, FileText, Image as ImageIcon, Music2, SquareMousePointer, Video, X } from "lucide-react";
+import { Braces, ChevronRight, FileText, Image as ImageIcon, Music2, SquareMousePointer, Video, X } from "lucide-react";
 import { useEditorStore } from "./store";
 
 export function LayersPanel() {
@@ -13,8 +13,8 @@ export function LayersPanel() {
   const ungrouped = blocks.filter(block => !block.parentId);
   const grouped = sections.map(section => ({ section, blocks: blocks.filter(block => block.parentId === section.id) })).filter(group => group.blocks.length);
 
-  const Icon = ({ block }: { block: (typeof blocks)[number] }) => block.type === "image" ? <ImageIcon className="h-3 w-3" /> : block.type === "video" ? <Video className="h-3 w-3" /> : block.type === "audio" ? <Music2 className="h-3 w-3" /> : block.type === "button" ? <SquareMousePointer className="h-3 w-3" /> : <FileText className="h-3 w-3" />;
-  const label = (block: (typeof blocks)[number]) => (block.type === "text" ? (block.content || "Text").slice(0, 28) : block.type === "button" ? (block.content || "Button").slice(0, 28) : block.caption || block.url || (block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"));
+  const Icon = ({ block }: { block: (typeof blocks)[number] }) => block.type === "image" ? <ImageIcon className="h-3 w-3" /> : block.type === "video" ? <Video className="h-3 w-3" /> : block.type === "audio" ? <Music2 className="h-3 w-3" /> : block.type === "button" ? <SquareMousePointer className="h-3 w-3" /> : block.type === "code" ? <Braces className="h-3 w-3" /> : <FileText className="h-3 w-3" />;
+  const label = (block: (typeof blocks)[number]) => (block.type === "text" ? (block.content || "Text").slice(0, 28) : block.type === "button" ? (block.content || "Button").slice(0, 28) : block.type === "code" ? (block.content || "Code").slice(0, 28) : block.caption || block.url || (block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"));
 
   const Row = ({ block, depth }: { block: (typeof blocks)[number]; depth?: number }) => {
     const active = selected.includes(block.id);

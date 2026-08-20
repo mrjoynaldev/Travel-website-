@@ -4,6 +4,9 @@ import type { DraggableAttributes, useDraggable } from "@dnd-kit/core";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Braces,
+  Check,
+  Copy,
   ImagePlus,
   Link2,
   Music2,
@@ -79,7 +82,18 @@ export function BlockView({
   const editingId = useEditorStore(state => state.editingId);
   const setEditing = useEditorStore(state => state.setEditing);
   const [editOpen, setEditOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const textEditing = block.type === "text" && editingId === block.id;
+
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(block.content || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable in some contexts */
+    }
+  };
 
   const shell =
     block.type === "button"
@@ -269,6 +283,34 @@ export function BlockView({
             <Music2 className="h-5 w-5 text-muted-foreground" />
           </div>
         ))}
+      {block.type === "code" && (
+        <div className="overflow-hidden rounded-lg border border-[#2a3541] bg-[#0f1a20]">
+          <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-white/5 px-3 py-1.5">
+            <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-white/40">
+              <Braces className="h-3 w-3" />
+              {block.language || "code"}
+            </span>
+            <button
+              type="button"
+              onClick={copyCode}
+              className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3 w-3" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3 w-3" /> Copy
+                </>
+              )}
+            </button>
+          </div>
+          <pre className="max-h-64 overflow-auto p-3 text-xs leading-relaxed text-emerald-100/90">
+            <code>{block.content || "// paste your code here"}</code>
+          </pre>
+        </div>
+      )}
       {block.link && (
         <p className="mt-1 flex items-center gap-1 text-[10px] text-primary">
           <Link2 className="h-3 w-3" />
@@ -296,6 +338,34 @@ export function BlockView({
                   updateBlock(block.id, { link: event.target.value })
                 }
                 placeholder="Link URL, e.g. https://codereportglobal.com/pricing"
+                className="h-8 text-xs"
+              />
+            </>
+          ) : block.type === "code" ? (
+            <>
+              <Input
+                value={block.language || ""}
+                onChange={event =>
+                  updateBlock(block.id, { language: event.target.value })
+                }
+                placeholder="Language, e.g. javascript, python, bash"
+                className="h-8 text-xs"
+              />
+              <textarea
+                value={block.content || ""}
+                onChange={event =>
+                  updateBlock(block.id, { content: event.target.value })
+                }
+                rows={8}
+                placeholder="Paste your code here…"
+                className="w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <Input
+                value={block.link || ""}
+                onChange={event =>
+                  updateBlock(block.id, { link: event.target.value })
+                }
+                placeholder="Optional link trigger (wraps this block as a click target)"
                 className="h-8 text-xs"
               />
             </>

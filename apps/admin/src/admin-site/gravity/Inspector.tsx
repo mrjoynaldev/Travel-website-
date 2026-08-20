@@ -8,7 +8,7 @@ import { MediaPicker, type MediaKind } from "./MediaPicker";
 import { useEditorStore } from "./store";
 import type { GravityBlock } from "./types";
 
-const TYPE_LABEL: Record<GravityBlock["type"], string> = { text: "Text", image: "Image", video: "Video", audio: "Audio", button: "Button" };
+const TYPE_LABEL: Record<GravityBlock["type"], string> = { text: "Text", image: "Image", video: "Video", audio: "Audio", button: "Button", code: "Code" };
 
 export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
   const updateBlock = useEditorStore(state => state.updateBlock);
@@ -39,6 +39,12 @@ export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
           <>
             <div className={field}><Label className="text-[10px] text-muted-foreground">Label</Label><Input value={block.content || ""} onChange={event => updateBlock(block.id, { content: event.target.value })} placeholder="e.g. Learn more" className="mt-1 h-8 text-xs" /></div>
             <div className={field}><Label className="text-[10px] text-muted-foreground">Link trigger</Label><Input value={block.link || ""} onChange={event => updateBlock(block.id, { link: event.target.value })} placeholder="https://…" className="mt-1 h-8 text-xs" /></div>
+          </>
+        )}
+        {block.type === "code" && (
+          <>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">Language</Label><Input value={block.language || ""} onChange={event => updateBlock(block.id, { language: event.target.value })} placeholder="javascript, python, bash…" className="mt-1 h-8 text-xs" /></div>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">Code</Label><textarea value={block.content || ""} onChange={event => updateBlock(block.id, { content: event.target.value })} rows={10} placeholder="Paste your code here…" className="mt-1 w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
           </>
         )}
         {(block.type === "image" || block.type === "video" || block.type === "audio") && (
