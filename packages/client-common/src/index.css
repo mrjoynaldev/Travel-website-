@@ -73,8 +73,8 @@
 
 @layer base {
   * { @apply border-border outline-ring/50; }
-  html { scroll-behavior: smooth; }
-  body { @apply bg-background text-foreground; margin: 0; min-width: 320px; font-family: "DM Sans", Arial, sans-serif; }
+  html { scroll-behavior: smooth; overflow-x: clip; }
+  body { @apply bg-background text-foreground; margin: 0; min-width: 320px; font-family: "DM Sans", Arial, sans-serif; overflow-x: clip; }
   button, input, textarea, select { font: inherit; }
   button:not(:disabled), [role="button"]:not([aria-disabled="true"]), [type="button"]:not(:disabled), [type="submit"]:not(:disabled), a[href], select:not(:disabled), input[type="checkbox"]:not(:disabled), input[type="radio"]:not(:disabled) { @apply cursor-pointer; }
   ::selection { background: #dce9ca; color: #142b20; }
