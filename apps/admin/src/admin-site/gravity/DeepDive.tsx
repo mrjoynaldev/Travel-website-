@@ -372,7 +372,7 @@ export function DeepDive(props: DeepDiveProps) {
               <DrawerHeader>
                 <DrawerTitle className="text-white">Layers</DrawerTitle>
               </DrawerHeader>
-              <div data-vaul-no-drag className="max-h-[55vh] overflow-y-auto px-4 pb-6">
+              <div data-vaul-no-drag className="max-h-[55vh] overflow-y-auto overscroll-contain touch-pan-y px-4 pb-6">
                 <LayersPanel />
               </div>
             </DrawerContent>
@@ -384,7 +384,7 @@ export function DeepDive(props: DeepDiveProps) {
               <DrawerHeader>
                 <DrawerTitle className="text-white">Inspector</DrawerTitle>
               </DrawerHeader>
-              <div data-vaul-no-drag className="max-h-[60vh] overflow-y-auto px-4 pb-6">
+              <div data-vaul-no-drag className="max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y px-4 pb-6">
                 <InspectorPanel block={selectedBlock} />
               </div>
             </DrawerContent>
@@ -636,7 +636,7 @@ export function DeepDive(props: DeepDiveProps) {
             <DrawerHeader>
               <DrawerTitle className="text-white">Add block</DrawerTitle>
             </DrawerHeader>
-            <div data-vaul-no-drag className="max-h-[70vh] grid grid-cols-2 gap-2 overflow-y-auto px-4 pb-6">
+            <div data-vaul-no-drag className="max-h-[70vh] grid grid-cols-2 gap-2 overflow-y-auto overscroll-contain touch-pan-y px-4 pb-6">
               {addOptions.map(option => (
                 <button
                   key={option.type}
@@ -664,14 +664,16 @@ export function DeepDive(props: DeepDiveProps) {
 
       {settingsOpen && isMobile && (
         <Drawer open onOpenChange={setSettingsOpen}>
-          <DrawerContent className="max-h-[90dvh]! overflow-y-auto overscroll-contain border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white [-webkit-overflow-scrolling:touch]">
-            <DrawerHeader className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-[#10131a]">
-              <DrawerTitle className="text-white">Settings</DrawerTitle>
-              <DrawerClose className="rounded-md p-1 text-white/70 transition-colors hover:text-white">
-                <X className="h-4 w-4" />
-              </DrawerClose>
-            </DrawerHeader>
-            <div data-vaul-no-drag className="px-4 pb-6">{settingsBody}</div>
+          <DrawerContent className="border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white">
+            <div data-vaul-no-drag className="max-h-[90dvh] overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
+              <DrawerHeader className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-[#10131a]">
+                <DrawerTitle className="text-white">Settings</DrawerTitle>
+                <DrawerClose className="rounded-md p-1 text-white/70 transition-colors hover:text-white">
+                  <X className="h-4 w-4" />
+                </DrawerClose>
+              </DrawerHeader>
+              <div className="px-4 pb-6">{settingsBody}</div>
+            </div>
           </DrawerContent>
         </Drawer>
       )}
