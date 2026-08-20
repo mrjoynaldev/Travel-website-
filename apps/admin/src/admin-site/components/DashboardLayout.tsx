@@ -45,11 +45,13 @@ import {
   Palette,
   PanelLeft,
   ScrollText,
+  Search,
   Settings2,
   ShieldCheck,
   Tags,
   UploadCloud,
   Users,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -158,6 +160,7 @@ export default function DashboardLayout({
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
   });
+  const [menuSearch, setMenuSearch] = useState("");
   const { loading, user } = useAuth();
 
   useEffect(() => {
@@ -201,7 +204,11 @@ export default function DashboardLayout({
         } as CSSProperties
       }
     >
-      <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
+      <DashboardLayoutContent
+        setSidebarWidth={setSidebarWidth}
+        menuSearch={menuSearch}
+        setMenuSearch={setMenuSearch}
+      >
         {children}
       </DashboardLayoutContent>
     </SidebarProvider>
@@ -211,11 +218,15 @@ export default function DashboardLayout({
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
   setSidebarWidth: (width: number) => void;
+  menuSearch: string;
+  setMenuSearch: (value: string) => void;
 };
 
 function DashboardLayoutContent({
   children,
   setSidebarWidth,
+  menuSearch,
+  setMenuSearch,
 }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
@@ -235,7 +246,10 @@ function DashboardLayoutContent({
     .map(group => ({
       ...group,
       items: group.items.filter(
-        item => !item.adminOnly || bootstrap?.actor.role === "admin"
+        item =>
+          (!item.adminOnly || bootstrap?.actor.role === "admin") &&
+          (menuSearch.trim() === "" ||
+            item.label.toLowerCase().includes(menuSearch.toLowerCase()))
       ),
     }))
     .filter(group => group.items.length);
@@ -284,59 +298,99 @@ function DashboardLayoutContent({
           className="border-r-0"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center">
-            <div className="flex items-center gap-3 px-2 transition-all w-full">
+          <SidebarHeader className="h-16 justify-center border-b border-sidebar-border px-3">
+            <div className="flex w-full items-center gap-3 transition-all">
               <button
                 onClick={toggleSidebar}
-                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg hover:bg-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label="Toggle navigation"
               >
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
-              {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    {studioName}
-                  </span>
-                </div>
-              ) : null}
+              <div className="flex min-w-0 flex-1 items-center gap-2 group-data-[collapsible=icon]:hidden">
+                <span className="truncate font-semibold tracking-tight">
+                  {studioName}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMenuSearch("")}
+                className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent transition-colors group-data-[collapsible=icon]:hidden"
+                aria-label="Clear search"
+              >
+                <Search className="h-4 w-4" />
+              </button>
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="gap-0">
-            {visibleMenuGroups.map(group => (
-              <SidebarGroup key={group.label}>
-                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+          <SidebarContent className="gap-0 overflow-y-auto p-3">
+            <div className="mb-2 px-1">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={menuSearch}
+                  onChange={event => setMenuSearch(event.target.value)}
+                  placeholder="Search…"
+                  className="h-10 bg-background/60 pl-9 pr-9 text-sm"
+                  aria-label="Search menu"
+                />
+                {menuSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setMenuSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-accent"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+            {visibleMenuGroups.map((group, groupIndex) => (
+              <div key={group.label} className={groupIndex > 0 ? "mt-4 border-t border-sidebar-border/60 pt-3" : ""}>
+                <SidebarGroupLabel className="px-3 py-1 font-label text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                  {group.label}
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
-                  <SidebarMenu className="px-2">
+                  <SidebarMenu className="gap-0.5">
                     {group.items.map(item => {
                       const isActive = pathname === item.path;
                       return (
                         <SidebarMenuItem key={item.path}>
                           <SidebarMenuButton
                             isActive={isActive}
-                            onClick={() => router.push(item.path)}
+                            onClick={() => {
+                              router.push(item.path);
+                              setMenuSearch("");
+                            }}
                             tooltip={item.label}
-                            className={`h-10 transition-all font-normal`}
+                            className="h-11 gap-3 rounded-lg px-3 text-sm transition-all group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center"
                           >
                             <item.icon
-                              className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                              className={`h-[18px] w-[18px] shrink-0 ${
+                                isActive ? "text-primary" : "text-muted-foreground"
+                              }`}
                             />
-                            <span>{item.label}</span>
+                            <span className="truncate">{item.label}</span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       );
                     })}
                   </SidebarMenu>
                 </SidebarGroupContent>
-              </SidebarGroup>
+              </div>
             ))}
+            {!visibleMenuGroups.length && (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+                No menu items match “{menuSearch}”.
+              </p>
+            )}
           </SidebarContent>
 
-          <SidebarFooter className="p-3">
+          <SidebarFooter className="border-t border-sidebar-border p-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <button className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-accent/60 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   <Avatar className="h-9 w-9 border shrink-0">
                     <AvatarFallback className="text-xs font-medium">
                       {user?.name?.charAt(0).toUpperCase()}
