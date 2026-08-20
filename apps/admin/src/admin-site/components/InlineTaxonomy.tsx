@@ -15,6 +15,7 @@ export function InlineTaxonomy({ categoryIds, tagIds, onToggleCategory, onToggle
   onToggleTag: (id: string) => void;
 }) {
   const taxonomy = trpc.studio.taxonomy.list.useQuery();
+  const loading = taxonomy.isPending || taxonomy.isLoading;
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [tagOpen, setTagOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
@@ -41,8 +42,10 @@ export function InlineTaxonomy({ categoryIds, tagIds, onToggleCategory, onToggle
         </div>
       )}
       <div className="mt-2 space-y-2">
+        {loading && <p className="text-xs text-muted-foreground">Loading categories…</p>}
+        {taxonomy.isError && <p className="text-xs text-destructive">Couldn't load categories. <button type="button" onClick={() => taxonomy.refetch()} className="underline">Retry</button></p>}
         {taxonomy.data?.categories.map(item => <label key={item.id} className="flex items-center gap-2 text-sm"><Checkbox checked={categoryIds.includes(item.id)} onCheckedChange={() => onToggleCategory(item.id)} />{item.name}</label>)}
-        {!taxonomy.data?.categories.length && <p className="text-xs text-muted-foreground">No categories yet — create the first one above.</p>}
+        {!loading && !taxonomy.isError && !taxonomy.data?.categories.length && <p className="text-xs text-muted-foreground">No categories yet — create the first one above.</p>}
       </div>
       <div className="mt-5 flex items-center justify-between">
         <p className="text-sm font-semibold">Tags</p>
@@ -56,8 +59,10 @@ export function InlineTaxonomy({ categoryIds, tagIds, onToggleCategory, onToggle
         </div>
       )}
       <div className="mt-2 flex flex-wrap gap-2">
+        {loading && <p className="text-xs text-muted-foreground">Loading tags…</p>}
+        {taxonomy.isError && <p className="text-xs text-destructive">Couldn't load tags. <button type="button" onClick={() => taxonomy.refetch()} className="underline">Retry</button></p>}
         {taxonomy.data?.tags.map(item => <button type="button" key={item.id} onClick={() => onToggleTag(item.id)} className={`rounded-full border px-2.5 py-1 text-xs ${tagIds.includes(item.id) ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>#{item.name}</button>)}
-        {!taxonomy.data?.tags.length && <p className="text-xs text-muted-foreground">No tags yet — create the first one above.</p>}
+        {!loading && !taxonomy.isError && !taxonomy.data?.tags.length && <p className="text-xs text-muted-foreground">No tags yet — create the first one above.</p>}
       </div>
     </>
   );
