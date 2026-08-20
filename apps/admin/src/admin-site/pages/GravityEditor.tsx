@@ -452,8 +452,8 @@ export function GravityEditor() {
             )}
           </div>
         </header>
-        <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="space-y-5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-7 xl:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="min-w-0 space-y-5">
             <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
               <Label
                 htmlFor="gravity-title"
