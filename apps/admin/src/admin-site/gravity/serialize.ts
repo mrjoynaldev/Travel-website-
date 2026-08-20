@@ -263,6 +263,8 @@ function elementToBlock(el: Element): PartialBlock | null {
   }
   if (tag === "audio") return { type: "audio", url: el.getAttribute("src") || "" };
   if (tag === "iframe") return { type: "video", url: el.getAttribute("src") || "" };
+  const nested = el.querySelector<Element>(".gravity-text, .gravity-code, .gravity-button-wrap, .gravity-media, figure, pre, img, video, audio, iframe");
+  if (nested && nested !== el) return elementToBlock(nested);
   return null;
 }
 
