@@ -5,11 +5,11 @@ import { PublicShell } from "@/components/public/PublicShell";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useRouteId } from "@/admin-site/lib/useRouteId";
 import { trpc } from "@/lib/trpc";
 
 export default function StudioPreview() {
-  const { id = "" } = useParams<{ id: string }>();
+  const id = useRouteId() ?? "";
   const query = trpc.studio.posts.get.useQuery({ id }, { enabled: Boolean(id) });
 
   if (query.isLoading) return <PublicShell><div className="grid min-h-[60vh] place-items-center"><Loader2 className="h-7 w-7 animate-spin text-primary" /></div></PublicShell>;

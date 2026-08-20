@@ -31,7 +31,8 @@ import {
   Undo2,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useRouteId } from "@/admin-site/lib/useRouteId";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -50,8 +51,7 @@ const emptyDraft: PostDraft = {
 };
 
 export function GravityEditor() {
-  const params = useParams<{ id: string }>();
-  const postId = params?.id;
+  const postId = useRouteId();
   const router = useRouter();
   const [draft, setDraft] = useState<PostDraft>(emptyDraft);
   const [ready, setReady] = useState(!postId);
