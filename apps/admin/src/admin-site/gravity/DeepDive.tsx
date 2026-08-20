@@ -106,6 +106,12 @@ export function DeepDive(props: DeepDiveProps) {
   useEffect(() => {
     setMounted(true);
   }, []);
+  useEffect(() => {
+    document.body.style.overflow = settingsOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [settingsOpen]);
   const zoom = useEditorStore(state => state.zoom);
   const setZoom = useEditorStore(state => state.setZoom);
   const addBlock = useEditorStore(state => state.addBlock);
@@ -651,15 +657,15 @@ export function DeepDive(props: DeepDiveProps) {
       )}
 
       {settingsOpen && !isMobile && (
-        <aside className="absolute bottom-16 right-0 top-14 z-40 w-[22rem] max-w-full overflow-y-auto border-l border-white/10 bg-[#10131a] p-4 shadow-2xl">
+        <aside className="absolute bottom-16 right-0 top-14 z-40 w-[22rem] max-w-full overflow-y-auto overscroll-contain border-l border-white/10 bg-[#10131a] p-4 shadow-2xl [-webkit-overflow-scrolling:touch]">
           {settingsBody}
         </aside>
       )}
 
       {settingsOpen && isMobile && (
         <Drawer open onOpenChange={setSettingsOpen}>
-          <DrawerContent className="max-h-[85vh] overflow-y-auto border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white">
-            <DrawerHeader className="flex items-center justify-between gap-2">
+          <DrawerContent className="max-h-[90dvh]! overflow-y-auto overscroll-contain border-t border-white/10 bg-[#10131a] pb-[env(safe-area-inset-bottom)] text-white [-webkit-overflow-scrolling:touch]">
+            <DrawerHeader className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-white/10 bg-[#10131a]">
               <DrawerTitle className="text-white">Settings</DrawerTitle>
               <DrawerClose className="rounded-md p-1 text-white/70 transition-colors hover:text-white">
                 <X className="h-4 w-4" />

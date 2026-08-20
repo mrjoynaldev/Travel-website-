@@ -126,7 +126,7 @@ export function MobileFlow() {
   };
 
   return (
-    <div className="h-full overflow-x-hidden overflow-y-auto overscroll-behavior-none">
+    <div className="h-full overflow-x-hidden overflow-y-auto overscroll-behavior-none [-webkit-overflow-scrolling:touch]">
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={unitIds} strategy={verticalListSortingStrategy}>
           <ol className="space-y-3 p-3 pb-6 sm:p-4 sm:pb-8">
