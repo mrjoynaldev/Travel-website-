@@ -58,6 +58,7 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type MenuItem = {
   icon: LucideIcon;
