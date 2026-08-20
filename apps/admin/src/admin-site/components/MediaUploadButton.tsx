@@ -13,7 +13,7 @@ const ALLOWED_MIME = [
   "audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm", "video/mp4", "video/webm",
 ] as const;
 
-export function MediaUploadButton({ accept, folder = "library", label = "Upload", className, onUploaded }: { accept: string; folder?: string; label?: string; className?: string; onUploaded: (asset: UploadedAsset) => void }) {
+export function MediaUploadButton({ accept, folder = "library", label = "Upload", className, id, onUploaded }: { accept: string; folder?: string; label?: string; className?: string; id?: string; onUploaded: (asset: UploadedAsset) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const upload = trpc.studio.media.upload.useMutation({ onError: error => toast.error(error.message) });
   const onFile = async (file?: File) => {
@@ -24,7 +24,7 @@ export function MediaUploadButton({ accept, folder = "library", label = "Upload"
     upload.mutate({ filename: file.name, mimeType: file.type as typeof ALLOWED_MIME[number], base64, folder, altText: "" }, { onSuccess: asset => { onUploaded(asset as unknown as UploadedAsset); toast.success("Media uploaded to the library."); } });
   };
   return <>
-    <input ref={fileRef} type="file" accept={accept} className="hidden" onChange={event => { onFile(event.target.files?.[0]); event.currentTarget.value = ""; }} />
+    <input ref={fileRef} id={id} type="file" accept={accept} className="hidden" onChange={event => { onFile(event.target.files?.[0]); event.currentTarget.value = ""; }} />
     <Button type="button" variant="outline" size="sm" className={className} disabled={upload.isPending} onClick={() => fileRef.current?.click()}>{upload.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadCloud className="h-4 w-4" />}{upload.isPending ? "Uploading…" : label}</Button>
   </>;
 }

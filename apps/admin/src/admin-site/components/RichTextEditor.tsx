@@ -34,6 +34,10 @@ import {
   Audio as AudioNode,
   CodeBlock,
   CTAButton,
+  Video,
+  classifyPastedUrl,
+  audioMimeFromUrl,
+  youtubeIdFromUrl,
 } from "./RichTextEditorExtensions";
 import {
   Braces,
@@ -62,6 +66,7 @@ import {
   UploadCloud,
   WandSparkles,
   Youtube as YoutubeIcon,
+  Plus,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Streamdown } from "streamdown";
@@ -126,6 +131,14 @@ export function RichTextEditor({
   const [linkHref, setLinkHref] = useState("");
   const [videoOpen, setVideoOpen] = useState(false);
   const [videoUrl, setVideoUrl] = useState("");
+  const [slashPos, setSlashPos] = useState<number | null>(null);
+  const [slashQuery, setSlashQuery] = useState("");
+  const providers = trpc.llm.providers.list.useQuery(undefined, {
+    retry: false,
+  });
+  const hasAi = (providers.data?.length ?? 0) > 0;
+  const aiConfigured =
+    providers.data !== undefined && (providers.data?.length ?? 0) === 0;
   const media = trpc.studio.media.list.useQuery(
     { search: mediaSearch || undefined },
     { enabled: mediaOpen }
@@ -190,20 +203,252 @@ export function RichTextEditor({
         height: 540,
       }),
       AudioNode,
+      Video,
       CTAButton,
     ],
     content: (initialContent as any) || { type: "doc", content: [] },
-    editorProps: { attributes: { class: "editor-content px-6 py-7" } },
-    onUpdate: ({ editor }) =>
+    editorProps: {
+      attributes: { class: "editor-content px-6 py-7" },
+      handleKeyDown: (view, event) => {
+        if (slashPos !== null) {
+          if (event.key === "Escape") {
+            setSlashPos(null);
+            setSlashQuery("");
+            return true;
+          }
+          if (event.key === "Enter") {
+            const items = slashItems.filter(
+              item =>
+                item.label.toLowerCase().includes(slashQuery) ||
+                item.hint.toLowerCase().includes(slashQuery)
+            );
+            if (items.length) {
+              event.preventDefault();
+              chooseSlash(items[0]);
+              return true;
+            }
+          }
+        }
+        return false;
+      },
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (items) {
+          for (const item of Array.from(items)) {
+            if (item.type.startsWith("image/")) {
+              const file = item.getAsFile();
+              if (file) {
+                event.preventDefault();
+                uploadFile(file);
+                return true;
+              }
+            }
+          }
+        }
+        const text = event.clipboardData?.getData("text/plain")?.trim();
+        if (text && /^https?:\/\//i.test(text)) {
+          event.preventDefault();
+          insertPastedUrl(text);
+          return true;
+        }
+        return false;
+      },
+    },
+    onUpdate: ({ editor }) => {
       onChange({
         json: editor.getJSON() as EditorValue,
         html: editor.getHTML(),
-      }),
+      });
+      const { selection } = editor.state;
+      if (selection.empty) {
+        const textBefore = selection.$from.parent.textBetween(
+          0,
+          selection.$from.parentOffset
+        );
+        if (textBefore.endsWith("/")) {
+          setSlashPos(selection.from - 1);
+          setSlashQuery("");
+          return;
+        }
+        if (slashPos !== null) {
+          const query = editor.state.doc.textBetween(
+            slashPos + 1,
+            selection.from
+          );
+          if (query.includes("\n") || query.length > 24) {
+            setSlashPos(null);
+            setSlashQuery("");
+          } else {
+            setSlashQuery(query.toLowerCase());
+          }
+          return;
+        }
+      }
+      if (slashPos !== null) {
+        setSlashPos(null);
+        setSlashQuery("");
+      }
+    },
   });
   useEffect(() => {
     if (editor && initialContent)
       editor.commands.setContent(initialContent as any, { emitUpdate: false });
   }, [editor, initialContent]);
+
+  const slashItems = [
+    {
+      key: "heading",
+      label: "Heading",
+      hint: "Section title",
+      icon: <span className="text-xs font-bold">H2</span>,
+      action: () => editor?.chain().focus().toggleHeading({ level: 2 }).run(),
+    },
+    {
+      key: "quote",
+      label: "Quote",
+      hint: "Pull out a quote",
+      icon: <Quote className="h-4 w-4" />,
+      action: () => editor?.chain().focus().toggleBlockquote().run(),
+    },
+    {
+      key: "list",
+      label: "Bullet list",
+      hint: "Scannable points",
+      icon: <List className="h-4 w-4" />,
+      action: () => editor?.chain().focus().toggleBulletList().run(),
+    },
+    {
+      key: "code",
+      label: "Code block",
+      hint: "Share code",
+      icon: <Code2 className="h-4 w-4" />,
+      action: () => editor?.chain().focus().toggleCodeBlock().run(),
+    },
+    {
+      key: "image",
+      label: "Image",
+      hint: "Upload or paste an image URL",
+      icon: <ImageIcon className="h-4 w-4" />,
+      action: () => {
+        setMediaOpen(true);
+        setSlashPos(null);
+        setSlashQuery("");
+      },
+    },
+    {
+      key: "video",
+      label: "Video",
+      hint: "YouTube or Vimeo link",
+      icon: <YoutubeIcon className="h-4 w-4" />,
+      action: () => {
+        setVideoOpen(true);
+        setSlashPos(null);
+        setSlashQuery("");
+      },
+    },
+    {
+      key: "audio",
+      label: "Audio",
+      hint: "Upload or paste an audio URL",
+      icon: <Music2 className="h-4 w-4" />,
+      action: () => {
+        setAudioOpen(true);
+        setSlashPos(null);
+        setSlashQuery("");
+      },
+    },
+    {
+      key: "cta",
+      label: "Button",
+      hint: "Call-to-action link",
+      icon: <MousePointerClick className="h-4 w-4" />,
+      action: () => {
+        setCtaOpen(true);
+        setSlashPos(null);
+        setSlashQuery("");
+      },
+    },
+    {
+      key: "table",
+      label: "Table",
+      hint: "Compare data",
+      icon: <TableIcon className="h-4 w-4" />,
+      action: () =>
+        editor
+          ?.chain()
+          .focus()
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+          .run(),
+    },
+  ];
+
+  const chooseSlash = (item: (typeof slashItems)[number]) => {
+    if (slashPos !== null && editor) {
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: slashPos, to: editor.state.selection.from })
+        .run();
+    }
+    item.action();
+    setSlashPos(null);
+    setSlashQuery("");
+  };
+
+  const insertPastedUrl = (url: string) => {
+    const kind = classifyPastedUrl(url);
+    if (kind === "video") {
+      if (youtubeIdFromUrl(url) || /vimeo\.com/i.test(url)) {
+        editor?.chain().focus().setYoutubeVideo({ src: url }).run();
+      } else {
+        editor
+          ?.chain()
+          .focus()
+          .insertContent({ type: "video", attrs: { src: url } })
+          .run();
+      }
+      toast.success("Video added.");
+    } else if (kind === "audio") {
+      editor
+        ?.chain()
+        .focus()
+        .insertContent({
+          type: "audio",
+          attrs: { src: url, type: audioMimeFromUrl(url) },
+        })
+        .run();
+      toast.success("Audio player added.");
+    } else if (kind === "image") {
+      editor?.chain().focus().setImage({ src: url, alt: "" }).run();
+      toast.success("Image added.");
+    } else {
+      if (editor?.state.selection.empty) {
+        editor
+          ?.chain()
+          .focus()
+          .insertContent(url)
+          .setLink({ href: url })
+          .run();
+      } else {
+        editor?.chain().focus().setLink({ href: url }).run();
+      }
+      toast.success("Link added.");
+    }
+  };
+
+  const openInsertMenu = () => {
+    if (slashPos === null) {
+      setSlashPos(editor?.state.selection.from ?? 0);
+      setSlashQuery("");
+    }
+  };
+
+  const visibleSlashItems = slashItems.filter(
+    item =>
+      item.label.toLowerCase().includes(slashQuery) ||
+      item.hint.toLowerCase().includes(slashQuery)
+  );
+  const insertMenuOpen = slashPos !== null;
   useEffect(() => {
     if (!editor) return;
     setSourceValue(
@@ -449,7 +694,7 @@ export function RichTextEditor({
       type="button"
       variant={active ? "secondary" : "ghost"}
       size="icon"
-      className="h-8 w-8"
+      className="h-9 w-9 min-w-0 shrink-0 md:h-8 md:w-8"
       title={label}
       aria-label={label}
       onClick={onClick}
@@ -459,8 +704,19 @@ export function RichTextEditor({
   );
   const inTable = editor?.isActive("table") || false;
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
-      <div className="flex flex-nowrap items-center gap-0.5 overflow-x-auto border-b border-border bg-[#fbfcfa] px-3 py-2 md:flex-wrap md:overflow-x-visible">
+    <div className="relative overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+      <div className="flex flex-nowrap items-center gap-0.5 overflow-x-auto border-b border-border bg-[#fbfcfa] px-3 py-1.5 md:flex-wrap md:overflow-x-visible">
+        <Button
+          type="button"
+          variant="secondary"
+          className="mr-1 h-9 shrink-0 gap-1 px-3 md:h-8"
+          title="Add content (or type / in the editor)"
+          aria-label="Add content"
+          onClick={openInsertMenu}
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden text-xs font-medium sm:inline">Add</span>
+        </Button>
         {toolbar(
           "Undo",
           false,
@@ -661,13 +917,57 @@ export function RichTextEditor({
           </div>
         </div>
       )}
+      {insertMenuOpen && (
+        <div className="absolute inset-0 z-30">
+          <div
+            className="absolute inset-0 bg-black/20"
+            onClick={() => {
+              setSlashPos(null);
+              setSlashQuery("");
+            }}
+          />
+          <div className="absolute inset-x-2 bottom-2 mx-auto max-h-[60vh] max-w-md overflow-y-auto rounded-xl border border-border bg-white p-1.5 shadow-2xl sm:inset-x-auto sm:left-1/2 sm:right-auto sm:bottom-3 sm:w-96 sm:-translate-x-1/2">
+            <p className="px-3 py-2 font-label text-[10px] text-muted-foreground">
+              Add to your story — or keep typing to dismiss
+            </p>
+            <div className="divide-y divide-border">
+              {visibleSlashItems.map(item => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => chooseSlash(item)}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted"
+                >
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-muted text-foreground">
+                    {item.icon}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium">
+                      {item.label}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {item.hint}
+                    </span>
+                  </span>
+                </button>
+              ))}
+              {!visibleSlashItems.length && (
+                <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+                  No match for “{slashQuery}”
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between border-t border-border bg-[#fbfcfa] px-5 py-2 text-xs text-muted-foreground">
         <span>{editor?.storage.characterCount.words() ?? 0} words</span>
         <span>
           {editor?.storage.characterCount.characters() ?? 0} characters
         </span>
       </div>
-      <div className="border-t border-[#cad8c5] bg-[#eef4ea] p-4">
+      {hasAi && (
+        <div className="border-t border-[#cad8c5] bg-[#eef4ea] p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             <span className="grid h-7 w-7 place-items-center rounded-md bg-primary text-primary-foreground">
@@ -733,7 +1033,14 @@ export function RichTextEditor({
             <Streamdown>{aiResult}</Streamdown>
           </div>
         )}
-      </div>
+        </div>
+      )}
+      {aiConfigured && (
+        <p className="border-t border-border bg-[#fbfcfa] px-5 py-2 text-[11px] text-muted-foreground">
+          AI assistant will appear here once you connect a provider in the AI
+          section.
+        </p>
+      )}
 
       <Dialog open={mediaOpen} onOpenChange={setMediaOpen}>
         <DialogContent className="max-w-3xl">

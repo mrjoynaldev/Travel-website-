@@ -19,15 +19,30 @@ import {
   Loader2,
   Save,
   Send,
+  Settings2,
   Star,
   Trash2,
   Undo2,
+  ListChecks,
+  Plus,
+  ImagePlus,
+  Check,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/useMobile";
 
 type Draft = {
   title: string;
@@ -67,6 +82,10 @@ export function StudioEditor() {
   const [featured, setFeatured] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
   const lastSavedHash = useRef("");
+  const slugTouched = useRef(false);
+  const isMobile = useIsMobile();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
   const post = trpc.studio.posts.get.useQuery(
     { id: postId || "00000000-0000-0000-0000-000000000000" },
     { enabled: Boolean(postId) }
@@ -105,8 +124,22 @@ export function StudioEditor() {
           : ""
       );
       setReady(true);
+      slugTouched.current = Boolean(post.data.slug);
     }
   }, [post.data]);
+
+  const slugify = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+
+  useEffect(() => {
+    if (!slugTouched.current && draft.title.trim() && !draft.slug.trim()) {
+      setDraft(current => ({ ...current, slug: slugify(draft.title) }));
+    }
+  }, [draft.title]);
   const create = trpc.studio.posts.create.useMutation({
     onSuccess: data => {
       toast.success("Draft created.");
@@ -209,6 +242,230 @@ export function StudioEditor() {
   const role = bootstrap.data?.actor.role;
   const status = post.data?.status || "draft";
   const canPublish = role === "admin" || role === "editor";
+
+  const sidebarContent = (
+    <>
+      <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <p className="font-label text-[10px] text-primary">Organization</p>
+        <InlineTaxonomy
+          categoryIds={draft.categoryIds}
+          tagIds={draft.tagIds}
+          onToggleCategory={id => toggleId("categoryIds", id)}
+          onToggleTag={id => toggleId("tagIds", id)}
+        />
+      </section>
+      {postId && canPublish && (
+        <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
+          <p className="font-label text-[10px] text-primary">
+            Featured & schedule
+          </p>
+          <label className="mt-4 flex items-center gap-2 text-sm">
+            <Checkbox
+              checked={featured}
+              onCheckedChange={checked =>
+                toggleFeatured.mutate({
+                  id: postId,
+                  featured: checked === true,
+                })
+              }
+            />
+            <Star className="h-4 w-4 text-primary" />
+            Feature on the homepage
+          </label>
+          {["draft", "review"].includes(status) && (
+            <div className="mt-4">
+              <Label className="text-xs text-muted-foreground">
+                Schedule publication
+              </Label>
+              <input
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={event => setScheduledAt(event.target.value)}
+                className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+              <div className="mt-2 flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={schedule.isPending || !scheduledAt}
+                  onClick={() =>
+                    schedule.mutate({
+                      id: postId,
+                      scheduledAt: new Date(scheduledAt).toISOString(),
+                    })
+                  }
+                >
+                  <CalendarClock className="mr-1 h-3.5 w-3.5" />
+                  Schedule
+                </Button>
+                {(post.data as any)?.scheduled_at && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={schedule.isPending}
+                    onClick={() => {
+                      setScheduledAt("");
+                      schedule.mutate({ id: postId, clear: true });
+                    }}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+      <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
+        <p className="font-label text-[10px] text-primary">SEO & social</p>
+        <div className="mt-4 space-y-3">
+          <div>
+            <Label className="text-xs text-muted-foreground">Meta title</Label>
+            <Input
+              value={draft.metaTitle}
+              onChange={event =>
+                setDraft({ ...draft, metaTitle: event.target.value })
+              }
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">
+              Meta description
+            </Label>
+            <Textarea
+              value={draft.metaDescription}
+              onChange={event =>
+                setDraft({
+                  ...draft,
+                  metaDescription: event.target.value,
+                })
+              }
+              rows={3}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-muted-foreground">
+              Canonical URL
+            </Label>
+            <Input
+              value={draft.canonicalUrl}
+              onChange={event =>
+                setDraft({ ...draft, canonicalUrl: event.target.value })
+              }
+              placeholder="https://…"
+              className="mt-1"
+            />
+          </div>
+        </div>
+      </section>
+      <section className="rounded-xl border border-border bg-[#fbfcfa] p-5">
+        <p className="font-label text-[10px] text-primary">
+          Revision history
+        </p>
+        <div className="mt-3 space-y-3">
+          {revisions.data?.slice(0, 5).map(item => (
+            <div
+              key={item.id}
+              className="rounded-lg border border-border bg-white p-3"
+            >
+              <p className="text-sm font-medium">
+                Revision {item.revision_number}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {item.summary || "Saved change"}
+              </p>
+              {(role === "admin" || role === "editor") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 h-auto p-0 text-xs text-primary"
+                  onClick={() =>
+                    postId &&
+                    restore.mutate({ postId, revisionId: item.id })
+                  }
+                >
+                  <Undo2 className="mr-1 h-3 w-3" />
+                  Restore
+                </Button>
+              )}
+            </div>
+          ))}
+          {!revisions.data?.length && (
+            <p className="text-sm text-muted-foreground">
+              A revision is saved when you update an existing post.
+            </p>
+          )}
+        </div>
+      </section>
+    </>
+  );
+
+  const publishRequired = [
+    { done: Boolean(draft.title.trim()), label: "Add a clear title" },
+    { done: draft.categoryIds.length > 0, label: "Choose a category" },
+    {
+      done: (draft.contentJson.content?.length ?? 0) > 0,
+      label: "Write some content",
+    },
+  ];
+  const publishRecommended = [
+    { done: Boolean(draft.featuredMediaId), label: "Add a cover image" },
+    { done: Boolean(draft.excerpt.trim()), label: "Write a short excerpt" },
+  ];
+  const publishReady = publishRequired.every(item => item.done);
+  const publishPost = () => {
+    setPublishOpen(false);
+    const targetStatus = canPublish ? "published" : "review";
+    if (postId) {
+      save();
+      transition.mutate({ id: postId, status: targetStatus });
+    } else {
+      create.mutate(
+        { ...draft, categoryIds: draft.categoryIds, tagIds: draft.tagIds },
+        {
+          onSuccess: data => {
+            transition.mutate({ id: data.id, status: targetStatus });
+            router.push("/studio/posts");
+          },
+        }
+      );
+    }
+  };
+
+  const actionBar = (
+    <div className="grid grid-cols-3 gap-2 p-2">
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setSettingsOpen(true)}
+        className="h-11 gap-2"
+      >
+        <Settings2 className="h-4 w-4" />
+        Settings
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={save}
+        disabled={create.isPending || update.isPending}
+        className="h-11 gap-2"
+      >
+        <Save className="h-4 w-4" />
+        Save draft
+      </Button>
+      <Button
+        type="button"
+        onClick={() => setPublishOpen(true)}
+        className="h-11 gap-2"
+      >
+        <Send className="h-4 w-4" />
+        Publish
+      </Button>
+    </div>
+  );
+
+  const publishChecks = [...publishRequired, ...publishRecommended];
   if (postId && (post.isLoading || !ready))
     return (
       <DashboardLayout>
@@ -360,10 +617,11 @@ export function StudioEditor() {
                   <Input
                     id="post-slug"
                     value={draft.slug}
-                    onChange={event =>
-                      setDraft({ ...draft, slug: event.target.value })
-                    }
-                    placeholder="generated-from-title"
+                    onChange={event => {
+                      slugTouched.current = true;
+                      setDraft({ ...draft, slug: event.target.value });
+                    }}
+                    placeholder="auto-generated from the title"
                     className="mt-1.5"
                   />
                 </div>
@@ -386,6 +644,72 @@ export function StudioEditor() {
                 </div>
               </div>
             </section>
+            <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <Label
+                  htmlFor="post-cover"
+                  className="font-label text-[10px] text-primary"
+                >
+                  Cover image
+                </Label>
+                {draft.featuredMediaId && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 text-xs text-muted-foreground"
+                    onClick={() =>
+                      setDraft(current => ({
+                        ...current,
+                        featuredMediaId: null,
+                      }))
+                    }
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <div className="mt-3 flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("inline-cover-upload")?.click()}
+                  className="grid h-24 w-36 shrink-0 place-items-center overflow-hidden rounded-lg border border-dashed border-border bg-muted/40 text-muted-foreground transition hover:border-primary hover:text-primary"
+                  aria-label="Upload a cover image"
+                >
+                  {featuredAsset?.url ? (
+                    <img
+                      src={featuredAsset.url}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex flex-col items-center gap-1.5 px-2 text-center">
+                      <ImagePlus className="h-6 w-6" />
+                      <span className="text-[10px]">Add cover</span>
+                    </span>
+                  )}
+                </button>
+                <div className="min-w-0 flex-1">
+                  <MediaUploadButton
+                    id="inline-cover-upload"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    folder="featured"
+                    label={draft.featuredMediaId ? "Replace cover" : "Upload cover"}
+                    onUploaded={asset => {
+                      setDraft(current => ({
+                        ...current,
+                        featuredMediaId: asset.id,
+                        ogImageUrl: current.ogImageUrl || asset.url,
+                      }));
+                    }}
+                  />
+                  <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                    The cover shows on the homepage, lists, and when your story
+                    is shared. Stories with a cover perform dramatically better.
+                  </p>
+                </div>
+              </div>
+            </section>
             <RichTextEditor
               postId={postId}
               title={draft.title}
@@ -399,221 +723,116 @@ export function StudioEditor() {
               }
             />
           </div>
-          <aside className="space-y-5">
-            <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
-              <p className="font-label text-[10px] text-primary">
-                Organization
-              </p>
-              <InlineTaxonomy
-                categoryIds={draft.categoryIds}
-                tagIds={draft.tagIds}
-                onToggleCategory={id => toggleId("categoryIds", id)}
-                onToggleTag={id => toggleId("tagIds", id)}
-              />
-            </section>
-            {postId && canPublish && (
-              <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
-                <p className="font-label text-[10px] text-primary">
-                  Featured & schedule
-                </p>
-                <label className="mt-4 flex items-center gap-2 text-sm">
-                  <Checkbox
-                    checked={featured}
-                    onCheckedChange={checked =>
-                      toggleFeatured.mutate({
-                        id: postId,
-                        featured: checked === true,
-                      })
-                    }
-                  />
-                  <Star className="h-4 w-4 text-primary" />
-                  Feature on the homepage
-                </label>
-                <div className="mt-4">
-                  <Label className="text-xs text-muted-foreground">
-                    Featured media
-                  </Label>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                    {featuredAsset?.url ? (
-                      <img
-                        src={featuredAsset.url}
-                        alt=""
-                        className="h-12 w-12 rounded-md border border-border object-cover"
-                      />
-                    ) : draft.featuredMediaId ? (
-                      <div className="grid h-12 w-12 place-items-center rounded-md border border-border bg-muted text-[10px] text-muted-foreground">
-                        IMG
-                      </div>
-                    ) : null}
-                    <MediaUploadButton
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      folder="featured"
-                      label={
-                        draft.featuredMediaId ? "Replace cover" : "Upload cover"
-                      }
-                      onUploaded={asset => {
-                        setDraft(current => ({
-                          ...current,
-                          featuredMediaId: asset.id,
-                          ogImageUrl: current.ogImageUrl || asset.url,
-                        }));
-                      }}
-                    />
-                    {draft.featuredMediaId && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          setDraft(current => ({
-                            ...current,
-                            featuredMediaId: null,
-                          }))
-                        }
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                  {featuredAsset?.url && (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {featuredAsset.filename}
-                    </p>
-                  )}
-                </div>
-                {["draft", "review"].includes(status) && (
-                  <div className="mt-4">
-                    <Label className="text-xs text-muted-foreground">
-                      Schedule publication
-                    </Label>
-                    <input
-                      type="datetime-local"
-                      value={scheduledAt}
-                      onChange={event => setScheduledAt(event.target.value)}
-                      className="mt-1.5 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    />
-                    <div className="mt-2 flex gap-2">
-                      <Button
-                        size="sm"
-                        disabled={schedule.isPending || !scheduledAt}
-                        onClick={() =>
-                          schedule.mutate({
-                            id: postId,
-                            scheduledAt: new Date(scheduledAt).toISOString(),
-                          })
-                        }
-                      >
-                        <CalendarClock className="mr-1 h-3.5 w-3.5" />
-                        Schedule
-                      </Button>
-                      {(post.data as any)?.scheduled_at && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={schedule.isPending}
-                          onClick={() => {
-                            setScheduledAt("");
-                            schedule.mutate({ id: postId, clear: true });
-                          }}
-                        >
-                          Clear
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </section>
-            )}
-            <section className="rounded-xl border border-border bg-white p-5 shadow-sm">
-              <p className="font-label text-[10px] text-primary">
-                SEO & social
-              </p>
-              <div className="mt-4 space-y-3">
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Meta title
-                  </Label>
-                  <Input
-                    value={draft.metaTitle}
-                    onChange={event =>
-                      setDraft({ ...draft, metaTitle: event.target.value })
-                    }
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Meta description
-                  </Label>
-                  <Textarea
-                    value={draft.metaDescription}
-                    onChange={event =>
-                      setDraft({
-                        ...draft,
-                        metaDescription: event.target.value,
-                      })
-                    }
-                    rows={3}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">
-                    Canonical URL
-                  </Label>
-                  <Input
-                    value={draft.canonicalUrl}
-                    onChange={event =>
-                      setDraft({ ...draft, canonicalUrl: event.target.value })
-                    }
-                    placeholder="https://…"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </section>
-            <section className="rounded-xl border border-border bg-[#fbfcfa] p-5">
-              <p className="font-label text-[10px] text-primary">
-                Revision history
-              </p>
-              <div className="mt-3 space-y-3">
-                {revisions.data?.slice(0, 5).map(item => (
-                  <div
-                    key={item.id}
-                    className="rounded-lg border border-border bg-white p-3"
-                  >
-                    <p className="text-sm font-medium">
-                      Revision {item.revision_number}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {item.summary || "Saved change"}
-                    </p>
-                    {(role === "admin" || role === "editor") && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="mt-2 h-auto p-0 text-xs text-primary"
-                        onClick={() =>
-                          postId &&
-                          restore.mutate({ postId, revisionId: item.id })
-                        }
-                      >
-                        <Undo2 className="mr-1 h-3 w-3" />
-                        Restore
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                {!revisions.data?.length && (
-                  <p className="text-sm text-muted-foreground">
-                    A revision is saved when you update an existing post.
-                  </p>
-                )}
-              </div>
-            </section>
+          <aside className="hidden space-y-5 xl:block">
+            {sidebarContent}
           </aside>
         </div>
       </div>
+      <div
+        className="fixed inset-x-0 bottom-14 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:backdrop-blur sm:hidden"
+        aria-label="Editor actions"
+      >
+        {actionBar}
+      </div>
+      <div
+        className="fixed inset-x-0 bottom-0 z-30 hidden border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur sm:block xl:hidden"
+        aria-label="Editor actions"
+      >
+        {actionBar}
+      </div>
+      <div className="h-16 xl:hidden" aria-hidden />
+      <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85vh] overflow-y-auto rounded-t-2xl"
+        >
+          <SheetHeader>
+            <SheetTitle>Post settings</SheetTitle>
+            <SheetDescription>
+              Everything else about this post.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-5">{sidebarContent}</div>
+        </SheetContent>
+      </Sheet>
+      <Sheet open={publishOpen} onOpenChange={setPublishOpen}>
+        <SheetContent
+          side="bottom"
+          className="max-h-[85vh] overflow-y-auto rounded-t-2xl"
+        >
+          <SheetHeader>
+            <SheetTitle>Ready to publish?</SheetTitle>
+            <SheetDescription>
+              A quick checklist before this story goes live.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-2">
+            {publishChecks.map(item => {
+              const isRequired = publishRequired.some(
+                check => check.label === item.label
+              );
+              return (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-3 rounded-lg border border-border bg-white p-3"
+                >
+                  <span
+                    className={cn(
+                      "grid h-6 w-6 shrink-0 place-items-center rounded-full",
+                      item.done
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground"
+                    )}
+                  >
+                    {item.done ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4" />
+                    )}
+                  </span>
+                  <span className="flex-1 text-sm font-medium">
+                    {item.label}
+                  </span>
+                  {!isRequired && (
+                    <span className="text-[10px] text-muted-foreground">
+                      optional
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={save}
+              disabled={create.isPending || update.isPending}
+              className="h-11"
+            >
+              Save draft
+            </Button>
+            <Button
+              type="button"
+              onClick={publishPost}
+              disabled={!publishReady || transition.isPending}
+              className="h-11 gap-2"
+            >
+              {transition.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {canPublish ? "Publish now" : "Submit for review"}
+            </Button>
+          </div>
+          {!publishReady && (
+            <p className="text-center text-xs text-muted-foreground">
+              Complete the required steps above to publish.
+            </p>
+          )}
+        </SheetContent>
+      </Sheet>
     </DashboardLayout>
   );
 }

@@ -61,6 +61,7 @@ export function GravityEditor() {
   const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
   const lastSavedHash = useRef("");
+  const slugTouched = useRef(false);
   const blocks = useEditorStore(state => state.blocks);
   const sections = useEditorStore(state => state.sections);
   const loadDoc = useEditorStore(state => state.loadDoc);
@@ -119,8 +120,22 @@ export function GravityEditor() {
           : ""
       );
       setReady(true);
+      slugTouched.current = Boolean(post.data.slug);
     }
   }, [post.data, loadDoc]);
+
+  const slugify = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+
+  useEffect(() => {
+    if (!slugTouched.current && draft.title.trim() && !draft.slug.trim()) {
+      setDraft(current => ({ ...current, slug: slugify(draft.title) }));
+    }
+  }, [draft.title]);
 
   useEffect(() => {
     if (!postId && ready) {
@@ -466,10 +481,11 @@ export function GravityEditor() {
                   <Input
                     id="gravity-slug"
                     value={draft.slug}
-                    onChange={event =>
-                      setDraft({ ...draft, slug: event.target.value })
-                    }
-                    placeholder="generated-from-title"
+                    onChange={event => {
+                      slugTouched.current = true;
+                      setDraft({ ...draft, slug: event.target.value });
+                    }}
+                    placeholder="auto-generated from the title"
                     className="mt-1.5"
                   />
                 </div>

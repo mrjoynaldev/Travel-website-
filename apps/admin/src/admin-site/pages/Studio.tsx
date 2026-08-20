@@ -338,7 +338,11 @@ export function StudioPosts() {
     <Frame
       title="Posts"
       eyebrow="Plan, write, review, publish"
-      actions={<CreateMenu />}
+      actions={
+        <div className="hidden sm:block">
+          <CreateMenu />
+        </div>
+      }
     >
       <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="order-2 h-fit rounded-xl border border-border bg-white p-4 shadow-sm lg:order-1">
@@ -458,6 +462,43 @@ export function StudioPosts() {
           </div>
         </aside>
         <section className="order-1 lg:order-2">
+          <div
+            className="mb-3 flex snap-x gap-2 overflow-x-auto pb-1 sm:hidden"
+            role="tablist"
+            aria-label="Filter by folder"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={folder.kind === "all"}
+              onClick={() => setFolder({ kind: "all" })}
+              className={`shrink-0 snap-start rounded-full border px-3 py-2 text-xs font-medium ${
+                folder.kind === "all"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-white text-muted-foreground"
+              }`}
+            >
+              All posts
+            </button>
+            {folders.cats.map(cat => (
+              <button
+                key={cat.id}
+                type="button"
+                role="tab"
+                aria-selected={folder.kind === "category" && folder.id === cat.id}
+                onClick={() =>
+                  setFolder({ kind: "category", id: cat.id })
+                }
+                className={`shrink-0 snap-start rounded-full border px-3 py-2 text-xs font-medium ${
+                  folder.kind === "category" && folder.id === cat.id
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-white text-muted-foreground"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
           <div className="mb-5 flex flex-col gap-3 sm:flex-row">
             <Input
               value={search}
@@ -567,10 +608,16 @@ export function StudioPosts() {
           </div>
         </section>
       </div>
+      <Link
+        href="/studio/posts/new"
+        className="fixed bottom-20 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg sm:hidden"
+        aria-label="New post"
+      >
+        <Plus className="h-6 w-6" />
+      </Link>
     </Frame>
   );
 }
-
 const fileToBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
