@@ -13,7 +13,7 @@ must follow the contract below **precisely**.
 
 ## 1. The canvas block model
 
-CodeReport stories are built from six block types. Internally each block is a
+CodeReport stories are built from seven block types. Internally each block is a
 JSON object; you do **not** need to produce JSON (HTML is preferred and safest).
 If you do produce JSON, use the exact shape at the end of this document.
 
@@ -25,6 +25,7 @@ If you do produce JSON, use the exact shape at the end of this document.
 | `audio` | Audio — direct file (mp3/wav/ogg/webm) or a YouTube link as an audio strip |
 | `button` | A call-to-action link |
 | `code` | A code snippet with language label + one-tap copy button on the site |
+| `custom` | Any raw HTML you can't express with the blocks above — charts, slides, comparison boxes, custom tables, embeds, interactive widgets |
 
 You may group blocks into a **section** so they render together (a 2–4 column
 grid or a stacked group).
@@ -131,6 +132,38 @@ Rules:
   `bash`, `typescript`, `json`, `css`, `html`, `sql`, `rust`, `go`, etc.
 - Keep the snippet focused (≤ ~80 lines unless the brief asks for more).
 
+### Custom — raw HTML for anything else (charts, slides, boxes, embeds)
+Use this when the brief needs something no single block can express. Everything
+inside is rendered **verbatim** on the published article:
+```html
+<div class="gravity-custom">
+  <!-- a simple bar chart built from plain HTML -->
+  <div class="chart" style="display:flex; gap:.5rem; align-items:flex-end;">
+    <div style="width:40px; height:60px; background:#2d7a4f;"></div>
+    <div style="width:40px; height:95px; background:#2d7a4f;"></div>
+    <div style="width:40px; height:45px; background:#e4a741;"></div>
+  </div>
+  <!-- or a comparison box, custom table, a slide/carousel, an embedded chart -->
+  <table>
+    <tr><th>Plan</th><th>Price</th></tr>
+    <tr><td>Starter</td><td>$0</td></tr>
+    <tr><td>Pro</td><td>$19</td></tr>
+  </table>
+</div>
+```
+Rules:
+- The wrapper must be exactly `<div class="gravity-custom">`. The importer keeps
+  its inner HTML byte-for-byte, so anything valid inside is fine.
+- Good candidates: charts, stat/comparison boxes, slides/carousels, custom
+  tables, form-free widgets, third-party chart/embed snippets (Chart.js, Google
+  Charts embeds, CodePen, maps, etc.).
+- **No `<script>` or `<style>` tags** inside, and no `<form>`/`<button>`/`<input>`
+  (those break the reader-site layout). Use inline `style=""` attributes instead
+  of a `<style>` block.
+- Only use this block when needed — prefer the dedicated blocks above; they stay
+  editable on the canvas. A `custom` block is edited as raw HTML.
+- Absolute URLs for any `src`/`href` inside.
+
 ### Section — group blocks so they render together
 Grid (side by side, 2–4 columns):
 ```html
@@ -161,13 +194,13 @@ is taken from the first heading inside the section.
 2. **Absolute URLs only** for every `src`/`href` (`https://…`). Never use
    relative or `file://` URLs. This includes uploaded studio files, any CDN, and
    streaming hosts.
-3. **No unsupported tags or attributes.** No `<script>`, `<style>`, `<link>`,
-   `<form>`, `<button>`, `<input>`, `<div>` wrappers (except `gravity-code` /
-   `gravity-cell` / `gravity-section`), no inline `style` attributes, no
-   `<img>` without `alt`.
-4. **No social embeds** (Twitter/X, Instagram, Facebook) unless the brief
-   explicitly requests them and provides the embed code — the canvas only
-   supports the blocks above.
+3. **No unsupported tags or attributes** in the block formats. No `<script>`,
+   `<style>`, `<link>`, `<form>`, `<button>`, `<input>`, no inline `style`
+   attributes, no `<img>` without `alt`. `<div>` wrappers are allowed only as
+   `gravity-code`, `gravity-custom`, `gravity-cell`, and `gravity-section`.
+4. **Social embeds** (Twitter/X, Instagram, Facebook, YouTube playlists) are
+   supported only inside a `custom` block — provide the embed snippet exactly as
+   the platform gives it. Do not paste platform embed codes anywhere else.
 5. **Headings matter.** Use exactly one clear `<h2 class="gravity-text">` for
    each section of the article. Do not invent heading styles.
 6. **Balance media.** Roughly 1 media block (image/video/audio) per 2–3 text
@@ -176,6 +209,9 @@ is taken from the first heading inside the section.
    `code` block with correct escaping and a proper language slug. Always include
    the copy button markup.
 8. **CTA.** End actionable pieces with a single `button` block.
+9. **Custom only when necessary.** If something is better expressed as a chart,
+   slide, or comparison box, use a `custom` block with clean inline-styled HTML;
+   otherwise stay with the editable blocks.
 
 ---
 
@@ -220,6 +256,14 @@ await report.publish();</code></pre>
   <iframe src="https://www.youtube-nocookie.com/embed/abc123xyz" title="Audio" allowfullscreen></iframe>
   <figcaption>Roadmap discussion — audio only.</figcaption>
 </figure>
+<div class="gravity-custom">
+  <div style="display:flex; gap:.75rem; align-items:flex-end; padding:1rem; border:1px solid #d8ddd5; border-radius:.6rem;">
+    <div style="width:56px; height:70px; background:#2d7a4f;"></div>
+    <div style="width:56px; height:110px; background:#2d7a4f;"></div>
+    <div style="width:56px; height:90px; background:#e4a741;"></div>
+    <div style="width:56px; height:130px; background:#2d7a4f;"></div>
+  </div>
+</div>
 <p class="gravity-button-wrap"><a class="cta-button cta-primary" href="https://codereportglobal.com/pricing">Start for free</a></p>
 ```
 
@@ -243,7 +287,8 @@ Each block needs a unique `id`:
 ```
 Block fields: `id`, `type`, `x`, `y`, `width`, plus type-specific fields —
 `content`/`runs`/`level` (text), `url`/`caption` (image/video/audio), `content`/
-`link` (button), `content`/`language` (code). `x`/`y` are canvas coordinates
+`link` (button), `content`/`language` (code), `content` (custom — raw HTML
+string). `x`/`y` are canvas coordinates
 (0–1200 wide); when you use JSON, keep blocks in a clean vertical column
 (`y` increasing) so the canvas stays tidy.
 

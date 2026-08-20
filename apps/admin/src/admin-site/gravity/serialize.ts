@@ -72,6 +72,9 @@ function blockMarkup(block: GravityBlock) {
   if (block.type === "code") {
     return codeBlockMarkup(block);
   }
+  if (block.type === "custom") {
+    return `<div class="gravity-custom">${block.content || ""}</div>`;
+  }
   return "";
 }
 
@@ -154,6 +157,7 @@ const DEFAULT_WIDTH: Record<string, number> = {
   audio: 320,
   button: 200,
   code: 460,
+  custom: 460,
 };
 
 const flowHeight = (block: Pick<GravityBlock, "type" | "height">) => {
@@ -170,6 +174,8 @@ const flowHeight = (block: Pick<GravityBlock, "type" | "height">) => {
       return 60;
     case "code":
       return 150;
+    case "custom":
+      return 180;
   }
 };
 
@@ -222,6 +228,9 @@ function parseTextElement(el: Element): PartialBlock {
 function elementToBlock(el: Element): PartialBlock | null {
   const cls = typeof el.className === "string" ? el.className : "";
   const tag = el.tagName.toLowerCase();
+  if (cls.includes("gravity-custom")) {
+    return { type: "custom", content: el.innerHTML || "" };
+  }
   if (cls.includes("gravity-code") || tag === "pre") {
     const codeEl = el.querySelector("code") || el;
     const lang = (el.querySelector(".gravity-code-lang")?.textContent || "").trim();
@@ -263,7 +272,7 @@ function elementToBlock(el: Element): PartialBlock | null {
   }
   if (tag === "audio") return { type: "audio", url: el.getAttribute("src") || "" };
   if (tag === "iframe") return { type: "video", url: el.getAttribute("src") || "" };
-  const nested = el.querySelector<Element>(".gravity-text, .gravity-code, .gravity-button-wrap, .gravity-media, figure, pre, img, video, audio, iframe");
+  const nested = el.querySelector<Element>(".gravity-text, .gravity-custom, .gravity-code, .gravity-button-wrap, .gravity-media, figure, pre, img, video, audio, iframe");
   if (nested && nested !== el) return elementToBlock(nested);
   return null;
 }

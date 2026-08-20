@@ -29,6 +29,7 @@ const TYPE_LABEL: Record<GravityBlock["type"], string> = {
   audio: "Audio",
   button: "Button",
   code: "Code",
+  custom: "Custom HTML",
 };
 
 export function MobileBlockSheet({
@@ -154,6 +155,33 @@ export function MobileBlockSheet({
                   rows={10}
                   placeholder="Paste your code here…"
                   className="mt-1.5 w-full resize-y rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                />
+              </div>
+            </>
+          )}
+          {block.type === "custom" && (
+            <>
+              <div>
+                <Label className="text-[10px] text-white/50">Custom HTML</Label>
+                <textarea
+                  value={block.content || ""}
+                  onChange={event =>
+                    updateBlock(block.id, { content: event.target.value })
+                  }
+                  rows={10}
+                  placeholder={'<div class="my-chart">…</div>'}
+                  className="mt-1.5 w-full resize-y rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-mono text-xs text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                />
+              </div>
+              <div>
+                <Label className="text-[10px] text-white/50">Link trigger</Label>
+                <Input
+                  value={block.link || ""}
+                  onChange={event =>
+                    updateBlock(block.id, { link: event.target.value })
+                  }
+                  placeholder="https://…"
+                  className="mt-1.5 h-11 border-white/10 bg-white/5 text-white"
                 />
               </div>
             </>

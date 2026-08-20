@@ -31,6 +31,8 @@ export const blockHeight = (block: GravityBlock) => {
       return 60;
     case "code":
       return 150;
+    case "custom":
+      return 180;
   }
 };
 
@@ -157,7 +159,9 @@ const addBlockAt = (
             ? 200
             : type === "code"
               ? 460
-              : 420;
+              : type === "custom"
+                ? 460
+                : 420;
   const bx = Math.max(
     0,
     Math.min(x ?? 32 + cascade, CANVAS_WIDTH - width)

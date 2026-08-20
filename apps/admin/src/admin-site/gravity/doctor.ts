@@ -5,7 +5,7 @@ import type { GravityBlock, GravitySection } from "./types";
 const CANVAS_WIDTH = 960;
 const PAD = 16;
 const GAP = 16;
-const MIN_HEIGHT: Record<string, number> = { text: 92, image: 150, video: 150, audio: 92, button: 70, code: 96 };
+const MIN_HEIGHT: Record<string, number> = { text: 92, image: 150, video: 150, audio: 92, button: 70, code: 96, custom: 96 };
 
 export type DoctorReport = { blocks: GravityBlock[]; sections: GravitySection[]; fixes: string[] };
 

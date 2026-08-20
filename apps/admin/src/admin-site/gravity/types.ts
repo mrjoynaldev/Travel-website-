@@ -1,4 +1,4 @@
-export type BlockType = "text" | "image" | "video" | "audio" | "button" | "code";
+export type BlockType = "text" | "image" | "video" | "audio" | "button" | "code" | "custom";
 
 export type TextRun = {
   text: string;

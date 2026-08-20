@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Braces, Combine, Eraser, FileUp, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, SquareMousePointer, Stethoscope, Trash2, Type, Ungroup, Video } from "lucide-react";
+import { Braces, Combine, Eraser, FileUp, ImagePlus, Layers, LayoutTemplate, Maximize2, MousePointer2, Music2, PanelRight, Puzzle, SquareMousePointer, Stethoscope, Trash2, Type, Ungroup, Video } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { runDoctor } from "./doctor";
@@ -47,6 +47,7 @@ export function GravityToolbar({ previewing, onTogglePreview, onOpenTemplates, o
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("audio")}><Music2 className="h-4 w-4" />Audio</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("button")}><SquareMousePointer className="h-4 w-4" />Button</Button>
       <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("code")}><Braces className="h-4 w-4" />Code</Button>
+      <Button type="button" size="sm" variant="outline" className={buttonClass} onClick={() => addBlock("custom")}><Puzzle className="h-4 w-4" />Custom</Button>
       <span className="mx-1 h-5 w-px bg-border" />
       <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onOpenTemplates}><LayoutTemplate className="h-4 w-4" />Templates</Button>
       <Button type="button" size="sm" variant="outline" className={`${buttonClass} border-primary/40 text-primary`} onClick={onOpenImport}><FileUp className="h-4 w-4" />Import HTML</Button>

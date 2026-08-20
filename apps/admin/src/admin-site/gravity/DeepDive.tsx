@@ -23,6 +23,7 @@ import {
   PanelRight,
   Pencil,
   Plus,
+  Puzzle,
   Send,
   Settings,
   SquareMousePointer,
@@ -131,6 +132,7 @@ export function DeepDive(props: DeepDiveProps) {
     { type: "audio", label: "Audio", icon: Music2 },
     { type: "button", label: "Button", icon: SquareMousePointer },
     { type: "code", label: "Code", icon: Braces },
+    { type: "custom", label: "Custom", icon: Puzzle },
   ] as const;
 
   const fitZoom = () => {

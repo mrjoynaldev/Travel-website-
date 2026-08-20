@@ -8,7 +8,7 @@ import { MediaPicker, type MediaKind } from "./MediaPicker";
 import { useEditorStore } from "./store";
 import type { GravityBlock } from "./types";
 
-const TYPE_LABEL: Record<GravityBlock["type"], string> = { text: "Text", image: "Image", video: "Video", audio: "Audio", button: "Button", code: "Code" };
+const TYPE_LABEL: Record<GravityBlock["type"], string> = { text: "Text", image: "Image", video: "Video", audio: "Audio", button: "Button", code: "Code", custom: "Custom HTML" };
 
 export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
   const updateBlock = useEditorStore(state => state.updateBlock);
@@ -51,6 +51,12 @@ export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
           <>
             <div className={field}><Label className="text-[10px] text-muted-foreground">{block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"}</Label><div className="mt-1"><MediaPicker kind={block.type as MediaKind} url={block.url} onChange={url => updateBlock(block.id, { url })} /></div></div>
             <div className={field}><Label className="text-[10px] text-muted-foreground">Caption</Label><Input value={block.caption || ""} onChange={event => updateBlock(block.id, { caption: event.target.value })} className="mt-1 h-8 text-xs" /></div>
+          </>
+        )}
+        {block.type === "custom" && (
+          <>
+            <div className={field}><Label className="text-[10px] text-muted-foreground">Custom HTML</Label><textarea value={block.content || ""} onChange={event => updateBlock(block.id, { content: event.target.value })} rows={10} placeholder={'<div class="my-chart">…</div>'} className="mt-1 w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+            <p className="mt-1.5 text-[10px] text-muted-foreground">Rendered verbatim on the published article. Charts, slides, custom boxes, embeds — anything.</p>
           </>
         )}
         {block.type !== "button" && (

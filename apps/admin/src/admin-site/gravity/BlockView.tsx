@@ -11,6 +11,7 @@ import {
   Link2,
   Music2,
   Pencil,
+  Puzzle,
   Trash2,
   Video,
   Youtube,
@@ -311,6 +312,36 @@ export function BlockView({
           </pre>
         </div>
       )}
+      {block.type === "custom" && (
+        <div className="overflow-hidden rounded-lg border border-dashed border-[#2a3541] bg-[#0d1117]/40">
+          <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-white/5 px-3 py-1.5">
+            <span className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-white/40">
+              <Puzzle className="h-3 w-3" />
+              Custom HTML
+            </span>
+            <button
+              type="button"
+              onClick={event => {
+                event.stopPropagation();
+                setEditOpen(value => !value);
+              }}
+              className="flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-medium text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+            >
+              <Pencil className="h-3 w-3" /> Edit HTML
+            </button>
+          </div>
+          {block.content ? (
+            <div
+              className="gravity-custom-canvas [&_iframe]:max-w-full [&_img]:max-w-full [&_table]:w-full [&_svg]:max-w-full"
+              dangerouslySetInnerHTML={{ __html: block.content }}
+            />
+          ) : (
+            <div className="grid h-24 place-items-center text-xs text-white/40">
+              Embed any custom HTML — charts, slides, boxes, embeds.
+            </div>
+          )}
+        </div>
+      )}
       {block.link && (
         <p className="mt-1 flex items-center gap-1 text-[10px] text-primary">
           <Link2 className="h-3 w-3" />
@@ -358,6 +389,26 @@ export function BlockView({
                 }
                 rows={8}
                 placeholder="Paste your code here…"
+                className="w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <Input
+                value={block.link || ""}
+                onChange={event =>
+                  updateBlock(block.id, { link: event.target.value })
+                }
+                placeholder="Optional link trigger (wraps this block as a click target)"
+                className="h-8 text-xs"
+              />
+            </>
+          ) : block.type === "custom" ? (
+            <>
+              <textarea
+                value={block.content || ""}
+                onChange={event =>
+                  updateBlock(block.id, { content: event.target.value })
+                }
+                rows={8}
+                placeholder={'<div class="my-chart">…your custom HTML…</div>'}
                 className="w-full resize-y rounded-md border border-input bg-background px-2 py-1.5 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <Input
