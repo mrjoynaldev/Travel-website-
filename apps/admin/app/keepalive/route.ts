@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const api = (process.env.API_URL || "http://localhost:4000").replace(/\/+$/, "");
+  const api = (process.env.API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
   let status = 502;
   for (let attempt = 0; attempt < 3; attempt++) {
     try {

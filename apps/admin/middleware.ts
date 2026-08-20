@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith("/api/keep-alive")) {
     return NextResponse.next();
   }
-  const apiOrigin = (process.env.API_URL || "").replace(/\/+$/, "");
+  const apiOrigin = (process.env.API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
   if (!apiOrigin) return NextResponse.next();
 
   const headers = new Headers(request.headers);
