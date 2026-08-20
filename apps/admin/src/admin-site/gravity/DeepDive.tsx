@@ -31,6 +31,7 @@ import {
   Video,
 } from "lucide-react";
 import { GravityCanvas } from "./GravityCanvas";
+import { MobileFlow } from "./MobileFlow";
 import { runDoctor } from "./doctor";
 import { InspectorPanel } from "./Inspector";
 import { LayersPanel } from "./LayersPanel";
@@ -101,6 +102,7 @@ export function DeepDive(props: DeepDiveProps) {
   const zoom = useEditorStore(state => state.zoom);
   const setZoom = useEditorStore(state => state.setZoom);
   const addBlock = useEditorStore(state => state.addBlock);
+  const appendBlock = useEditorStore(state => state.appendBlock);
   const loadDoc = useEditorStore(state => state.loadDoc);
   const sections = useEditorStore(state => state.sections);
   const blocks = useEditorStore(state => state.blocks);
@@ -188,6 +190,7 @@ export function DeepDive(props: DeepDiveProps) {
   const inSection = blocks.some(
     block => selected.includes(block.id) && block.parentId
   );
+  const flowMode = isMobile && !previewMode;
 
   const settingsBody = (
     <div className="space-y-5">
@@ -323,15 +326,17 @@ export function DeepDive(props: DeepDiveProps) {
                 <GravityPreview />
               </div>
             </div>
+          ) : isMobile ? (
+            <MobileFlow />
           ) : (
             <GravityCanvas
               viewportRef={viewportRef}
               hideZoomBar
               fullHeight
-              mobileDocked={isMobile}
+              mobileDocked={false}
             />
           )}
-          {mouseEnabled && !previewMode && (
+          {mouseEnabled && !previewMode && !isMobile && (
             <MousePad viewportRef={viewportRef} />
           )}
           {showLayers && !previewMode && !isMobile && (
@@ -372,7 +377,7 @@ export function DeepDive(props: DeepDiveProps) {
         )}
       </div>
 
-      {isMobile && !previewMode && selected.length > 0 && !editingId && (
+      {isMobile && !previewMode && !editingId && !flowMode && selected.length > 0 && (
         <div className="flex shrink-0 items-center gap-2 overflow-x-auto border-t border-white/10 bg-[#0d1016] px-3 py-2">
           <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white/60">
             {selected.length === 1 ? "Block" : `${selected.length} selected`}
@@ -551,40 +556,44 @@ export function DeepDive(props: DeepDiveProps) {
           <Stethoscope className="h-4 w-4" />
           <span className="hidden sm:inline">Doctor</span>
         </Button>
-        <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
-        <button
-          type="button"
-          aria-label="Zoom out"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-          onClick={() =>
-            setZoom(value =>
-              Math.max(0.15, Math.round((value - 0.1) * 100) / 100)
-            )
-          }
-        >
-          <Minus className="h-4 w-4" />
-        </button>
-        <span className="w-12 shrink-0 text-center text-xs tabular-nums text-white/60">
-          {Math.round(zoom * 100)}%
-        </span>
-        <button
-          type="button"
-          aria-label="Zoom in"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-          onClick={() =>
-            setZoom(value => Math.min(2, Math.round((value + 0.1) * 100) / 100))
-          }
-        >
-          <Plus className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          aria-label="Fit to view"
-          className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
-          onClick={fitZoom}
-        >
-          <Maximize className="h-4 w-4" />
-        </button>
+        {!flowMode && (
+          <>
+            <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
+            <button
+              type="button"
+              aria-label="Zoom out"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+              onClick={() =>
+                setZoom(value =>
+                  Math.max(0.15, Math.round((value - 0.1) * 100) / 100)
+                )
+              }
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="w-12 shrink-0 text-center text-xs tabular-nums text-white/60">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              type="button"
+              aria-label="Zoom in"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+              onClick={() =>
+                setZoom(value => Math.min(2, Math.round((value + 0.1) * 100) / 100))
+              }
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              aria-label="Fit to view"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+              onClick={fitZoom}
+            >
+              <Maximize className="h-4 w-4" />
+            </button>
+          </>
+        )}
         <span className="mx-1 h-6 w-px shrink-0 bg-white/10" />
         <button
           type="button"
@@ -608,7 +617,7 @@ export function DeepDive(props: DeepDiveProps) {
                   key={option.type}
                   type="button"
                   onClick={() => {
-                    addBlock(option.type);
+                    appendBlock(option.type);
                     setAddOpen(false);
                   }}
                   className="flex h-14 items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white/90 transition-colors hover:bg-white/10 hover:text-white"

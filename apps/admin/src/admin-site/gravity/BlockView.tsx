@@ -65,12 +65,14 @@ export function BlockView({
   isDragging,
   listeners,
   attributes,
+  fullWidth,
 }: {
   block: GravityBlock;
   selected: boolean;
   isDragging?: boolean;
   listeners?: DraggableListeners;
   attributes?: DraggableAttributes;
+  fullWidth?: boolean;
 }) {
   const updateBlock = useEditorStore(state => state.updateBlock);
   const deleteBlocks = useEditorStore(state => state.deleteBlocks);
@@ -96,7 +98,7 @@ export function BlockView({
       }}
       className={`${shell} ${selected ? "border-primary ring-2 ring-primary/30" : ""} ${isDragging ? "opacity-60" : ""}`}
       style={{
-        width: block.width,
+        width: fullWidth ? "100%" : block.width,
         transform: block.rotation ? `rotate(${block.rotation}deg)` : undefined,
         transformOrigin: "center",
       }}

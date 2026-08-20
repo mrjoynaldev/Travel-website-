@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { flowOrder } from "./serialize";
 import { CANVAS_WIDTH } from "./templates";
 import {
   uid,
@@ -97,6 +98,9 @@ type EditorState = {
   setEditing: (id: string | null) => void;
   addBlock: (type: BlockType) => void;
   addBlockAt: (type: BlockType, x: number, y: number) => void;
+  appendBlock: (type: BlockType) => void;
+  reorderUnits: (order: string[]) => void;
+  moveUnit: (id: string, direction: -1 | 1) => void;
   updateBlock: (id: string, patch: Partial<GravityBlock>) => void;
   moveBlock: (id: string, x: number, y: number, snapEnabled: boolean) => void;
   resizeBlock: (
@@ -169,6 +173,37 @@ const addBlockAt = (
   return { blocks: [...state.blocks, block], selected: [block.id] };
 };
 
+const FLOW_GAP = 24;
+
+/**
+ * Reassign y positions so units stack top-to-bottom in the given order,
+ * leaving x/width untouched so the desktop canvas stays coherent.
+ */
+const reflowY = (
+  blocks: GravityBlock[],
+  sections: GravitySection[],
+  order: string[]
+): GravityBlock[] => {
+  const units = flowOrder(blocks, sections);
+  if (order.length !== units.length || !units.every(unit => order.includes(unit.id)))
+    return blocks;
+  const ymap = new Map<string, number>();
+  let cursor = 0;
+  for (const id of order) {
+    const unit = units.find(item => item.id === id);
+    if (!unit) continue;
+    const ids = unit.kind === "section" ? unit.blockIds : [unit.id];
+    for (const blockId of ids) {
+      ymap.set(blockId, cursor);
+      const block = blocks.find(item => item.id === blockId);
+      cursor += (block ? blockHeight(block) : TEXT_HEIGHT) + FLOW_GAP;
+    }
+  }
+  return blocks.map(block =>
+    ymap.has(block.id) ? { ...block, y: ymap.get(block.id)! } : block
+  );
+};
+
 export const useEditorStore = create<EditorState>(set => ({
   blocks: [],
   sections: [],
@@ -189,6 +224,31 @@ export const useEditorStore = create<EditorState>(set => ({
     }),
   addBlock: type => set(state => addBlockAt(state, type)),
   addBlockAt: (type, x, y) => set(state => addBlockAt(state, type, x, y)),
+  appendBlock: type =>
+    set(state => {
+      const units = flowOrder(state.blocks, state.sections);
+      let bottom = 0;
+      for (const unit of units) {
+        const ids = unit.kind === "section" ? unit.blockIds : [unit.id];
+        for (const id of ids) {
+          const block = state.blocks.find(item => item.id === id);
+          if (block) bottom = Math.max(bottom, block.y + blockHeight(block));
+        }
+      }
+      return addBlockAt(state, type, 0, bottom + FLOW_GAP);
+    }),
+  reorderUnits: order =>
+    set(state => ({ blocks: reflowY(state.blocks, state.sections, order) })),
+  moveUnit: (id, direction) =>
+    set(state => {
+      const order = flowOrder(state.blocks, state.sections).map(unit => unit.id);
+      const index = order.indexOf(id);
+      const target = index + direction;
+      if (index < 0 || target < 0 || target >= order.length) return state;
+      const [moved] = order.splice(index, 1);
+      order.splice(target, 0, moved);
+      return { blocks: reflowY(state.blocks, state.sections, order) };
+    }),
   updateBlock: (id, patch) =>
     set(state => ({
       blocks: state.blocks.map(block =>

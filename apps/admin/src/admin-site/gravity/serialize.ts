@@ -97,3 +97,41 @@ export function parseGravityDoc(value: unknown): { blocks: GravityBlock[]; secti
   }
   return { blocks: [], sections: [] };
 }
+
+export type FlowUnit =
+  | { kind: "section"; id: string; blockIds: string[] }
+  | { kind: "block"; id: string };
+
+/**
+ * Canonical document order used by the published HTML (blocksToHtml) AND the
+ * mobile flow editor, so what you reorder on mobile is exactly what readers see.
+ * Sections are grouped by their topmost child's y; free blocks join the stream by y.
+ */
+export function flowOrder(
+  blocks: GravityBlock[],
+  sections: GravitySection[]
+): FlowUnit[] {
+  const groups = sections
+    .map(section => ({
+      section,
+      children: blocks.filter(block => block.parentId === section.id),
+    }))
+    .filter(group => group.children.length > 0);
+  const free = blocks.filter(block => !block.parentId);
+  const units: FlowUnit[] = [
+    ...groups.map(group => ({
+      kind: "section" as const,
+      id: group.section.id,
+      blockIds: group.children.map(child => child.id),
+    })),
+    ...free.map(block => ({ kind: "block" as const, id: block.id })),
+  ];
+  const topOf = (unit: FlowUnit): number => {
+    const ids = unit.kind === "section" ? unit.blockIds : [unit.id];
+    const ys = ids
+      .map(id => blocks.find(block => block.id === id)?.y ?? 0)
+      .filter(y => y !== undefined);
+    return ys.length ? Math.min(...ys) : 0;
+  };
+  return units.sort((a, b) => topOf(a) - topOf(b));
+}
