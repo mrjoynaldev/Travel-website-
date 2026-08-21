@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { PublicShell, type PublicPageInfo, type PublicationInfo } from "@/components/public/PublicShell";
-import { GaTag } from "@/components/GaTag";
+import { GaTag } from "../components/GaTag";
 import { Toaster } from "@/components/ui/sonner";
 import { serverTrpc } from "@web/lib/trpc-server";
 import "./globals.css";
