@@ -14,6 +14,21 @@ const postInput = z.object({
 
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 150) || "untitled-post";
 
+// IndexNow: instant URL submission to Bing/Yandex/Seznam (key file hosted at /38f216160dda9ea59525512b52c19573.txt).
+const INDEXNOW_KEY = "38f216160dda9ea59525512b52c19573";
+export function indexNowPing(urls: string[]) {
+  void fetch("https://api.indexnow.org/indexnow", {
+    method: "POST",
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+    body: JSON.stringify({
+      host: "codereportglobal.indevs.in",
+      key: INDEXNOW_KEY,
+      keyLocation: `https://codereportglobal.indevs.in/${INDEXNOW_KEY}.txt`,
+      urlList: urls,
+    }),
+  }).catch(() => {});
+}
+
 async function actorFor(ctx: any) { return getActor({ openId: ctx.user.openId, name: ctx.user.name, email: ctx.user.email }); }
 async function syncTaxonomy(postId: string, categoryIds: string[], tagIds: string[]) {
   const db = getSupabase();
@@ -135,6 +150,7 @@ export const studioRouter = router({
       await queueWorkflowNotifications(actor, post, post.status, input.status, input.rejectionNote);
       await recordAudit(actor, "post.workflow_transition", "post", post.id, { from: post.status, to: input.status });
       await dispatchPendingNotifications(actor.siteId, post.id);
+      if (input.status === "published") indexNowPing([`https://codereportglobal.indevs.in/articles/${data.slug}`, "https://codereportglobal.indevs.in/"]);
       return data;
     }),
     revisions: protectedProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {

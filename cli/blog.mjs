@@ -213,6 +213,10 @@ Posts:
   posts feature <id> [--off]                        Toggle homepage feature flag
   posts schedule <id> --at <iso-date>|--clear       Schedule / clear scheduled publishing
 
+IndexNow (instant Bing/Yandex indexing):
+  indexnow --url <u> [--url <u2> …]                 Submit changed URLs immediately
+                                                    (publishes auto-submit via API)
+
 Post fields:
   --title <t>                    Headline (required to create)
   --slug <s>                     URL slug (auto from title)
@@ -381,6 +385,26 @@ async function main() {
         return print(data);
       }
       return console.log(HELP);
+    }
+
+    if (cmd === "indexnow") {
+      const urls = argValues("--url");
+      if (!urls.length) { console.error("Usage: indexnow --url <https://…> [--url <…> …]"); process.exit(1); }
+      const KEY = "38f216160dda9ea59525512b52c19573";
+      const response = await fetch("https://api.indexnow.org/indexnow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        body: JSON.stringify({
+          host: "codereportglobal.indevs.in",
+          key: KEY,
+          keyLocation: `https://codereportglobal.indevs.in/${KEY}.txt`,
+          urlList: urls,
+        }),
+      });
+      note(response.ok
+        ? `✓ IndexNow accepted ${urls.length} URL(s) (HTTP ${response.status}).`
+        : `✗ IndexNow returned HTTP ${response.status} (403=key issue, 422=wrong host, 429=spam guard).`);
+      return print({ status: response.status, urls });
     }
 
     if (cmd === "subscribers" && (!sub || sub === "list")) return print(await client.studio.subscribers.list.query());
