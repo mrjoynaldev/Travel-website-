@@ -10,7 +10,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "CodeReport Global", template: "%s · CodeReport Global" },
   description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
-  icons: { icon: "/favicon.png" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-144.png", sizes: "144x144", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   openGraph: {
     type: "website",
     siteName: "CodeReport Global",
@@ -61,6 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   "@id": `${SITE_URL}/#organization`,
                   name: publication?.name || "CodeReport Global",
                   url: SITE_URL,
+                  logo: `${SITE_URL}/logo.png`,
                   description: publication?.description || "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
                 },
                 {
