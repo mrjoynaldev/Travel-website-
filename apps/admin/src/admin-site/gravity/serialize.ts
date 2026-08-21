@@ -42,8 +42,13 @@ function renderRuns(block: GravityBlock) {
 }
 
 function codeBlockMarkup(block: GravityBlock) {
-  const code = block.content || "";
-  const lang = (block.language || "code").trim() || "code";
+  let code = (block.content || "").replace(/[\u200b\u200c\u200d\u{feff}]/gu, "");
+  const lines = code.split("\n");
+  while (lines.length && /^\s*[\w+-]*\s*copy\s*$/i.test(lines[0])) lines.shift();
+  while (lines.length && /^\s*copy\s*$/i.test(lines[lines.length - 1])) lines.pop();
+  code = lines.join("\n");
+  const rawLang = String(block.language || "").replace(/copy/gi, "").trim().toLowerCase();
+  const lang = /^[a-z0-9+#-]{1,16}$/.test(rawLang) ? rawLang : "code";
   const copy = `var b=this,n=this.closest('.gravity-code');navigator.clipboard.writeText(n.dataset.code||'').then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)})`;
   return `<div class="gravity-code" data-code="${escapeHtml(code)}" data-lang="${escapeHtml(lang)}"><div class="gravity-code-head"><span class="gravity-code-lang">${escapeHtml(lang)}</span><button type="button" class="gravity-code-copy" aria-label="Copy code" onclick="${copy}">Copy</button></div><pre><code>${escapeHtml(code)}</code></pre></div>`;
 }

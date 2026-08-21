@@ -206,6 +206,8 @@ Run through this before every `submit`/`publish`:
       (or archive/topic pages while the library is small)
 - [ ] All images have descriptive alt text; cover/thumbnail set; og-image set
 - [ ] At least one code block for developer topics; all facts sourced
+- [ ] Every fenced block has an explicit language tag and contains zero UI
+      artifacts — no "Copy"/"yamlCopy"/"ChatGPT said" residue anywhere
 - [ ] Direct answer to the target question within the first two paragraphs
 - [ ] GEO pass: quotable opening answer, concrete facts/numbers, named sources,
       full entity names, no generic intro fluff (see §3b)

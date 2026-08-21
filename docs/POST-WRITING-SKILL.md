@@ -117,6 +117,15 @@ cannot articulate how, do not write the post.
 - **Body**: one `h2` per section mirroring sub-questions searchers have;
   `h3` for sub-points. Include: at least one runnable code block (developer
   topics), a list or table where scannable, media every 2–3 blocks.
+- **Code blocks (strict)**:
+  - Every fenced block MUST declare its language explicitly (`bash`, `yaml`,
+    `json`, `ts`, …). The site auto-renders a language chip + copy button on
+    each block — never type "Copy", "yamlCopy" or any UI residue into
+    content; those strings are ChatGPT paste artifacts and are treated as
+    defects.
+  - Terminal commands: ONE command sequence per fenced `bash` block, exactly
+    as a reader would paste it — no `$` prompts unless showing output
+    interleaving, no invented flags.
 - **Close**: verdict/what-to-watch + one button CTA (related article or hub).
 
 ## 6. On-page optimization (set these CLI fields)
