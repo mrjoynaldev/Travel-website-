@@ -18,7 +18,11 @@ import superjson from "superjson";
 import { gravityToHtml } from "./gravity.mjs";
 
 const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.CRG_SITE_URL || "https://codereportglobal.indevs.in").replace(/\/+$/, "");
 const TOKEN = process.env.CRG_TOKEN || parseFlag("--token");
+
+const liveUrl = slug => `${PUBLIC_SITE}/articles/${slug}`;
+const note = message => console.error(message);
 
 if (!TOKEN) {
   console.error("Missing access token. Set CRG_TOKEN or pass --token=crg_...");
@@ -194,6 +198,7 @@ Account:
 Posts:
   posts list [--status <s>] [--search <q>]          List posts (draft|review|published|archived)
   posts get <id>                                    Fetch one post with taxonomy
+  posts url <id>                                    Print the live website URL (published only)
   posts create [fields]                             Create a draft (see fields below)
   posts update <id> [fields]                        Update any field (merged with current)
   posts submit <id>                                 Draft → review
@@ -262,7 +267,19 @@ async function main() {
         return print(await client.studio.posts.list.query({ status: argValue("--status"), search: argValue("--search") }));
       }
       if (sub === "get") return print(await client.studio.posts.get.query({ id: requireArg(args, 2, "posts get <id>") }));
-      if (sub === "create") return print(await client.studio.posts.create.mutate(await buildPostInput({ requireContent: true })));
+      if (sub === "url") {
+        const post = await client.studio.posts.get.query({ id: requireArg(args, 2, "posts url <id>") });
+        if (post.status !== "published") {
+          note(`✗ "${post.title}" is ${post.status} — no public URL yet. Publish it first.`);
+          process.exit(1);
+        }
+        return console.log(liveUrl(post.slug));
+      }
+      if (sub === "create") {
+        const post = await client.studio.posts.create.mutate(await buildPostInput({ requireContent: true }));
+        note(`✓ Draft created (id ${post.id}). Not public yet — run: posts publish ${post.id}`);
+        return print(post);
+      }
       if (sub === "update") {
         const id = requireArg(args, 2, "posts update <id> [fields]");
         const current = await client.studio.posts.get.query({ id });
@@ -283,8 +300,16 @@ async function main() {
         };
         return print(await client.studio.posts.update.mutate({ id, data: merged, revisionNote: argValue("--revision-note") || "CLI update" }));
       }
-      if (sub === "submit") return print(await client.studio.posts.transition.mutate({ id: requireArg(args, 2, "posts submit <id>"), status: "review" }));
-      if (sub === "publish") return print(await client.studio.posts.transition.mutate({ id: requireArg(args, 2, "posts publish <id>"), status: "published" }));
+      if (sub === "submit") {
+        const post = await client.studio.posts.transition.mutate({ id: requireArg(args, 2, "posts submit <id>"), status: "review" });
+        note("✓ Submitted for review.");
+        return print(post);
+      }
+      if (sub === "publish") {
+        const post = await client.studio.posts.transition.mutate({ id: requireArg(args, 2, "posts publish <id>"), status: "published" });
+        note(`✓ Published live: ${liveUrl(post.slug)}`);
+        return print(post);
+      }
       if (sub === "archive") return print(await client.studio.posts.transition.mutate({ id: requireArg(args, 2, "posts archive <id>"), status: "archived" }));
       if (sub === "delete") return print(await client.studio.posts.remove.mutate({ id: requireArg(args, 2, "posts delete <id>"), confirmed: true }));
       if (sub === "feature") return print(await client.studio.posts.toggleFeatured.mutate({ id: requireArg(args, 2, "posts feature <id>"), featured: !hasFlag("--off") }));

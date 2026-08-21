@@ -19,7 +19,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   Boxes,
+  Copy,
   Download,
+  ExternalLink,
   Film,
   Folder,
   FolderOpen,
@@ -39,6 +41,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
+import { publicArticleUrl } from "@/admin-site/lib/publicSite";
 
 function CreateMenu() {
   return (
@@ -584,6 +587,36 @@ export function StudioPosts() {
                       </div>
                     </div>
                     <div className="col-span-2 flex items-center justify-end gap-2 sm:col-span-1 sm:justify-end">
+                      {post.status === "published" && (
+                        <>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="gap-1.5"
+                            title="Copy the live article URL"
+                            onClick={() => {
+                              navigator.clipboard
+                                .writeText(publicArticleUrl(post.slug))
+                                .then(() =>
+                                  toast.success("Live URL copied to clipboard.")
+                                );
+                            }}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Copy URL</span>
+                          </Button>
+                          <a
+                            href={publicArticleUrl(post.slug)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Button size="sm" variant="outline" className="gap-1.5">
+                              <ExternalLink className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">Live</span>
+                            </Button>
+                          </a>
+                        </>
+                      )}
                       <Link href={`/studio/posts/${post.id}`}>
                         <Button size="sm" variant="outline" className="gap-1.5">
                           <PenLine className="h-3.5 w-3.5" />

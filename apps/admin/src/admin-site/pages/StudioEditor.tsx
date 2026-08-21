@@ -16,6 +16,8 @@ import {
   ArrowLeft,
   CalendarClock,
   CheckCircle2,
+  Copy,
+  ExternalLink,
   Eye,
   Loader2,
   Save,
@@ -36,6 +38,7 @@ import { useRouteId } from "@/admin-site/lib/useRouteId";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
+import { publicArticleUrl } from "@/admin-site/lib/publicSite";
 import { cn } from "@/lib/utils";
 import {
   Sheet,
@@ -165,8 +168,22 @@ export function StudioEditor() {
       toast.error("Autosave could not complete. Please use Save changes."),
   });
   const transition = trpc.studio.posts.transition.useMutation({
-    onSuccess: () => {
-      toast.success("Workflow state updated.");
+    onSuccess: data => {
+      if (data.status === "published") {
+        toast.success(`Published live: ${publicArticleUrl(data.slug)}`, {
+          duration: 10000,
+          action: {
+            label: "Copy URL",
+            onClick: () => {
+              navigator.clipboard
+                .writeText(publicArticleUrl(data.slug))
+                .then(() => toast.success("Live URL copied to clipboard."));
+            },
+          },
+        });
+      } else {
+        toast.success("Workflow state updated.");
+      }
       post.refetch();
     },
     onError: error => toast.error(error.message),
@@ -507,6 +524,32 @@ export function StudioEditor() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {postId && status === "published" && (
+              <>
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() =>
+                    window.open(publicArticleUrl(draft.slug), "_blank")
+                  }
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="hidden md:inline">View live</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => {
+                    navigator.clipboard
+                      .writeText(publicArticleUrl(draft.slug))
+                      .then(() => toast.success("Live URL copied to clipboard."));
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                  <span className="hidden md:inline">Copy URL</span>
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               className="gap-2"
