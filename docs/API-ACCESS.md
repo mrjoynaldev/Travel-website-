@@ -35,8 +35,8 @@ The CLI is a zero-dependency-of-your-own Node script at `cli/blog.mjs`.
 # Required
 export CRG_TOKEN="crg_…"
 
-# Optional (defaults to the local dev API)
-export CRG_API_URL="https://your-api.onrender.com"
+# Optional (defaults to https://codereportglobal-backend.onrender.com)
+export CRG_API_URL="https://codereportglobal-backend.onrender.com"
 
 # Quick self-check
 node cli/blog.mjs whoami
@@ -71,10 +71,26 @@ node cli/blog.mjs <command> [options]
 |---|---|
 | `posts list [--status <s>] [--search <q>]` | List posts (`draft\|review\|published\|archived`) |
 | `posts get <id>` | Fetch a single post with taxonomy |
-| `posts create --title <t> [--slug <s>] [--excerpt <e>] [--body <text>\|--file <path>]` | Create a draft |
-| `posts publish <id>` | Move a review post to published |
+| `posts create [fields]` | Create a draft — all fields supported |
+| `posts update <id> [fields]` | Update any field (merged with current) |
+| `posts submit <id>` | Draft → review |
+| `posts publish <id>` | Review → published (live) |
 | `posts archive <id>` | Archive a post |
 | `posts delete <id>` | Soft-delete (move to trash) |
+| `posts feature <id> [--off]` | Toggle homepage feature flag |
+| `posts schedule <id> --at <iso>\|--clear` | Schedule / clear publication |
+
+Post fields: `--title --slug --excerpt --meta-title --meta-description
+--canonical --og-image --thumbnail <asset-id|url> --category <name> (repeatable,
+auto-created) --tag <name> (repeatable, auto-created) --gravity-file <path>
+--file <path> --body <text>`. Gravity JSON files are converted to published
+HTML by the CLI (`cli/gravity.mjs`).
+
+### Media
+| Command | Description |
+|---|---|
+| `media list [--folder <f>] [--search <q>]` | List library assets |
+| `media upload --file <path> [--alt <t>] [--caption <c>] [--folder <f>] [--mime <type>]` | Upload image/audio/video/document; returns asset id + URL |
 
 ### Taxonomy
 | Command | Description |
@@ -84,20 +100,31 @@ node cli/blog.mjs <command> [options]
 | `tags list` | List tags |
 | `tags create --name <n>` | Create a tag |
 
-### Audience & media
+### Audience & insights
 | Command | Description |
 |---|---|
 | `subscribers list` | List newsletter subscribers |
-| `media list [--folder <f>]` | List media assets |
+| `analytics` | 30-day analytics summary |
+| `export [--format json\|markdown]` | Full content export |
 
 ### Examples
 
 ```bash
-# Publish from a markdown file
-node cli/blog.mjs posts create --title "Ship faster" --file ./draft.md
+# Publish a complete article from a Gravity JSON file
+node cli/blog.mjs posts create \
+  --title "V8 ships built-in JIT for WASM" \
+  --slug "v8-wasm-jit" \
+  --excerpt "What the new pipeline means for your bundles." \
+  --meta-description "V8's new WASM JIT cuts cold-start 40%. Benchmarks, migration notes, and what changes for your build." \
+  --category "AI News" --tag "v8" --tag "webassembly" \
+  --thumbnail 9f3c…-… --og-image https://…/cover.jpg \
+  --gravity-file ./article.gravity.json
+node cli/blog.mjs posts submit <id>
+node cli/blog.mjs posts publish <id>
 
-# Promote a reviewed post to live
-node cli/blog.mjs posts publish 9f3c…-…-…
+# Upload a cover with alt text, then attach it
+node cli/blog.mjs media upload --file cover.jpg --alt "Release timeline chart" --folder featured
+node cli/blog.mjs posts update <id> --thumbnail <asset-id>
 
 # Audit everything that's still in review
 node cli/blog.mjs posts list --status review
