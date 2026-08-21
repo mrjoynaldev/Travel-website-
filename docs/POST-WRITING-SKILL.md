@@ -56,6 +56,35 @@ ask, and make sure one H2 answers each natural sub-question of that sentence.
   how-to/explainer posts, all interlinked.
 - Finish a cluster before starting the next. Google trusts sites that cover a
   subject comprehensively (topical authority), not isolated one-offs.
+- Same reader, different stages: the person searching "how to prevent X" is
+  the person who searched "what is X" months earlier. Covering the full
+  journey keeps them on our site for that entire arc.
+
+## 3b. Conversion architecture (traffic → readers → repeat viewers)
+
+A keyword without a conversion path is vanity traffic. Define each post's
+pipeline job BEFORE writing:
+
+1. **Entry promise = exact intent.** Title/intro must match what the query
+   actually wants (news ≠ tutorial ≠ comparison). Mismatched intent bounces.
+2. **Depth holds attention.** If top-5 results average 3,000 words, 500 words
+   is not comprehensive — it's a bounce. Depth is also the only defense in the
+   zero-click era: content must go deeper than the AI summary to earn the
+   click at all.
+3. **Exit paths everywhere — never a dead end.** ≥3 contextual internal links
+   inside body copy (topic hub + ≥2 related articles) plus a close-of-post CTA
+   button. Internal linking is the highest effort-to-value tactic in SEO and
+   the engine of multi-page sessions.
+4. **Stage-aware CTA:** news/explainer → link the deeper guide or hub;
+   comparison/best-of → link the hub. Every link moves the reader one step
+   down the funnel, never sideways to something unrelated.
+5. **Free-value exchange:** runnable code, checklists, tables-as-reference,
+   (future) small tools/calculators. These convert a visit into a remembered
+   brand, earn bookmarks, and become the assets other sites link to.
+6. **Compounding loop:** original data/analysis → backlinks → authority →
+   easier rankings → more traffic. Early stage: publish 10–15 excellent
+   pieces before any outreach. Later: refreshing a position 5–15 post usually
+   beats a fresh draft.
 
 ## 4. The pre-write interrogation (ask yourself BEFORE writing)
 
@@ -176,6 +205,10 @@ every list. Implications:
   question in ChatGPT/Perplexity/Google AI Mode. If competitors are cited and
   we are not, treat it as a content defect to fix (sharper answer block,
   deeper facts, more sources), not bad luck.
+- **Track engagement, not just visits** (`research ga` / GA4): leading
+  signals that the conversion architecture works are impressions rising before
+  clicks, multi-page sessions via internal links, and returning visitors.
+  Posts with traffic but no depth-of-engagement get the depth fix first.
 - Early-stage discipline: publish 10–15 excellent pieces before investing in
   link outreach; the best links arrive when something is genuinely worth
   linking to.
