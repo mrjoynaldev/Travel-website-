@@ -123,7 +123,18 @@
   .article-prose pre code.hljs, .editor-content pre code.hljs { color: #e6f0ea; }
   .gravity-code, .article-prose .gravity-code { margin: 1.6em 0; overflow: hidden; border-radius: .75rem; background: #17271f; border: 1px solid rgba(255,255,255,.08); }
   .gravity-code-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem .9rem; background: rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.08); }
-  .gravity-code-lang { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: #8fa89c; }
+  .gravity-code-lang { font-family: "DM Mono", monospace; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; color: #8fa89c; display: inline-flex; align-items: center; gap: .45em; }
+  .gravity-code-lang::before { content: ""; width: .55em; height: .55em; border-radius: 9999px; background: currentColor; box-shadow: 0 0 6px currentColor; opacity: .95; }
+  .gravity-code[data-lang="python"] .gravity-code-lang, .gravity-code[data-lang="py"] .gravity-code-lang { color: #60a5fa; }
+  .gravity-code[data-lang="bash"] .gravity-code-lang, .gravity-code[data-lang="sh"] .gravity-code-lang, .gravity-code[data-lang="shell"] .gravity-code-lang { color: #4ade80; }
+  .gravity-code[data-lang="json"] .gravity-code-lang { color: #fbbf24; }
+  .gravity-code[data-lang="yaml"] .gravity-code-lang, .gravity-code[data-lang="yml"] .gravity-code-lang { color: #a78bfa; }
+  .gravity-code[data-lang="ts"] .gravity-code-lang, .gravity-code[data-lang="tsx"] .gravity-code-lang { color: #22d3ee; }
+  .gravity-code[data-lang="js"] .gravity-code-lang, .gravity-code[data-lang="javascript"] .gravity-code-lang, .gravity-code[data-lang="jsx"] .gravity-code-lang { color: #fde047; }
+  .gravity-code[data-lang="go"] .gravity-code-lang { color: #2dd4bf; }
+  .gravity-code[data-lang="rust"] .gravity-code-lang, .gravity-code[data-lang="rs"] .gravity-code-lang { color: #fb923c; }
+  .gravity-code[data-lang="sql"] .gravity-code-lang { color: #f472b6; }
+  .gravity-code[data-lang="html"] .gravity-code-lang, .gravity-code[data-lang="css"] .gravity-code-lang { color: #f87171; }
   .gravity-code-copy { font-family: "DM Sans", Arial, sans-serif; font-size: .72rem; font-weight: 600; color: #d8e6de; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: .4rem; padding: .3em .8em; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
   .gravity-code-copy:hover { background: rgba(255,255,255,.16); }
   .gravity-code pre { margin: 0; border-radius: 0; background: transparent; padding: 1rem; overflow-x: auto; color: #e6f0ea; font-family: "DM Mono", monospace; font-size: .82rem; line-height: 1.6; }
