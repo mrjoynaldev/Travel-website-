@@ -50,6 +50,9 @@ export function InspectorPanel({ block }: { block: GravityBlock | undefined }) {
         {(block.type === "image" || block.type === "video" || block.type === "audio") && (
           <>
             <div className={field}><Label className="text-[10px] text-muted-foreground">{block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"}</Label><div className="mt-1"><MediaPicker kind={block.type as MediaKind} url={block.url} onChange={url => updateBlock(block.id, { url })} /></div></div>
+            {block.type === "image" && (
+              <div className={field}><Label className="text-[10px] text-muted-foreground">Alt text</Label><Input value={block.alt || ""} onChange={event => updateBlock(block.id, { alt: event.target.value })} placeholder="Describe this image for SEO & accessibility" className="mt-1 h-8 text-xs" /><p className="mt-1 text-[10px] text-muted-foreground">Falls back to the caption when empty.</p></div>
+            )}
             <div className={field}><Label className="text-[10px] text-muted-foreground">Caption</Label><Input value={block.caption || ""} onChange={event => updateBlock(block.id, { caption: event.target.value })} className="mt-1 h-8 text-xs" /></div>
           </>
         )}

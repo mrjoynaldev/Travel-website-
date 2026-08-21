@@ -19,6 +19,7 @@ export type GravityBlock = {
   runs?: TextRun[];
   level?: "h2" | "h3" | "p" | "quote" | "list";
   url?: string;
+  alt?: string;
   caption?: string;
   link?: string;
   language?: string;

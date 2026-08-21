@@ -51,7 +51,7 @@ function codeBlockMarkup(block: GravityBlock) {
 function blockMarkup(block: GravityBlock) {
   if (block.type === "image") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
-    return wrapLink(`<figure class="gravity-media"><img src="${escapeHtml(block.url || "")}" alt="${escapeHtml(block.caption || "")}" loading="lazy">${caption}</figure>`, block);
+    return wrapLink(`<figure class="gravity-media"><img src="${escapeHtml(block.url || "")}" alt="${escapeHtml(block.alt || block.caption || "")}" loading="lazy">${caption}</figure>`, block);
   }
   if (block.type === "video") {
     const caption = block.caption ? `<figcaption>${escapeHtml(block.caption)}</figcaption>` : "";
@@ -273,7 +273,7 @@ function elementToBlock(el: Element): PartialBlock | null {
     const audio = el.querySelector("audio");
     const iframe = el.querySelector("iframe");
     const caption = el.querySelector("figcaption")?.textContent || "";
-    if (img) return { type: "image", url: img.getAttribute("src") || "", caption };
+    if (img) return { type: "image", url: img.getAttribute("src") || "", alt: img.getAttribute("alt") || "", caption };
     if (video) {
       const src = video.querySelector("source")?.getAttribute("src") || video.getAttribute("src") || "";
       return { type: "video", url: src, caption };
@@ -286,7 +286,7 @@ function elementToBlock(el: Element): PartialBlock | null {
         : { type: "video", url: src, caption };
     }
   }
-  if (tag === "img") return { type: "image", url: el.getAttribute("src") || "" };
+  if (tag === "img") return { type: "image", url: el.getAttribute("src") || "", alt: el.getAttribute("alt") || "" };
   if (tag === "video") {
     const src = el.querySelector("source")?.getAttribute("src") || el.getAttribute("src") || "";
     return { type: "video", url: src };

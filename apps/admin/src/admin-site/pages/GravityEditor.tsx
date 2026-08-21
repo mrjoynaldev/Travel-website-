@@ -18,10 +18,20 @@ import { StatusPill } from "@/admin-site/pages/Studio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { trpc } from "@/lib/trpc";
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { trpc } from "@/lib/trpc";
+import { cn } from "@/lib/utils";
+import {
+  AlertCircle,
   Archive,
   ArrowLeft,
+  Check,
   CheckCircle2,
   Eye,
   Loader2,
@@ -58,6 +68,7 @@ export function GravityEditor() {
   const [featured, setFeatured] = useState(false);
   const [scheduledAt, setScheduledAt] = useState("");
   const [deepDive, setDeepDive] = useState(false);
+  const [publishOpen, setPublishOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
   const lastSavedHash = useRef("");
@@ -263,6 +274,27 @@ export function GravityEditor() {
   const status = post.data?.status || "draft";
   const canPublish = role === "admin" || role === "editor";
 
+  const publishRequired = [
+    { done: Boolean(draft.title.trim()), label: "Add a clear title" },
+    { done: draft.categoryIds.length > 0, label: "Choose a category" },
+    { done: blocks.length > 0, label: "Add some content blocks" },
+  ];
+  const publishRecommended = [
+    { done: Boolean(draft.featuredMediaId), label: "Add a cover image" },
+    { done: Boolean(draft.excerpt.trim()), label: "Write a short excerpt" },
+  ];
+  const publishChecks = [...publishRequired, ...publishRecommended];
+  const publishReady = publishRequired.every(item => item.done);
+  const requestTransition = (target: "draft" | "review" | "published" | "archived") => {
+    if (!postId) return;
+    if ((target === "review" || target === "published") && !publishReady) {
+      setPublishOpen(true);
+      return;
+    }
+    save();
+    transition.mutate({ id: postId, status: target });
+  };
+
   const settingsProps = {
     draft,
     setDraft,
@@ -303,7 +335,7 @@ export function GravityEditor() {
     onCreate: () => create.mutate(buildPayload()),
     createPending: create.isPending,
     onTransition: (value: "review" | "published" | "draft" | "archived") =>
-      postId && transition.mutate({ id: postId, status: value }),
+      requestTransition(value),
     transitionPending: transition.isPending,
     onDelete: () => {
       if (
@@ -327,12 +359,101 @@ export function GravityEditor() {
     );
   }
 
+  const publishSheet = (
+    <Sheet open={publishOpen} onOpenChange={setPublishOpen}>
+      <SheetContent
+        side="bottom"
+        className="max-h-[85vh] overflow-y-auto rounded-t-2xl"
+      >
+        <SheetHeader>
+          <SheetTitle>Ready to publish?</SheetTitle>
+          <SheetDescription>
+            A quick checklist before this story goes live.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="space-y-2">
+          {publishChecks.map(item => {
+            const isRequired = publishRequired.some(
+              check => check.label === item.label
+            );
+            return (
+              <div
+                key={item.label}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg border p-3",
+                  item.done || !isRequired
+                    ? "border-border bg-white"
+                    : "border-destructive/40 bg-white"
+                )}
+              >
+                <span
+                  className={cn(
+                    "grid h-6 w-6 shrink-0 place-items-center rounded-full",
+                    item.done
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {item.done ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4" />
+                  )}
+                </span>
+                <span className="flex-1 text-sm font-medium">{item.label}</span>
+                {!isRequired && (
+                  <span className="text-[10px] text-muted-foreground">
+                    optional
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={save}
+            disabled={create.isPending || update.isPending}
+            className="h-11"
+          >
+            Save draft
+          </Button>
+          <Button
+            type="button"
+            onClick={() =>
+              requestTransition(status === "draft" ? "review" : "published")
+            }
+            disabled={!publishReady || transition.isPending}
+            className="h-11 gap-2"
+          >
+            {transition.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+            {status === "draft" ? "Submit for review" : "Publish now"}
+          </Button>
+        </div>
+        {!publishReady && (
+          <p className="text-center text-xs text-muted-foreground">
+            Complete the required steps above to publish.
+          </p>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+
   if (isMobile) {
     return (
-      <DeepDive
-        {...deepDiveProps}
-        onClose={() => router.push("/studio/posts")}
-      />
+      <>
+        <DeepDive
+          {...deepDiveProps}
+          onClose={() => router.push("/studio/posts")}
+        />
+        {publishSheet}
+      </>
     );
   }
 
@@ -386,9 +507,7 @@ export function GravityEditor() {
               <Button
                 variant="secondary"
                 disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "review" })
-                }
+                onClick={() => requestTransition("review")}
                 className="gap-2"
               >
                 <Send className="h-4 w-4" />
@@ -398,9 +517,7 @@ export function GravityEditor() {
             {postId && status === "review" && canPublish && (
               <Button
                 disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "published" })
-                }
+                onClick={() => requestTransition("published")}
                 className="gap-2"
               >
                 <CheckCircle2 className="h-4 w-4" />
@@ -411,9 +528,7 @@ export function GravityEditor() {
               <Button
                 variant="outline"
                 disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "draft" })
-                }
+                onClick={() => requestTransition("draft")}
                 className="gap-2"
               >
                 <Undo2 className="h-4 w-4" />
@@ -424,9 +539,7 @@ export function GravityEditor() {
               <Button
                 variant="outline"
                 disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "archived" })
-                }
+                onClick={() => requestTransition("archived")}
                 className="gap-2"
               >
                 <Archive className="h-4 w-4" />
@@ -518,6 +631,7 @@ export function GravityEditor() {
       {deepDive && (
         <DeepDive {...deepDiveProps} onClose={() => setDeepDive(false)} />
       )}
+      {publishSheet}
     </DashboardLayout>
   );
 }

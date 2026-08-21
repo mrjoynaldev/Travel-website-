@@ -679,7 +679,7 @@ export function StudioMedia() {
         | "video/webm",
       base64: await fileToBase64(file),
       folder: folder.trim() || "library",
-      altText: "",
+      altText: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim().slice(0, 300),
     });
   };
   return (

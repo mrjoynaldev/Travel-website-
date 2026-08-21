@@ -2,6 +2,7 @@
 
 import { RichTextEditor } from "@/admin-site/components/RichTextEditor";
 import { MediaUploadButton } from "@/admin-site/components/MediaUploadButton";
+import { SeoHint } from "@/admin-site/components/SeoHint";
 import { InlineTaxonomy } from "@/admin-site/components/InlineTaxonomy";
 import DashboardLayout from "@/admin-site/components/DashboardLayout";
 import { StatusPill } from "@/admin-site/pages/Studio";
@@ -327,6 +328,11 @@ export function StudioEditor() {
               }
               className="mt-1"
             />
+            <SeoHint
+              value={draft.metaTitle}
+              max={60}
+              ideal="keep the page title under 60 characters so it is not cut off in search results"
+            />
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">
@@ -342,6 +348,12 @@ export function StudioEditor() {
               }
               rows={3}
               className="mt-1"
+            />
+            <SeoHint
+              value={draft.metaDescription}
+              min={120}
+              max={160}
+              ideal="write it like ad copy — 150–160 characters shows fully in Google"
             />
           </div>
           <div>

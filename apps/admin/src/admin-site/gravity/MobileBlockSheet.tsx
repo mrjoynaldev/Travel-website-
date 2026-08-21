@@ -202,6 +202,22 @@ export function MobileBlockSheet({
                   />
                 </div>
               </div>
+              {block.type === "image" && (
+                <div>
+                  <Label className="text-[10px] text-white/50">Alt text</Label>
+                  <Input
+                    value={block.alt || ""}
+                    onChange={event =>
+                      updateBlock(block.id, { alt: event.target.value })
+                    }
+                    placeholder="Describe this image for SEO & accessibility"
+                    className="mt-1.5 h-11 border-white/10 bg-white/5 text-white"
+                  />
+                  <p className="mt-1 text-[10px] text-white/40">
+                    Falls back to the caption when empty.
+                  </p>
+                </div>
+              )}
               <div>
                 <Label className="text-[10px] text-white/50">Caption</Label>
                 <Input

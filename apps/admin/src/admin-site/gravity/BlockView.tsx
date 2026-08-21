@@ -214,7 +214,7 @@ export function BlockView({
           <>
             <img
               src={block.url}
-              alt={block.caption || ""}
+              alt={block.alt || block.caption || ""}
               className="h-32 w-full rounded-lg object-cover"
             />
             {block.caption && (

@@ -532,7 +532,7 @@ export function RichTextEditor({
         | "image/svg+xml",
       base64,
       folder: "editor-images",
-      altText: "",
+      altText: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim().slice(0, 300),
     });
   };
   const onAudioFile = async (file?: File) => {
@@ -569,7 +569,7 @@ export function RichTextEditor({
         | "audio/webm",
       base64,
       folder: "editor-audio",
-      altText: "",
+      altText: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim().slice(0, 300),
     });
   };
   const runAi = () => {
