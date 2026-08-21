@@ -59,8 +59,8 @@ export async function GET() {
     ...(posts.length
       ? posts.map(
           (p: any) =>
-            `- [${p.title}](${base}/articles/${p.slug})${
-              p.excerpt ? ` — ${String(p.excerpt).slice(0, 160)}` : ""
+            `- [${p.title}](${base}/articles/${p.slug}): ${
+              p.excerpt ? String(p.excerpt).slice(0, 140) : "Full article."
             }`,
         )
       : ["- New articles are published regularly; check the sitemap at /sitemap.xml."]),

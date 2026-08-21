@@ -55,7 +55,38 @@ export type FeedResult = { body: string; contentType: string; status: number };
 
 export async function robotsTxt(): Promise<FeedResult> {
   const base = origin();
-  const aiBots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "PerplexityBot", "ClaudeBot", "Google-Extended", "Applebot-Extended"]
+  // Verified against vendor docs + Cloudflare AI Crawl Control bot directory (2026).
+  const aiBots = [
+    // OpenAI
+    "GPTBot",
+    "OAI-SearchBot",
+    "ChatGPT-User",
+    // Anthropic
+    "ClaudeBot",
+    "Claude-SearchBot",
+    "Claude-User",
+    "anthropic-ai",
+    // Perplexity
+    "PerplexityBot",
+    "Perplexity-User",
+    // Google / Apple tokens & crawlers
+    "Google-Extended",
+    "Applebot",
+    "Applebot-Extended",
+    // Meta
+    "Meta-ExternalAgent",
+    "Meta-ExternalFetcher",
+    "FacebookBot",
+    // Others
+    "CCBot",
+    "Amazonbot",
+    "Bytespider",
+    "cohere-ai",
+    "MistralAI-User",
+    "DuckAssistBot",
+    "YouBot",
+    "Diffbot",
+  ]
     .map(bot => `User-agent: ${bot}\nAllow: /`)
     .join("\n");
   const sitemapLines = base ? [`Sitemap: ${base}/sitemap.xml`, `Sitemap: ${base}/news-sitemap.xml`] : [];
