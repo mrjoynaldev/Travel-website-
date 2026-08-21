@@ -4,8 +4,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { serverTrpc } from "@web/lib/trpc-server";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: { default: "CodeReport Global", template: "%s · CodeReport Global" },
   description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
   icons: { icon: "/favicon.png" },
@@ -56,18 +58,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app"}/#organization`,
+                  "@id": `${SITE_URL}/#organization`,
                   name: publication?.name || "CodeReport Global",
-                  url: process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app",
+                  url: SITE_URL,
                   description: publication?.description || "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
                 },
                 {
                   "@type": "WebSite",
-                  "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app"}/#website`,
-                  url: process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app",
+                  "@id": `${SITE_URL}/#website`,
+                  url: SITE_URL,
                   name: publication?.name || "CodeReport Global",
+                  alternateName: ["Code Report Global", "CodeReport", "The Code Report"],
                   description: publication?.description || "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
-                  publisher: { "@id": `${process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app"}/#organization` },
+                  publisher: { "@id": `${SITE_URL}/#organization` },
                 },
               ],
             }),

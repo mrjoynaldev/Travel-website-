@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

@@ -37,7 +37,7 @@ export default async function AuthorPage({ params }: Props) {
     notFound();
   }
   const initials = author.display_name.split(" ").map((part: string) => part[0]).join("").slice(0, 2);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
   const personLd = {
     "@context": "https://schema.org",
     "@type": "Person",
