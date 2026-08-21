@@ -25,6 +25,7 @@ With a **read + write** token you can do everything an admin does:
 | Media library | upload images/audio/video/documents with alt text + caption; list/search assets |
 | Taxonomy | list and create categories and tags |
 | Audience | list newsletter subscribers; 30-day analytics; full content export |
+| Research | GA4 traffic (visitors, pageviews, top pages, countries, sources), Google Trends trending searches by country, Hacker News front page / topic search — all via `research` commands below |
 
 Every action is audit-logged under the token owner's account.
 
@@ -65,6 +66,12 @@ node cli/blog.mjs tags list
 
 # 3. Avoid duplicate slugs / find internal-link targets
 node cli/blog.mjs posts list --status published
+
+# 3b. Content research — ground every pitch in real signals
+node cli/blog.mjs research trends --geo US   # trending searches (switch --geo)
+node cli/blog.mjs research hn                # Hacker News front page
+node cli/blog.mjs research hn --query agents # topic search on HN
+node cli/blog.mjs research ga                # our live GA4 traffic + top pages
 
 # 4. (Optional) upload a cover image or media asset
 node cli/blog.mjs media upload --file cover.jpg \

@@ -8,6 +8,7 @@ import AgentWorkspace from "@/admin-site/pages/AgentWorkspace";
 import { StudioBranding, StudioPages } from "@/admin-site/pages/SiteManagement";
 import StudioSections from "@/admin-site/pages/SiteSections";
 import { StudioAIProviders } from "@/admin-site/pages/StudioAI";
+import StudioResearch from "@/admin-site/pages/StudioResearch";
 import {
   StudioApiTokens,
   StudioSubscribers,
@@ -50,6 +51,8 @@ function resolveStudioView(pathname: string) {
       return StudioModeration;
     case "analytics":
       return StudioAnalytics;
+    case "research":
+      return StudioResearch;
     case "team":
       return StudioTeam;
     case "notifications":

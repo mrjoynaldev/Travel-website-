@@ -78,6 +78,19 @@ const AI_PROMPTS = [
     description: "Give it a topic brief. It interrogates the idea, drafts the Gravity JSON, runs the QA checklist, and publishes after my approval.",
     instructions: `I will give you a topic brief next. Follow POST-WRITING-SKILL.md §4 first: present me the interrogation answers (intent, top-5 table stakes, the gap, depth target, unique value, quotable answer) and wait for my confirmation. Then draft the article as a Gravity JSON file, run the pre-publish QA checklist from AI-EDITOR-AGENT.md §7, create the post with ALL fields set (meta description 120–160 chars, category, tags, thumbnail, og-image), submit it, and share the preview link. Publish only after I explicitly approve.`,
   },
+  {
+    id: "research",
+    icon: Sparkles,
+    title: "Content Research & Trends",
+    description: "Pulls Google Trends + Hacker News + our GA4 traffic through the CLI, cross-matches with our categories, and proposes scored story ideas.",
+    instructions: `Run these commands and analyze the results:
+1. \`node cli/blog.mjs research trends --geo US\` (repeat for other geos if I ask)
+2. \`node cli/blog.mjs research hn\` — and \`node cli/blog.mjs research hn --query <topic>\` for topics I mention
+3. \`node cli/blog.mjs research ga\` — see which of OUR articles already pull traffic
+4. \`node cli/blog.mjs posts list --status published\` — know what we have covered
+
+Then propose 5 story ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / HN thread / traffic pattern), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet — wait for my pick.`,
+  },
 ] as const;
 
 function Workspace({

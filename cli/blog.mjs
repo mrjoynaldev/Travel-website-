@@ -195,6 +195,11 @@ Usage: node cli/blog.mjs <command> [options]
 Account:
   whoami                                Show publication + role for this token
 
+Research:
+  research ga [--days <n>]              GA4 traffic: visitors, views, top pages, countries, sources
+  research trends [--geo <US>]          Google Trends trending searches by country
+  research hn [--query <q>]             Hacker News front page or topic search
+
 Posts:
   posts list [--status <s>] [--search <q>]          List posts (draft|review|published|archived)
   posts get <id>                                    Fetch one post with taxonomy
@@ -351,6 +356,30 @@ async function main() {
     if (cmd === "tags") {
       if (!sub || sub === "list") return print(await client.studio.taxonomy.list.query().then(r => r.tags));
       if (sub === "create") return print(await client.studio.taxonomy.createTag.mutate({ name: requireFlag("--name") }));
+      return console.log(HELP);
+    }
+
+    if (cmd === "research") {
+      if (!sub || sub === "ga") {
+        const days = Number(argValue("--days")) || 28;
+        const data = await client.studio.research.gaOverview.query({ days });
+        if (!data.configured) { note("✗ Google Analytics is not configured on the API server yet."); return print(data); }
+        const t = data.totals;
+        note(`✓ GA4 last ${data.days} days: ${t.activeUsers} visitors · ${t.sessions} sessions · ${t.pageviews} pageviews · top page: ${data.topPages[0]?.path ?? "n/a"}`);
+        return print(data);
+      }
+      if (sub === "trends") {
+        const geo = (argValue("--geo") || "US").toUpperCase();
+        const data = await client.studio.research.trends.query({ geo });
+        note(`✓ Google Trends for ${geo} (${(data.items || []).length} items). Use --geo <country-code> to switch.`);
+        return print(data);
+      }
+      if (sub === "hn") {
+        const query = argValue("--query");
+        const data = await client.studio.research.hackerNews.query({ query, limit: Number(argValue("--limit")) || 20 });
+        note(query ? `✓ Hacker News stories matching "${query}".` : "✓ Hacker News front page right now.");
+        return print(data);
+      }
       return console.log(HELP);
     }
 

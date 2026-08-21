@@ -52,6 +52,7 @@ import {
   UploadCloud,
   Users,
   X,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -104,7 +105,10 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
   },
   {
     label: "Insights",
-    items: [{ icon: BarChart3, label: "Analytics", path: "/studio/analytics" }],
+    items: [
+      { icon: BarChart3, label: "Analytics", path: "/studio/analytics" },
+      { icon: TrendingUp, label: "Research & trends", path: "/studio/research" },
+    ],
   },
   {
     label: "People",
