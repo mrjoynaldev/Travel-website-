@@ -23,8 +23,11 @@ Work only inside the current cluster plan (one topical funnel at a time — see
    developers use when describing the problem — that phrasing is the keyword.
 5. **Competitor gaps**: paste a competitor sitemap into an LLM and list what
    they cover that we do not; invert it too (what everyone misses).
-6. **AI-assistant mining**: ask ChatGPT/Perplexity the cluster's buying-style
-   questions and record which sources get cited — those are the formats to beat.
+6. **AI-assistant mining**: ask ChatGPT, Perplexity AND Google AI Mode the
+   cluster's buying-style questions. Record which brands get cited (your real
+   competitors) and which source pages get quoted (the formats to beat). If a
+   rival is cited and we are not, study exactly what their page does that ours
+   does not — then do it better.
 
 ## 2. Validate before writing (keyword sweet spot)
 
@@ -39,6 +42,11 @@ A topic earns a post only when it scores on all four:
 
 Rule of thumb: shorter keyword = higher volume, vaguer intent, brutal
 competition. Start long-tail; build up as authority grows.
+
+Search behavior shift: users increasingly paste **full conversational
+questions** into Google and assistants ("I want to pick up a new hobby… can you
+recommend classes near me?"). Prefer targets phrased the way people actually
+ask, and make sure one H2 answers each natural sub-question of that sentence.
 
 ## 3. Cluster strategy (never scatter)
 
@@ -110,8 +118,11 @@ Never fabricate quotes, stats, dates, or products. Attribute everything.
 
 ## 7b. GEO layer (be the citation, not the source that got skipped)
 
-Google AI Overviews, ChatGPT, Perplexity and Claude now answer first and cite
-a handful of sources. Write so an LLM can lift a passage verbatim:
+The zero-click reality: AI Overviews now answer even commercial queries and
+only a small minority of searchers click any result. **You are either inside
+the answer or invisible** — being quoted matters as much as ranking. Google
+AI Overviews, ChatGPT, Perplexity and Claude answer first and cite a handful
+of sources. Write so an LLM can lift a passage verbatim:
 
 - **Quotable answer block** — 2–4 sentences right after the intro that directly
   answer the core question. This is the passage engines will steal.
@@ -124,6 +135,35 @@ a handful of sources. Write so an LLM can lift a passage verbatim:
 - **Freshness signal** — mention the news date ("on August 21, 2026, …") and
   keep evergreen claims dateless.
 
+### E-E-A-T block (mandatory in every post)
+
+Engines weight demonstrable Experience, Expertise, Authority, Trust:
+
+- **Author identity** on the post (byline via author fields) + a one-line
+  "why you can trust this analysis" note where relevant.
+- **Sources section / inline citations**: every claim traced to a primary
+  source link (docs, changelog, benchmark, filing).
+- **Original research we did** that AI cannot produce: ran the benchmark,
+  read the whole changelog, surveyed devs, built the table.
+- Expert quotes from podcasts/talks/papers with links — sourced expertise is
+  still expertise.
+
+## 7c. Citation-source map (where LLMs actually pull from)
+
+Approximate engine biases worth knowing when choosing targets and outbound
+citations: ChatGPT leans Wikipedia/Reddit/Forbes; Perplexity leans Reddit,
+YouTube, LinkedIn; AI Overviews lean YouTube/Reddit/Quora. Reddit appears in
+every list. Implications:
+
+1. **Cite these surfaces in posts** when they host the primary discussion
+   (linking real Reddit/HN/YouTube threads as evidence).
+2. **Participate off-site** where developers discuss our topics (HN threads,
+   relevant subreddits) with genuinely useful comments — brand mentions inside
+   cited communities feed back into AI answers. Never spam; add value or stay
+   out.
+3. Our own `llms.txt`, schema markup and clean structure are already deployed —
+   early-mover advantage compounds; keep them accurate as content grows.
+
 ## 8. After publishing
 
 - Verify HTTP 200 on the article URL.
@@ -132,3 +172,10 @@ a handful of sources. Write so an LLM can lift a passage verbatim:
   position movement; update titles/intros on posts stuck at positions 5–15.
 - Update existing page-2/3 posts before writing brand-new ones when both
   options exist — refreshing a near-miss usually beats a fresh draft.
+- **Track citations, not just rankings**: after 2–4 weeks re-ask the target
+  question in ChatGPT/Perplexity/Google AI Mode. If competitors are cited and
+  we are not, treat it as a content defect to fix (sharper answer block,
+  deeper facts, more sources), not bad luck.
+- Early-stage discipline: publish 10–15 excellent pieces before investing in
+  link outreach; the best links arrive when something is genuinely worth
+  linking to.
