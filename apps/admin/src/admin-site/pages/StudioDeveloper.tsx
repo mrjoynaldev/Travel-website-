@@ -62,7 +62,7 @@ const AI_PROMPTS = [
     icon: Bot,
     title: "Full Publishing Agent",
     description: "Complete control. Reads every doc, verifies access, reports the site state, proposes today's content plan, then writes and publishes on command.",
-    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then propose a content plan for today following POST-WRITING-SKILL.md (one cluster at a time) and WAIT for my approval before writing anything. Once I approve a piece: follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the preview link. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
+    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`node cli/blog.mjs research ga\`, \`node cli/blog.mjs research trends --geo US\` and \`node cli/blog.mjs research hn\` and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) — WAIT for my approval before writing anything. Once I approve a piece: follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the live URL. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
   },
   {
     id: "strategy",
