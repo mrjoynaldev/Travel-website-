@@ -33,6 +33,9 @@ export const metadata: Metadata = {
     images: ["/og-default.png"],
   },
   robots: { index: true, follow: true },
+  verification: {
+    yandex: "f5a900063c4544c5",
+  },
 };
 
 export const viewport: Viewport = { themeColor: "#1b563f" };
