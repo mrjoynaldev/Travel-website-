@@ -24,7 +24,8 @@ const TOKEN = process.env.CRG_TOKEN || parseFlag("--token");
 const liveUrl = slug => `${PUBLIC_SITE}/articles/${slug}`;
 const note = message => console.error(message);
 
-if (!TOKEN) {
+const TOKENLESS_COMMANDS = new Set(["indexnow"]);
+if (!TOKEN && !process.argv.slice(2).some(a => TOKENLESS_COMMANDS.has(a))) {
   console.error("Missing access token. Set CRG_TOKEN or pass --token=crg_...");
   console.error("Create one in Studio → API tokens.");
   process.exit(1);
