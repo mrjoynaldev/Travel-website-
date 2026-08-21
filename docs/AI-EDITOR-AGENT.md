@@ -49,10 +49,35 @@ If `whoami` fails, stop and report — never attempt to work around auth.
 - Article URLs: `https://codereportglobal.indevs.in/articles/{slug}`
 - Topic hubs: `/topics/{slug}` · Tag pages: `/tags/{slug}` · Archive: `/archive`
 - Sitemaps: `/sitemap.xml` (all) and `/news-sitemap.xml` (last 48h, auto)
+- `llms.txt`: served at `/llms.txt` — a live markdown map of the site for AI
+  crawlers (GPTBot, ClaudeBot, PerplexityBot are explicitly allowed in robots.txt)
 - Admin panel: Vercel `codereportglobal-admin` project (`/studio`)
 - Categories are the site's topic hubs — assign exactly one primary category per
   post (plus optional second), and 2–5 specific tags.
 - The site is brand-new: every published post matters. Quality over quantity.
+
+## 3b. GEO — Generative Engine Optimization (critical)
+
+Search is now answer-first: Google AI Overviews, ChatGPT, Perplexity and
+Claude cite sources instead of ranking blue links. Either your article is part
+of the answer, or it is invisible. Every article you publish must be
+**citation-ready**:
+
+1. **Answer first** — open with a 2–4 sentence direct, quotable answer to the
+   article's core question before any narrative.
+2. **Factual density** — concrete numbers, dates, versions, names. Vague prose
+   never gets cited.
+3. **Original value** — analysis, comparisons, tables, or takeaways an LLM
+   cannot synthesize from other coverage alone.
+4. **Clean semantics** — one H1 (title), descriptive H2/H3 questions as
+   subheads, short paragraphs, bulleted facts.
+5. **Attribution** — author byline is set automatically; link primary sources
+   and name them in the text ("according to…").
+6. **Entity clarity** — use full product/company names on first mention
+   (e.g. "OpenAI's GPT-5.2", not "the new model").
+7. **No fluff** — skip generic intros ("In today's fast-paced world…"). LLMs
+   and readers both skip them.
+
 
 ## 4. Publishing workflow (terminal)
 
@@ -169,4 +194,6 @@ Run through this before every `submit`/`publish`:
 - [ ] All images have descriptive alt text; cover/thumbnail set; og-image set
 - [ ] At least one code block for developer topics; all facts sourced
 - [ ] Direct answer to the target question within the first two paragraphs
+- [ ] GEO pass: quotable opening answer, concrete facts/numbers, named sources,
+      full entity names, no generic intro fluff (see §3b)
 - [ ] Live check after publish: HTTP 200 on the article URL

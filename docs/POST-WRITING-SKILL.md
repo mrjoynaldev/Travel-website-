@@ -108,6 +108,22 @@ Every post must contain at least two of:
 
 Never fabricate quotes, stats, dates, or products. Attribute everything.
 
+## 7b. GEO layer (be the citation, not the source that got skipped)
+
+Google AI Overviews, ChatGPT, Perplexity and Claude now answer first and cite
+a handful of sources. Write so an LLM can lift a passage verbatim:
+
+- **Quotable answer block** — 2–4 sentences right after the intro that directly
+  answer the core question. This is the passage engines will steal.
+- **Fact density** — numbers, dates, version names, prices. One concrete fact
+  per paragraph beats three adjectives.
+- **Question-shaped subheads** — H2s phrased as the questions users ask AI
+  ("Is X faster than Y?", "How much does X cost?").
+- **Named entities** — full names on first mention; link primary sources.
+- **Comparison tables and lists** — the most-cited formats in AI answers.
+- **Freshness signal** — mention the news date ("on August 21, 2026, …") and
+  keep evergreen claims dateless.
+
 ## 8. After publishing
 
 - Verify HTTP 200 on the article URL.
