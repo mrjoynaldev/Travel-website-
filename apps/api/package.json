@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "NODE_ENV=production next start -p ${PORT:-4000}",
     "check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prebuild": "mkdir -p public/docs && cp ../../docs/AI-EDITOR-AGENT.md ../../docs/POST-WRITING-SKILL.md ../../docs/API-ACCESS.md ../../cli/blog.mjs ../../cli/gravity.mjs ../../cli/setup.sh public/docs/"
   },
   "dependencies": {
     "@fieldnote/contracts": "workspace:*",

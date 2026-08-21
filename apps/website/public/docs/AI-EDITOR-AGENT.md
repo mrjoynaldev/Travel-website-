@@ -44,7 +44,7 @@ node cli/blog.mjs whoami                                          # ALWAYS run f
 
 ```bash
 mkdir -p ~/crg-cli && cd ~/crg-cli
-curl -fsSL https://codereportglobal-backend.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
+curl -fsSL https://codereportglobal.indevs.in/docs/setup.sh -o setup.sh && bash setup.sh
 export CRG_TOKEN="crg_…"
 export CRG_API_URL="https://codereportglobal-backend.onrender.com"
 node blog.mjs whoami                                              # ALWAYS run first
@@ -52,7 +52,7 @@ node blog.mjs whoami                                              # ALWAYS run f
 
 The bootstrap downloads `blog.mjs` + `gravity.mjs` from this site and installs
 the two npm dependencies. All documentation lives at
-`https://codereportglobal-backend.onrender.com/docs/<filename>`.
+`https://codereportglobal.indevs.in/docs/<filename>`.
 
 If `whoami` fails, stop and report — never attempt to work around auth.
 

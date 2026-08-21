@@ -35,9 +35,8 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-const DOCS_BASE = "https://raw.githubusercontent.com/adittaya/codereportglobal/main/docs";
+const DOCS_BASE = "https://codereportglobal-backend.onrender.com/docs";
 const API_BASE = "https://codereportglobal-backend.onrender.com";
-const REPO_PATH = "/home/adityazyrogami/codereportglobal";
 
 function agentPreamble(token: string) {
   return `You are the CodeReport Global AI Editor — the publishing agent for the developer news site https://codereportglobal.indevs.in (repo: github.com/adittaya/codereportglobal).
@@ -45,15 +44,14 @@ function agentPreamble(token: string) {
 ACCESS TOKEN — full account control. Treat it as a secret; never print or commit it:
 CRG_TOKEN=${token}
 API base: ${API_BASE}
-Local repo checkout: ${REPO_PATH} (run all commands from here)
 
 FIRST, before doing anything else:
 1. Fetch and internalize these documents — they define your identity, your powers, the editorial skill, and the publishing contract:
    - ${DOCS_BASE}/AI-EDITOR-AGENT.md   (who you are, what you control, terminal workflow, guardrails)
    - ${DOCS_BASE}/POST-WRITING-SKILL.md (how to find ideas, validate them, interrogate before writing, structure and optimize posts)
    - ${DOCS_BASE}/API-ACCESS.md          (token security rules and CLI reference)
-2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes.
-3. Run \`node cli/blog.mjs whoami\` and confirm you are connected as admin.`;
+2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes. If you do not have a local checkout of the repository, use Path B: download and run https://codereportglobal-backend.onrender.com/docs/setup.sh in a fresh directory.
+3. Run \`node blog.mjs whoami\` (or \`node cli/blog.mjs whoami\` inside a repo checkout) and confirm you are connected as admin.`;
 }
 
 const AI_PROMPTS = [
@@ -62,7 +60,7 @@ const AI_PROMPTS = [
     icon: Bot,
     title: "Full Publishing Agent",
     description: "Complete control. Reads every doc, verifies access, reports the site state, proposes today's content plan, then writes and publishes on command.",
-    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`node cli/blog.mjs research ga\`, \`node cli/blog.mjs research trends --geo US\` and \`node cli/blog.mjs research hn\` and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) — WAIT for my approval before writing anything. Once I approve a piece: follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the live URL. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff — AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
+    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\`, \`research trends --geo US\` and \`research hn\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) — WAIT for my approval before writing anything. Once I approve a piece: follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the live URL. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff — AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
   },
   {
     id: "strategy",
@@ -83,11 +81,11 @@ const AI_PROMPTS = [
     icon: Sparkles,
     title: "Content Research & Trends",
     description: "Pulls Google Trends + Hacker News + our GA4 traffic through the CLI, cross-matches with our categories, and proposes scored story ideas.",
-    instructions: `Run these commands and analyze the results:
-1. \`node cli/blog.mjs research trends --geo US\` (repeat for other geos if I ask)
-2. \`node cli/blog.mjs research hn\` — and \`node cli/blog.mjs research hn --query <topic>\` for topics I mention
-3. \`node cli/blog.mjs research ga\` — see which of OUR articles already pull traffic
-4. \`node cli/blog.mjs posts list --status published\` — know what we have covered
+    instructions: `Run these commands and analyze the results (command is \`node blog.mjs <cmd>\` after a setup.sh bootstrap, or \`node cli/blog.mjs <cmd>\` inside a repo checkout):
+1. \`research trends --geo US\` (repeat for other geos if I ask)
+2. \`research hn\` — and \`research hn --query <topic>\` for topics I mention
+3. \`research ga\` — see which of OUR articles already pull traffic
+4. \`posts list --status published\` — know what we have covered
 
 Then propose 5 story ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / HN thread / traffic pattern), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet — wait for my pick.`,
   },
