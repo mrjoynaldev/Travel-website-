@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description: category.description || `Published stories from CodeReport Global on ${category.name}.`,
       alternates: { canonical: `/topics/${category.slug}` },
-      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `/topics/${category.slug}`, title, description: category.description || undefined },
-      twitter: { card: "summary_large_image", title },
+      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `/topics/${category.slug}`, title, description: category.description || undefined, images: [{ url: "/og-default.png", width: 1200, height: 630 }] },
+      twitter: { card: "summary_large_image", images: ["/og-default.png"], title },
     };
   } catch {
     return {};

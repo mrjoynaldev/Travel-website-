@@ -17,8 +17,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description: page.meta_description?.trim() || undefined,
       alternates: { canonical: `/${page.slug}` },
-      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `/${page.slug}`, title },
-      twitter: { card: "summary_large_image", title },
+      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `/${page.slug}`, title, images: [{ url: "/og-default.png", width: 1200, height: 630 }] },
+      twitter: { card: "summary_large_image", images: ["/og-default.png"], title },
     };
   } catch {
     return {};

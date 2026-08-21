@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   title: "Publication archive",
   description: "A chronological map of every published CodeReport Global story.",
   alternates: { canonical: "/archive" },
-  openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: "/archive" },
-  twitter: { card: "summary_large_image" },
+  openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: "/archive", images: [{ url: "/og-default.png", width: 1200, height: 630 }] },
+  twitter: { card: "summary_large_image", images: ["/og-default.png"] },
 };
 
 export default async function ArchivePage() {
