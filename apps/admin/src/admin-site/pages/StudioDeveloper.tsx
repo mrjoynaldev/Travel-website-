@@ -2,7 +2,15 @@
 
 import DashboardLayout from "@/admin-site/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,15 +20,65 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
 import {
+  Bot,
+  ClipboardList,
   Copy,
   KeyRound,
+  Lightbulb,
   Loader2,
+  PenLine,
   Plus,
+  Sparkles,
   Trash2,
   UsersRound,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+
+const DOCS_BASE = "https://raw.githubusercontent.com/adittaya/codereportglobal/main/docs";
+const API_BASE = "https://codereportglobal-backend.onrender.com";
+const REPO_PATH = "/home/adityazyrogami/codereportglobal";
+
+function agentPreamble(token: string) {
+  return `You are the CodeReport Global AI Editor — the publishing agent for the developer news site https://codereportglobal.indevs.in (repo: github.com/adittaya/codereportglobal).
+
+ACCESS TOKEN — full account control. Treat it as a secret; never print or commit it:
+CRG_TOKEN=${token}
+API base: ${API_BASE}
+Local repo checkout: ${REPO_PATH} (run all commands from here)
+
+FIRST, before doing anything else:
+1. Fetch and internalize these documents — they define your identity, your powers, the editorial skill, and the publishing contract:
+   - ${DOCS_BASE}/AI-EDITOR-AGENT.md   (who you are, what you control, terminal workflow, guardrails)
+   - ${DOCS_BASE}/POST-WRITING-SKILL.md (how to find ideas, validate them, interrogate before writing, structure and optimize posts)
+   - ${DOCS_BASE}/API-ACCESS.md          (token security rules and CLI reference)
+2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes.
+3. Run \`node cli/blog.mjs whoami\` and confirm you are connected as admin.`;
+}
+
+const AI_PROMPTS = [
+  {
+    id: "full",
+    icon: Bot,
+    title: "Full Publishing Agent",
+    description: "Complete control. Reads every doc, verifies access, reports the site state, proposes today's content plan, then writes and publishes on command.",
+    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then propose a content plan for today following POST-WRITING-SKILL.md (one cluster at a time) and WAIT for my approval before writing anything. Once I approve a piece: follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the preview link. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
+  },
+  {
+    id: "strategy",
+    icon: Lightbulb,
+    title: "Content Strategy Session",
+    description: "No publishing. Analyzes the site and audience, then brings me niche/cluster options with demand and difficulty, and asks me questions.",
+    instructions: `Do NOT publish or modify anything yet. Act as my content strategist. Analyze what the site covers (fetch categories, tags, and recent posts via the CLI), think about the developer-news audience, then present a table of 5 candidate content clusters/niches scored on demand, competition difficulty, intent fit, and freshness potential. For each, sketch a 5-article funnel (hub ← comparisons ← explainers) and tell me which ONE cluster you would start with and why. Before finalizing, ask me up to 3 questions about my goals, tone, and priorities.`,
+  },
+  {
+    id: "article",
+    icon: PenLine,
+    title: "Write & Publish One Article",
+    description: "Give it a topic brief. It interrogates the idea, drafts the Gravity JSON, runs the QA checklist, and publishes after my approval.",
+    instructions: `I will give you a topic brief next. Follow POST-WRITING-SKILL.md §4 first: present me the interrogation answers (intent, top-5 table stakes, the gap, depth target, unique value, quotable answer) and wait for my confirmation. Then draft the article as a Gravity JSON file, run the pre-publish QA checklist from AI-EDITOR-AGENT.md §7, create the post with ALL fields set (meta description 120–160 chars, category, tags, thumbnail, og-image), submit it, and share the preview link. Publish only after I explicitly approve.`,
+  },
+] as const;
 
 function Workspace({
   title,
@@ -65,6 +123,9 @@ export function StudioApiTokens() {
   const [name, setName] = useState("");
   const [scopes, setScopes] = useState<"read" | "write">("write");
   const [newToken, setNewToken] = useState<string | null>(null);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiToken, setAiToken] = useState("");
+  const [customExtra, setCustomExtra] = useState("");
   const submit = () => {
     if (!name.trim()) {
       toast.error("Give the token a name.");
@@ -87,6 +148,24 @@ export function StudioApiTokens() {
     navigator.clipboard
       .writeText(newToken)
       .then(() => toast.success("Token copied to clipboard."));
+  };
+  const openAiPrompts = () => {
+    setAiToken(newToken || "");
+    setAiOpen(true);
+  };
+  const copyPrompt = (instructions: string) => {
+    if (!aiToken.trim()) {
+      toast.error("Paste your access token first (create one above if needed).");
+      return;
+    }
+    const extra = customExtra.trim()
+      ? `\n\nEDITOR'S EXTRA INSTRUCTIONS:\n${customExtra.trim()}`
+      : "";
+    const prompt = `${agentPreamble(aiToken.trim())}\n\nYOUR ASSIGNMENT:\n${instructions}${extra}`;
+    navigator.clipboard
+      .writeText(prompt)
+      .then(() => toast.success("Prompt copied — paste it into your AI agent."))
+      .catch(() => toast.error("Could not access the clipboard."));
   };
   return (
     <Workspace title="API access tokens" eyebrow="Developer · headless access">
@@ -118,7 +197,7 @@ export function StudioApiTokens() {
       <section className="rounded-xl border border-border bg-white p-6 shadow-sm">
         <div className="flex items-center gap-3">
           <KeyRound className="h-5 w-5 text-primary" />
-          <div>
+          <div className="flex-1">
             <h2 className="font-display text-2xl font-semibold">
               Create a token
             </h2>
@@ -126,6 +205,10 @@ export function StudioApiTokens() {
               Scopes: read-only tokens cannot make changes.
             </p>
           </div>
+          <Button onClick={openAiPrompts} className="gap-2" variant="secondary">
+            <Sparkles className="h-4 w-4" />
+            AI prompts
+          </Button>
         </div>
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1">
@@ -218,6 +301,85 @@ export function StudioApiTokens() {
           </p>
         )}
       </section>
+      <Dialog open={aiOpen} onOpenChange={setAiOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              AI agent prompts
+            </DialogTitle>
+            <DialogDescription>
+              Pick a prompt, copy it, and paste it into any AI agent (Claude,
+              ChatGPT, Cursor…). The copied prompt includes your access token
+              and links to every guide the agent needs.
+            </DialogDescription>
+          </DialogHeader>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground">
+              Access token (embedded into the copied prompt)
+            </label>
+            <Input
+              value={aiToken}
+              onChange={event => setAiToken(event.target.value)}
+              placeholder="crg_… — pre-filled if you just created one"
+              className="mt-1.5 font-mono text-xs"
+            />
+            {newToken && !aiToken && (
+              <button
+                type="button"
+                className="mt-1 text-[11px] font-medium text-primary hover:underline"
+                onClick={() => setAiToken(newToken)}
+              >
+                Use the token you just created
+              </button>
+            )}
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground">
+              Extra instructions (optional, appended to every prompt)
+            </label>
+            <Textarea
+              value={customExtra}
+              onChange={event => setCustomExtra(event.target.value)}
+              rows={2}
+              placeholder="e.g. Focus on Rust and developer-tools news this month."
+              className="mt-1.5"
+            />
+          </div>
+          <div className="space-y-2">
+            {AI_PROMPTS.map(prompt => (
+              <div
+                key={prompt.id}
+                className="flex items-start gap-3 rounded-lg border border-border bg-white p-3"
+              >
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10">
+                  <prompt.icon className="h-4 w-4 text-primary" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">{prompt.title}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {prompt.description}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 gap-1.5"
+                  onClick={() => copyPrompt(prompt.instructions)}
+                >
+                  <ClipboardList className="h-3.5 w-3.5" />
+                  Copy
+                </Button>
+              </div>
+            ))}
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Security: the pasted prompt contains a live admin token. Share it
+            only with agents you trust and revoke the token in this screen when
+            finished.
+          </p>
+        </DialogContent>
+      </Dialog>
     </Workspace>
   );
 }
