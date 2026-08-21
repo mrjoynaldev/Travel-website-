@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       { source: "/robots.txt", destination: `${apiOrigin}/robots.txt` },
       { source: "/sitemap.xml", destination: `${apiOrigin}/sitemap.xml` },
       { source: "/rss.xml", destination: `${apiOrigin}/rss.xml` },
+      { source: "/news-sitemap.xml", destination: `${apiOrigin}/news-sitemap.xml` },
     ];
   },
 };

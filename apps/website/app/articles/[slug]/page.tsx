@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = post.meta_title?.trim() || post.title;
     const description = post.meta_description?.trim() || post.excerpt?.trim() || undefined;
     const canonical = post.canonical_url?.trim() || `${siteUrl()}/articles/${post.slug}`;
-    const image = post.og_image_url?.trim() || post.featuredMedia?.url || undefined;
+    const image = post.og_image_url?.trim() || post.featuredMedia?.url || `${siteUrl()}/og-default.png`;
     const keywords = (post.tags ?? []).map((tag: { name: string }) => tag.name);
     return {
       title,
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         url: canonical,
         siteName: "CodeReport Global",
         locale: "en_US",
-        images: image ? [{ url: image }] : undefined,
+        images: [{ url: image }],
         publishedTime: post.published_at || undefined,
         modifiedTime: post.updated_at || undefined,
         authors: post.author?.display_name ? [post.author.display_name] : undefined,
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         card: "summary_large_image",
         title,
         description,
-        images: image ? [image] : undefined,
+        images: [image],
       },
       robots: { index: true, follow: true },
     };
@@ -66,12 +66,12 @@ export default async function ArticlePage({ params }: Props) {
 
   const pageUrl = `${siteUrl()}/articles/${post.slug}`;
   const canonical = post.canonical_url?.trim() || pageUrl;
-  const image = post.og_image_url?.trim() || post.featuredMedia?.url || undefined;
+  const image = post.og_image_url?.trim() || post.featuredMedia?.url || `${siteUrl()}/og-default.png`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
       {
-        "@type": "Article",
+        "@type": "NewsArticle",
         "@id": `${pageUrl}#article`,
         headline: post.meta_title?.trim() || post.title,
         description: post.meta_description?.trim() || post.excerpt?.trim() || undefined,

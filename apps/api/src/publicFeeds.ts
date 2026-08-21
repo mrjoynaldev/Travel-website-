@@ -55,8 +55,33 @@ export type FeedResult = { body: string; contentType: string; status: number };
 
 export async function robotsTxt(): Promise<FeedResult> {
   const base = origin();
-  const body = `User-agent: *\nAllow: /\n${base ? `Sitemap: ${base}/sitemap.xml\n` : ""}`;
+  const aiBots = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "PerplexityBot", "ClaudeBot", "Google-Extended", "Applebot-Extended"]
+    .map(bot => `User-agent: ${bot}\nAllow: /`)
+    .join("\n");
+  const sitemapLines = base ? [`Sitemap: ${base}/sitemap.xml`, `Sitemap: ${base}/news-sitemap.xml`] : [];
+  const body = [`User-agent: *\nAllow: /`, aiBots, ...sitemapLines].filter(Boolean).join("\n") + "\n";
   return { body, contentType: "text/plain", status: 200 };
+}
+
+export async function newsSitemapXml(): Promise<FeedResult> {
+  try {
+    const { posts } = await latestPosts();
+    const base = origin();
+    if (!base) return { body: "CANONICAL_ORIGIN must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
+    const cutoff = Date.now() - 48 * 60 * 60 * 1000;
+    const recent = posts.filter((post: any) => {
+      const published = new Date(post.published_at || post.updated_at).getTime();
+      return Number.isFinite(published) && published >= cutoff;
+    });
+    const urls = recent.map((post: any) => {
+      const title = stripHtml(post.title || post.slug);
+      const date = new Date(post.published_at || post.updated_at).toISOString();
+      return `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><news:news><news:publication><news:name>CodeReport Global</news:name><news:language>en</news:language></news:publication><news:publication_date>${date}</news:publication_date><news:title>${xmlEscape(title)}</news:title></news:news></url>`;
+    }).join("");
+    return { body: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">${urls}</urlset>`, contentType: "application/xml", status: 200 };
+  } catch {
+    return { body: "News sitemap is temporarily unavailable.", contentType: "text/plain", status: 503 };
+  }
 }
 
 export async function sitemapXml(): Promise<FeedResult> {

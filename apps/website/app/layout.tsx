@@ -23,11 +23,13 @@ export const metadata: Metadata = {
     siteName: "CodeReport Global",
     locale: "en_US",
     url: "/",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "CodeReport Global" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "CodeReport Global",
     description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
+    images: ["/og-default.png"],
   },
   robots: { index: true, follow: true },
 };
