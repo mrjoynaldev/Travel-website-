@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const tagsResult = await serverTrpc.blog.tags.query();
     const tag = tagsResult.find(item => item.slug === slug);
     if (!tag) return {};
-    const title = `#${tag.name} — CodeReport Global`;
+    const title = `#${tag.name}`;
     return {
       title,
       description: `Published stories tagged ${tag.name} from CodeReport Global.`,

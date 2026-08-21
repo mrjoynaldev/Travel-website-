@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const categoriesResult = await serverTrpc.blog.categories.query();
     const category = categoriesResult.find(item => item.slug === slug);
     if (!category) return {};
-    const title = `${category.name} — CodeReport Global`;
+    const title = category.name;
     return {
       title,
       description: category.description || `Published stories from CodeReport Global on ${category.name}.`,
