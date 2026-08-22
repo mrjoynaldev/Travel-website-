@@ -9,6 +9,7 @@ DIR="$(pwd)"
 echo "-> Downloading CLI files..."
 curl -fsSL "$BASE/blog.mjs" -o blog.mjs
 curl -fsSL "$BASE/gravity.mjs" -o gravity.mjs
+curl -fsSL "$BASE/distribute.mjs" -o distribute.mjs
 
 echo "-> Installing dependencies (@trpc/client v11, superjson)..."
 [ -f package.json ] || npm init -y >/dev/null

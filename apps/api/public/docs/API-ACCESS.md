@@ -29,7 +29,9 @@ effect immediately. Optional expiry is available at creation.
 
 ## 2. Configure the CLI
 
-The CLI is a zero-dependency-of-your-own Node script at `cli/blog.mjs`.
+The CLI is a zero-dependency-of-your-own Node script at `cli/blog.mjs`. The
+distribution kit generator lives next to it at `cli/distribute.mjs` and uses
+the same env vars (see POST-WRITING-SKILL.md §9 for the channel rules).
 
 ```bash
 # Required

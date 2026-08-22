@@ -50,8 +50,8 @@ export CRG_API_URL="https://codereportglobal-backend.onrender.com"
 node blog.mjs whoami                                              # ALWAYS run first
 ```
 
-The bootstrap downloads `blog.mjs` + `gravity.mjs` from this site and installs
-the two npm dependencies. All documentation lives at
+The bootstrap downloads `blog.mjs` + `gravity.mjs` + `distribute.mjs` from this
+site and installs the two npm dependencies. All documentation lives at
 `https://codereportglobal-backend.onrender.com/docs/<filename>`.
 
 If `whoami` fails, stop and report — never attempt to work around auth.
@@ -140,6 +140,12 @@ node cli/blog.mjs posts update <id> --meta-description "Improved copy"   # any f
 node cli/blog.mjs posts feature <id>          # homepage feature
 node cli/blog.mjs posts schedule <id> --at 2026-09-01T09:00:00Z
 node cli/blog.mjs posts delete <id>           # trash — ONLY with explicit editor approval
+
+# Distribution (POST-WRITING-SKILL.md §9)
+CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
+#   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, reddit-comments.md,
+#     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url,
+#     newsletter-tip.md, checklist.md) — run after every publish
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**
