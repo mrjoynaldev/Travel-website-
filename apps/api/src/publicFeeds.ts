@@ -100,11 +100,13 @@ export async function newsSitemapXml(): Promise<FeedResult> {
     const base = origin();
     if (!base) return { body: "CANONICAL_ORIGIN must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
     const cutoff = Date.now() - 48 * 60 * 60 * 1000;
-    const recent = posts.filter((post: any) => {
-      const published = new Date(post.published_at || post.updated_at).getTime();
-      return Number.isFinite(published) && published >= cutoff;
-    });
-    const urls = recent.map((post: any) => {
+    const withDates = posts
+      .map((post: any) => ({ post, published: new Date(post.published_at || post.updated_at).getTime() }))
+      .filter((entry: any) => Number.isFinite(entry.published));
+    const recent = withDates.filter((entry: any) => entry.published >= cutoff);
+    const selected = recent.length > 0 ? recent : [...withDates].sort((a: any, b: any) => b.published - a.published).slice(0, 10);
+    const urls = selected.map((entry: any) => {
+      const post = entry.post;
       const title = stripHtml(post.title || post.slug);
       const date = new Date(post.published_at || post.updated_at).toISOString();
       return `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><news:news><news:publication><news:name>CodeReport Global</news:name><news:language>en</news:language></news:publication><news:publication_date>${date}</news:publication_date><news:title>${xmlEscape(title)}</news:title></news:news></url>`;
