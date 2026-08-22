@@ -398,10 +398,12 @@ export async function getAnalyticsSummary(actor: BlogActor, from: string, to: st
   const topPosts = new Map<string, { postId: string; title: string; slug: string; views: number; engagement: number }>();
   for (const event of events ?? []) {
     if (!event.post_id) continue;
+    const raw = event.posts as unknown as { title?: string; slug?: string } | Array<{ title: string; slug: string }> | null;
+    const resolved = Array.isArray(raw) ? raw[0] : raw;
     const current = topPosts.get(event.post_id) ?? {
       postId: event.post_id,
-      title: (event.posts as unknown as Array<{ title: string; slug: string }> | null)?.[0]?.title ?? "Untitled post",
-      slug: (event.posts as unknown as Array<{ title: string; slug: string }> | null)?.[0]?.slug ?? "",
+      title: resolved?.title ?? "Untitled post",
+      slug: resolved?.slug ?? "",
       views: 0,
       engagement: 0,
     };
