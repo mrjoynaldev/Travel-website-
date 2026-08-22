@@ -142,12 +142,13 @@ export async function rssXml(): Promise<FeedResult> {
     const { site, posts } = await latestPosts();
     const base = origin();
     if (!base) return { body: "CANONICAL_ORIGIN must be configured before RSS generation.", contentType: "text/plain", status: 503 };
+    const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]&gt;")}]]>`;
     const items = posts
       .slice(0, 50)
-      .map(post => `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description></item>`)
+      .map(post => `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`)
       .join("");
     const name = site?.name || process.env.SITE_NAME || "CodeReport Global";
-    const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description>${items}</channel></rss>`;
+    const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description><atom:link href="${xmlEscape(`${base}/rss.xml`)}" rel="self" type="application/rss+xml" />${items}</channel></rss>`;
     return { body, contentType: "application/rss+xml", status: 200 };
   } catch {
     return { body: "RSS is temporarily unavailable.", contentType: "text/plain", status: 503 };
