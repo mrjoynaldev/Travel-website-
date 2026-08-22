@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ListingPage } from "@web/components/ListingPage";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type PostListItem = Awaited<ReturnType<typeof serverTrpc.blog.list.query>>["items"][number];
 

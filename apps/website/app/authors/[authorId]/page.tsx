@@ -4,7 +4,7 @@ import { ArticleCard, type ArticleCardPost } from "@/components/public/ArticleCa
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type Props = { params: Promise<{ authorId: string }> };
 

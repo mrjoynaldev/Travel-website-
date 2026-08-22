@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import ArticleView from "@web/components/ArticleView";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 

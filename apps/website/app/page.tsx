@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import HomeView from "@web/components/HomeView";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "CodeReport Global — Developer-first AI news and practical guides",

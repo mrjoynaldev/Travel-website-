@@ -4,7 +4,7 @@ import { FileWarning } from "lucide-react";
 import Link from "next/link";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
