@@ -32,7 +32,11 @@ export const metadata: Metadata = {
     description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
     images: ["/og-default.png"],
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
   verification: {
     yandex: "f5a900063c4544c5",
   },

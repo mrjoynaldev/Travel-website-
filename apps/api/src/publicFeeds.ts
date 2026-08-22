@@ -103,8 +103,8 @@ export async function newsSitemapXml(): Promise<FeedResult> {
     const withDates = posts
       .map((post: any) => ({ post, published: new Date(post.published_at || post.updated_at).getTime() }))
       .filter((entry: any) => Number.isFinite(entry.published));
-    const recent = withDates.filter((entry: any) => entry.published >= cutoff);
-    const selected = recent.length > 0 ? recent : [...withDates].sort((a: any, b: any) => b.published - a.published).slice(0, 10);
+    // Google News sitemap rule: only articles from the last 48 hours may appear.
+    const selected = withDates.filter((entry: any) => entry.published >= cutoff).slice(0, 1000);
     const urls = selected.map((entry: any) => {
       const post = entry.post;
       const title = stripHtml(post.title || post.slug);

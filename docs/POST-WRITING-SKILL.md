@@ -152,14 +152,19 @@ Before any draft exists, complete this sentence and show it to the editor:
 | Field | Rule |
 |---|---|
 | `--meta-title` | Only if title >60 chars; keep keyword, add brand |
-| `--meta-description` | 120–160 chars, ad copy: benefit + keyword + hook |
+| `--meta-description` | 120–160 chars, unique to this page: what the reader GAINS + keyword + hook (Google rewrites titles/descriptions that are stuffed or boilerplate) |
 | `--excerpt` | 1–2 honest sentences (cards + meta fallback) |
 | `--category` | Exactly one primary hub (max two) |
 | `--tag` | 2–5 specific entity tags (company, product, language) |
-| `--thumbnail` + `--og-image` | Always set; alt text mandatory on every image |
+| `--thumbnail` + `--og-image` | Always set; ≥1200px wide preferred (~16:9) for Google Discover; alt text mandatory on every image |
+
+Title rules (Google title-link doc): unique per page, descriptive, no keyword
+stuffing, brand appears once via the site template (`%s · CodeReport Global`) —
+never repeat the brand inside the article title itself.
 
 Internal linking (best-effort-to-value tactic in SEO): ≥3 per post — the topic
-hub, ≥2 related articles, plus outbound citations to primary sources.
+hub, ≥2 related articles, plus outbound citations to primary sources. Anchor
+text must describe the destination ("the Rust Glancer repo", never "click here").
 
 ## 7. Originality layer (what survives AI slop)
 
@@ -292,3 +297,28 @@ Channel tiers:
 Discipline: reply to every serious comment on our syndicated copies within
 24h — engagement outweighs the drop itself. Log every placement in the kit's
 `checklist.md` so the Weekly Ranking Review can attribute traffic and citations.
+
+## 10. Official Google Search compliance (docs/SEO-GOOGLE.md is the full reference)
+
+Google's position: AI-written content is legal and ranked normally — "regardless
+of how content is produced." The ONLY way we fail is the **scaled content abuse**
+policy: many pages with little added value. Therefore every article must pass the
+people-first gate below; volume never substitutes for value.
+
+Publish-gate (all YES or rewrite):
+
+1. Passes the §4 self-check AND the people-first list in SEO-GOOGLE.md §2
+2. Title honest + descriptive (no clickbait, no shock, no unconfirmed promises)
+3. Meta description unique, benefit-led, 120–160 chars
+4. Every image has contextual alt text; hero ≥1200px wide when possible
+5. Visible date + JSON-LD dates stay consistent on updates — substantive edits
+   update `updated_at` and the visible "Updated" label together; NEVER date-bump
+   without substance (explicit spam signal)
+6. Outbound links: plain citations need nothing; affiliate/sponsored get
+   rel="sponsored"; never link-buy/exchange
+7. Updates to old posts follow §8's decision tree — refresh only with new
+   substance, never mass-delete or bulk-refresh for "freshness"
+
+Discover/AI Overviews eligibility is inherited automatically once a page is
+indexed + snippet-eligible; do not build special pages for AI queries (that IS
+scaled abuse). Weekly Ranking Review reads GSC per SEO-GOOGLE.md §10.
