@@ -353,7 +353,7 @@ async function pushKit(slug) {
     { channel: "bluesky", payload: { text: blueskyTxt } },
     { channel: "mastodon", payload: { text: blueskyTxt } },
   ];
-  const rows = await client.distribution.push.mutate({ slug, items });
+  const rows = await client.distribution.enqueue.mutate({ slug, items });
   console.error(`   queued ${rows.length} item(s):`);
   for (const row of rows) console.error(`   - [${row.status}] ${row.channel}`);
   console.log("\nQueued. Approve them in Studio → Distribution (hard cap: 3 posts/day).");

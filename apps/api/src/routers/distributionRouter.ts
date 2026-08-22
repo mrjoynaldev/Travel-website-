@@ -140,7 +140,7 @@ export const distributionRouter = router({
       }));
       const { data, error } = await db.from("distribution_queue").upsert(rows, { onConflict: "site_id,slug,channel" }).select("id, slug, channel, status");
       if (error) throw new TRPCError({ code: "BAD_REQUEST", message: "Could not enqueue the distribution items." });
-      await recordAudit(actor, "distribution.enqueued", "post", input.slug, { channels: input.items.map(i => i.channel) });
+      await recordAudit(actor, "distribution.enqueued", "post", input.postId ?? null, { slug: input.slug, channels: input.items.map(i => i.channel) });
       return data ?? [];
     }),
 
@@ -174,7 +174,7 @@ export const distributionRouter = router({
       try {
         const { url } = await dispatch(row);
         const { data: updated } = await db.from("distribution_queue").update({ status: "posted", posted_url: url, posted_at: new Date().toISOString(), error: null, updated_at: new Date().toISOString() }).eq("id", row.id).select("*").single();
-        await recordAudit(actor, "distribution.posted", "post", row.slug, { channel: row.channel, url });
+        await recordAudit(actor, "distribution.posted", "post", row.post_id ?? null, { channel: row.channel, url, slug: row.slug });
         return updated;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -240,7 +240,7 @@ export const distributionRouter = router({
         .eq("slug", input.slug)
         .eq("channel", "devto")
         .in("status", ["pending", "approved", "failed"]);
-      await recordAudit(actor, "distribution.devto_flipped", "post", input.slug, { url });
+      await recordAudit(actor, "distribution.devto_flipped", "post", null, { slug: input.slug, url });
       return { url };
     }),
 });
