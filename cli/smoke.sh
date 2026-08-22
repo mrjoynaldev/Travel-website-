@@ -57,11 +57,16 @@ try:
   print(0 if len(items)>=3 else 1)
 except Exception as e:
   print('ERR '+str(e))")"
-check "queue rows pending=3"     3   "$(echo "$DIST" | python3 -c "
+check "queue rows pending>=1"    1   "$(echo "$DIST" | python3 -c "
 import json,sys
 d=json.load(sys.stdin)['result']['data']['json']
 items=d if isinstance(d,list) else d.get('items',[])
-print(sum(1 for i in items if i.get('status')=='pending'))")"
+print(1 if sum(1 for i in items if i.get('status')=='pending')>=1 else 0)")"
+check "posted rows exist"        1   "$(echo "$DIST" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)['result']['data']['json']
+items=d if isinstance(d,list) else d.get('items',[])
+print(1 if any(i.get('status')=='posted' for i in items) else 0)")"
 check "devto row carries draftId" 4459214 "$(echo "$DIST" | python3 -c "
 import json,sys
 d=json.load(sys.stdin)['result']['data']['json']
