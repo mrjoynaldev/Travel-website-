@@ -92,10 +92,13 @@ async function fetchBlueskyLinkCard(url: string, auth: string): Promise<any | un
     const page = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(8000) });
     if (!page.ok) return undefined;
     const html = await page.text();
+    const decodeHtml = (s: string) =>
+      s.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'");
     const meta = (prop: string) => {
       const forward = new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]*content=["']([^"']+)`, "i");
       const backward = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]*(?:property|name)=["']${prop}["']`, "i");
-      return html.match(forward)?.[1] ?? html.match(backward)?.[1];
+      const raw = html.match(forward)?.[1] ?? html.match(backward)?.[1];
+      return raw ? decodeHtml(raw) : undefined;
     };
     const title = (meta("og:title") || "").trim().slice(0, 200);
     const description = (meta("og:description") || "").trim().slice(0, 300);
