@@ -152,10 +152,25 @@ CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
 #
 # Bluesky rich-text rule (handled server-side since 2026-08-22): links and
 #   hashtags ONLY render blue/clickable + searchable when the post record has
-#   ATProto facets. Our API adds them automatically from the text — your job:
+#   ATProto facets. Our API adds them automatically from the text, plus a
+#   link-preview card built from the article's OpenGraph tags. Your job:
 #   ALWAYS include the full article URL and 2–3 relevant #hashtags inside
 #   bluesky.txt (kit generator does this). Mastodon formats natively; dev.to is
 #   markdown. Never shorten URLs on any channel.
+#
+# Verified per-channel rules (from official docs, checked 2026-08-22):
+#   dev.to: front matter is source of truth — keep ≤4 lowercase tags,
+#     canonical_url = our article URL (SEO integrity), cover_image REQUIRED
+#     (biggest CTR lever; served at 1000x420). Publishing flips via JSON
+#     {"published":true}, never via front matter. Drafts are NOT fetchable via
+#     /api/articles/:id — use /api/articles/me/all with the api-key header.
+#   Mastodon: plain text; server auto-links URLs and #hashtags. URLs count as
+#     exactly 23 chars regardless of length (500-char budget) — shorteners are
+#     actively discouraged. Hashtags may contain letters/digits/underscores but
+#     cannot be digits-only. API posts as public + language en automatically.
+#   Bluesky: ≤300 graphemes total including URL + hashtags; facets and the
+#     link-preview card (og:title/og:image from our page) are injected by our
+#     API. Hashtags: letters/digits only in tag facet text.
 #
 # CREDENTIALS POLICY (strict):
 #   You need EXACTLY ONE credential: CRG_TOKEN. All social-platform secrets

@@ -86,6 +86,42 @@ function detectBlueskyFacets(text: string): any[] {
   return facets.sort((a, b) => a.index.byteStart - b.index.byteStart);
 }
 
+async function fetchBlueskyLinkCard(url: string, auth: string): Promise<any | undefined> {
+  try {
+    const page = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(8000) });
+    if (!page.ok) return undefined;
+    const html = await page.text();
+    const meta = (prop: string) => {
+      const forward = new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]*content=["']([^"']+)`, "i");
+      const backward = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]*(?:property|name)=["']${prop}["']`, "i");
+      return html.match(forward)?.[1] ?? html.match(backward)?.[1];
+    };
+    const title = (meta("og:title") || "").trim().slice(0, 200);
+    const description = (meta("og:description") || "").trim().slice(0, 300);
+    if (!title) return undefined;
+    const imageUrl = meta("og:image");
+    let thumb: any;
+    if (imageUrl && /^https?:\/\//.test(imageUrl)) {
+      const imageResponse = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
+      if (imageResponse.ok) {
+        const bytes = Buffer.from(await imageResponse.arrayBuffer());
+        if (bytes.length > 0 && bytes.length <= 900_000) {
+          const upload = await fetch("https://bsky.social/xrpc/com.atproto.repo.uploadBlob", {
+            method: "POST",
+            headers: { Authorization: auth, "Content-Type": imageResponse.headers.get("content-type") || "image/jpeg" },
+            body: bytes,
+          });
+          const uploaded = (await upload.json().catch(() => ({}))) as any;
+          if (upload.ok && uploaded.blob) thumb = uploaded.blob;
+        }
+      }
+    }
+    return { $type: "app.bsky.embed.external", external: { uri: url, title, description, ...(thumb ? { thumb } : {}) } };
+  } catch {
+    return undefined;
+  }
+}
+
 async function postBluesky(text: string): Promise<string> {
   const handle = requireEnv("BLUESKY_HANDLE");
   const password = requireEnv("BLUESKY_APP_PASSWORD");
@@ -96,6 +132,9 @@ async function postBluesky(text: string): Promise<string> {
   });
   const session = (await sessionResponse.json().catch(() => ({}))) as any;
   if (!sessionResponse.ok || !session.accessJwt) throw new TRPCError({ code: "BAD_GATEWAY", message: `Bluesky login failed (${sessionResponse.status}).` });
+  const facets = detectBlueskyFacets(text);
+  const linkMatch = text.match(/https?:\/\/[^\s)#]+/u);
+  const embed = linkMatch ? await fetchBlueskyLinkCard(linkMatch[0], `Bearer ${session.accessJwt}`) : undefined;
   const postResponse = await fetch("https://bsky.social/xrpc/com.atproto.repo.createRecord", {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.accessJwt}` },
@@ -106,7 +145,8 @@ async function postBluesky(text: string): Promise<string> {
         $type: "app.bsky.feed.post",
         text,
         langs: ["en"],
-        ...(detectBlueskyFacets(text).length ? { facets: detectBlueskyFacets(text) } : {}),
+        ...(facets.length ? { facets } : {}),
+        ...(embed ? { embed } : {}),
         createdAt: new Date().toISOString(),
       },
     }),
@@ -123,7 +163,7 @@ async function postMastodon(text: string): Promise<string> {
   const response = await fetch(`https://${instance}/api/v1/statuses`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ status: text.slice(0, 500), visibility: "public" }),
+    body: JSON.stringify({ status: text.slice(0, 500), visibility: "public", language: "en" }),
   });
   const data = (await response.json().catch(() => ({}))) as any;
   if (!response.ok || !data.url) throw new TRPCError({ code: "BAD_GATEWAY", message: `Mastodon post failed (${response.status}).` });

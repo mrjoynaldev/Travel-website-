@@ -357,10 +357,20 @@ Golden rules:
    3 posts/day across all channels).
 
 Bluesky formatting rule: links and hashtags are clickable/searchable ONLY via
-ATProto facets — our API injects them server-side from the post text, so
-`bluesky.txt` MUST always contain the full article URL plus 2–3 relevant
-#hashtags. Never shorten URLs on any channel (Mastodon/dev.to format
-natively).
+ATProto facets — our API injects them server-side from the post text (plus a
+link-preview card from the article's OpenGraph tags), so `bluesky.txt` MUST
+always contain the full article URL plus 2–3 relevant #hashtags. Never shorten
+URLs on any channel (Mastodon/dev.to format natively).
+
+Verified per-channel rules (official docs, checked 2026-08-22):
+- dev.to: front matter wins on updates; keep ≤4 lowercase tags, canonical_url
+  = our URL, cover_image REQUIRED (largest CTR lever). Publish state flips via
+  JSON {"published":true} only. Drafts are invisible to /api/articles/:id.
+- Mastodon: plain text auto-links URLs + hashtags. URLs always count as 23
+  chars inside the 500-char budget — never shorten. Hashtags: letters, digits,
+  underscores; not digits-only. Posts go out public / language en via API.
+- Bluesky: ≤300 graphemes including URL + hashtags; facets + link-preview card
+  are injected by our API automatically.
 
 Channel tiers:
 - **AUTO** (system posts inside a hard daily cap): dev.to (canonical_url set),
