@@ -3,7 +3,8 @@
 Editorial operating system for the AI Editor Agent. Derived from a full SEO
 course (search-intent-first keyword strategy, topic clusters, on-page
 checklists, link-worthy content, AI-search visibility). Follow it in order:
-**find → validate → interrogate → structure → write → optimize → publish.**
+**find → validate → interrogate → angle → structure → write → optimize →
+publish → distribute.**
 
 ---
 
@@ -106,6 +107,24 @@ Answer these in one short paragraph each before drafting:
 The bar: **5× better than what already exists** for this exact search. If you
 cannot articulate how, do not write the post.
 
+### 4b. The angle gate (mandatory sentence before drafting)
+
+Before any draft exists, complete this sentence and show it to the editor:
+
+> "Unlike [current top results / mainstream coverage], this post [the specific
+> gap it fills] for [exact reader], proven by [our unique evidence]."
+
+- If it cannot be completed with something concrete, there is no angle — go
+  back to §1 or skip the post. "Comprehensive guide" is not an angle;
+  neither is "we also covered it."
+- **Information gain is the currency**: each post must contain at least one
+  thing a reader cannot get from the top-3 combined (original test, assembled
+  table, named-source synthesis, contrarian-but-defensible read).
+- News posts still need an angle: "what changed" is table stakes; the angle is
+  "what this changes for developers who do X."
+- Re-check after drafting: if the draft does not deliver the promised angle,
+  fix the draft, not the sentence.
+
 ## 5. Structure blueprint
 
 - **Title**: ≤60 chars, keyword front-loaded, specific promise. News: what
@@ -204,20 +223,69 @@ every list. Implications:
 
 ## 8. After publishing
 
+**Publish day:**
 - Verify HTTP 200 on the article URL.
 - The post auto-enters `/sitemap.xml` and (for 48h) `/news-sitemap.xml`.
-- Log the target query cluster; revisit GSC after ~2 weeks for impressions and
-  position movement; update titles/intros on posts stuck at positions 5–15.
-- Update existing page-2/3 posts before writing brand-new ones when both
-  options exist — refreshing a near-miss usually beats a fresh draft.
-- **Track citations, not just rankings**: after 2–4 weeks re-ask the target
-  question in ChatGPT/Perplexity/Google AI Mode. If competitors are cited and
-  we are not, treat it as a content defect to fix (sharper answer block,
-  deeper facts, more sources), not bad luck.
-- **Track engagement, not just visits** (`research ga` / GA4): leading
-  signals that the conversion architecture works are impressions rising before
-  clicks, multi-page sessions via internal links, and returning visitors.
-  Posts with traffic but no depth-of-engagement get the depth fix first.
-- Early-stage discipline: publish 10–15 excellent pieces before investing in
-  link outreach; the best links arrive when something is genuinely worth
-  linking to.
+- Log the target query cluster and the visible position baseline.
+
+**Day-3 check (`research ga` + GSC):**
+- Indexing confirmed? Impressions appearing? Zero impressions by day 7 =
+  suspect indexing or intent mismatch — re-inspect title/meta against the
+  actual query phrasing.
+
+**Day-14 ranking ritual:**
+- GSC positions: stuck at **positions 5–15** = update candidate (refresh
+  title/intro/depth). Pages 2–3 → run the decision tree below.
+- **Citations**: re-ask the target question in ChatGPT, Perplexity AND Google
+  AI Mode. Competitors cited and we are not = content defect to fix (sharper
+  answer block, deeper facts, more sources), not bad luck.
+- **Engagement** (`research ga`): leading signals the conversion architecture
+  works are impressions rising before clicks, multi-page sessions via internal
+  links, returning visitors. Traffic without depth-of-engagement gets the
+  depth fix first.
+
+**Update-vs-new decision tree:**
+1. Same intent + near-miss ranking (5–15) or thin depth → **UPDATE** the
+   existing post; refreshing a near-miss usually beats a fresh draft.
+2. Adjacent but distinct question users ask → **NEW** post that links back.
+3. Two of our own posts splitting one intent → **MERGE** into the stronger
+   URL, then update it.
+
+Early-stage discipline: publish 10–15 excellent pieces before investing in
+link outreach; the best links arrive when something is genuinely worth
+linking to.
+
+## 9. Distribution & share kits (syndication engine)
+
+Publishing is half the job. Every published article gets a distribution pass
+so the piece earns reach AND backlinks without duplicate-content risk.
+
+Golden rules:
+1. **Own domain first.** codereportglobal.indevs.in is always the canonical
+   home; every syndicated copy must point back with rel=canonical.
+2. **Wait for indexing before full-copy syndication**: as a new site wait
+   7–10 days after publish (verify with GSC), then syndicate. Link drops and
+   social posts are exempt — only full-text copies wait.
+3. **Never hand-paste raw markdown into platforms.** Generate the share kit:
+   `node distribute.mjs kit <slug>` writes `~/crg-cli/kits/<slug>/` with
+   per-platform files (`devto.md`, `bluesky.txt`, `reddit-comments.md`,
+   `linkedin.md`, `hn-title.txt` + `hn-firstcomment.md`, `medium-import.url`,
+   `newsletter-tip.md`, `checklist.md`).
+
+Channel tiers:
+- **AUTO** (system posts inside a hard daily cap): dev.to (canonical_url set),
+  Bluesky, Mastodon, Hashnode (RSS import respects canonicals).
+- **QUEUE + APPROVE**: Reddit comments — approve-then-post only, global cap
+  3 posts/day enforced in code. Find threads younger than 24h; contribute
+  value first; link only when genuinely relevant; never the same community
+  twice in one week.
+- **MANUAL** (paste from kit): Hacker News (title + first comment drafted;
+  automating story posts = ban), LinkedIn, X, Medium (Import-a-story sets the
+  canonical automatically — never use their closed API), Quora, newsletter
+  tips (TLDR AI, Ben's Bites, Console.dev).
+- **ONE-TIME checklist**: GitHub awesome-list PRs, Source of Sources signup,
+  daily.dev Squad (corporate blogs are ineligible as plain sources).
+
+Discipline: reply to every serious comment on our syndicated copies within
+24h — engagement outweighs the drop itself. Log every placement in the kit's
+`checklist.md` so the Weekly Ranking Review can attribute traffic and citations.

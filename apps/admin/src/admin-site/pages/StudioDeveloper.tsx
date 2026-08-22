@@ -30,6 +30,7 @@ import {
   Plus,
   Sparkles,
   Trash2,
+  TrendingUp,
   UsersRound,
 } from "lucide-react";
 import { useState } from "react";
@@ -60,7 +61,7 @@ const AI_PROMPTS = [
     icon: Bot,
     title: "Full Publishing Agent",
     description: "Complete control. Reads every doc, verifies access, reports the site state, proposes today's content plan, then writes and publishes on command.",
-    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\`, \`research trends --geo US\` and \`research hn\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) — WAIT for my approval before writing anything. Once I approve a piece: follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the live URL. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff — AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
+    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\`, \`research trends --geo US\` and \`research hn\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) — WAIT for my approval before writing anything. Once I approve a piece: pass the §4b angle gate FIRST (show me the one-sentence angle in the exact required shape and wait for my confirmation), then follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the live URL. After publishing, run the §9 distribution pass: generate the share kit with \`node distribute.mjs kit <slug>\` and report the kit path plus which channels are auto vs manual. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff — AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
   },
   {
     id: "strategy",
@@ -88,6 +89,14 @@ const AI_PROMPTS = [
 4. \`posts list --status published\` — know what we have covered
 
 Then propose 5 story ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / HN thread / traffic pattern), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet — wait for my pick.`,
+  },
+  {
+    id: "weekly-review",
+    icon: TrendingUp,
+    title: "Weekly Ranking Review",
+    description:
+      "No publishing. Pulls our GA signals + my GSC snapshot, re-tests target queries in AI engines, and applies the update-vs-new decision tree.",
+    instructions: `Do NOT publish or modify anything. Run our weekly ranking ritual per POST-WRITING-SKILL.md §8: 1) run \`research ga\` and list our top articles by views with engagement signals (depth of session, returning visitors); 2) ask me for this week's GSC snapshot (queries, impressions, positions) and log it against last week; 3) for every target query cluster we track, re-ask its core question in ChatGPT, Perplexity and Google AI Mode (if you cannot browse, give me the exact question list to paste and I will return answers) and record who gets cited vs us; 4) apply the §8 update-vs-new decision tree and present a table: article → signal → verdict (UPDATE / NEW companion / MERGE / leave) with the exact next action for each row; 5) also check pending distribution kits in ~/crg-cli/kits/ and report which placements were logged since last week. End with the ONE highest-leverage move for this week.`,
   },
 ] as const;
 
