@@ -326,30 +326,4 @@ export const distributionRouter = router({
       return { url };
     }),
 
-  // Temporary helper to delete test Bluesky posts — remove after verification
-  blueskyDelete: protectedProcedure
-    .input(z.object({ rkey: z.string().trim().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      const actor = await actorFor(ctx);
-      assertRole(actor, ["admin", "editor"]);
-      const handle = requireEnv("BLUESKY_HANDLE");
-      const password = requireEnv("BLUESKY_APP_PASSWORD");
-      const sessionResponse = await fetch("https://bsky.social/xrpc/com.atproto.server.createSession", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: handle, password }),
-      });
-      const session = (await sessionResponse.json().catch(() => ({}))) as any;
-      if (!sessionResponse.ok || !session.accessJwt) throw new TRPCError({ code: "BAD_GATEWAY", message: `Bluesky login failed (${sessionResponse.status}).` });
-      const del = await fetch("https://bsky.social/xrpc/com.atproto.repo.deleteRecord", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.accessJwt}` },
-        body: JSON.stringify({ repo: session.did, collection: "app.bsky.feed.post", rkey: input.rkey }),
-      });
-      if (!del.ok) {
-        const body = await del.text().catch(() => "");
-        throw new TRPCError({ code: "BAD_GATEWAY", message: `Bluesky delete failed (${del.status}): ${body.slice(0, 200)}` });
-      }
-      return { deleted: input.rkey };
-    }),
 });
