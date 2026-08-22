@@ -146,6 +146,12 @@ CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
 #   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, reddit-comments.md,
 #     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url,
 #     newsletter-tip.md, checklist.md) — run after every publish
+#
+# dev.to API notes (verified live):
+#   POST https://dev.to/api/articles  with header `api-key` AND a browser-like
+#   User-Agent (e.g. "Mozilla/5.0") — default library UAs get an empty 403 from
+#   Cloudflare. Full-copy syndication waits for the indexing window (§9); create
+#   as draft (published:false) immediately, flip to published:true after.
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**
