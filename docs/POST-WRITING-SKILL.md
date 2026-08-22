@@ -147,6 +147,82 @@ Before any draft exists, complete this sentence and show it to the editor:
     interleaving, no invented flags.
 - **Close**: verdict/what-to-watch + one button CTA (related article or hub).
 
+## 5a. Voice: write like a person who did the thing
+
+Our default narrator is **one of our engineers who ran everything yesterday**,
+writing for a colleague. Generic-AI voice is a defect treated like a broken code
+block.
+
+- **Personalized over instructional**: "Here is how you can fix X" → "I lost an
+  hour to this error last night — here's the fix that actually worked." Open
+  with the real situation, not the topic.
+- **First person is encouraged**: what you tried first and why it failed, which
+  option you picked and why, what surprised you. We genuinely test commands
+  before publishing (§7), so write from that actual work — specifics (exact
+  versions, verbatim error strings, timings) are what make it human. Never
+  invent fake experience details; ground every "I" claim in real verification.
+- **Opinions welcome when defensible**: "I don't recommend the Docker route
+  here because the extension reload breaks volumes."
+- **Banned AI-tell phrases** (treated as QA defects): "in conclusion",
+  "it's important to note", "delve", "landscape" (metaphorical), "game-changer",
+  "unlock", "seamless/seamlessly", "robust", "leverage", "let's dive in",
+  "in today's fast-paced world", "furthermore/moreover" chains, and any
+  unearned tricolon ("fast, reliable, and secure").
+- **Read-aloud test**: would a senior dev say this sentence out loud to a
+  colleague? If not, rewrite it.
+
+## 5b. The completeness contract (finish the article)
+
+A tutorial is DONE only when a reader who knows nothing reaches the promised
+goal without opening another tab:
+
+- Prerequisites with exact versions; every command in order; **expected output**
+  shown after any step that can fail silently; the errors we actually hit plus
+  their fixes; a verification step at the end ("run `glancer --version` — you
+  should see 0.4.x"); uninstall/rollback note where useful.
+- **No length limit.** Long is fine when every section carries weight; cut
+  fluff, never steps. If depth competes with brevity, depth wins.
+- Forbidden endings: trailing off, "and so on", "left as an exercise",
+  "beyond the scope of this article" (either cover it properly or split it into
+  its own article per §5d and link it), unfinished TODO sections.
+- Finish means: the title's promise is fully delivered **on this page**, and
+  the next step is a link onward, not homework.
+
+## 5c. Format arsenal (use the whole canvas)
+
+The site renders rich formats natively — use them deliberately, never as
+decoration:
+
+| Format | When it adds real value |
+|---|---|
+| Code blocks | Always declare language; chip + copy button render automatically |
+| Images / screenshots | Show REAL terminal output or UI state instead of describing it; alt text mandatory; hero ≥1200px wide |
+| Video embeds (YouTube etc.) | Official demos, screencasts of visual tools — when moving pixels prove more than prose |
+| Audio embeds | Podcast/discussion clips that are primary sources |
+| Tables | Config options, version comparisons, head-to-heads — assemble what nobody else assembled |
+| Blockquotes | Verbatim source quotes, always with a link |
+| Bold / highlights | The one thing to remember per section — sparingly |
+| Internal links | Descriptive anchors naming the destination's promise (never "click here") |
+
+Every embed must carry information the surrounding prose cannot. A decorative
+image fails QA; a screenshot of the actual error message passes.
+
+## 5d. Split rule: many focused pages beat one mega-page
+
+- **One page = one primary search intent.** If a draft serves two distinct user
+  goals (e.g., "install Rust Glancer" AND "tune Glancer for large repos"), do
+  not write one hybrid post — write TWO complete articles, each satisfying §5b
+  for its own goal, each with its own title/meta targeting its specific query.
+- Rule of thumb: past ~2,500 words serving two goals → split into two ~1,200–1,800
+  word articles. Each page then ranks for ITS query; a single bloated URL ranks
+  weakly for both.
+- **Backlink architecture (hub-and-spoke)**: every spoke links UP to its topic
+  hub and SIDEWAYS to sibling spokes with descriptive, promise-naming anchors;
+  leave one deliberate open loop per article ("once installed, the next problem
+  is multi-root setups →"). Multi-page sessions through these links are a
+  quality signal and compound topical authority (§3).
+- Sequence splits within days of each other so the cluster reads as complete.
+
 ## 6. On-page optimization (set these CLI fields)
 
 | Field | Rule |
