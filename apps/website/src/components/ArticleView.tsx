@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Clock3, MessageCircle, Send, Share2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { enhanceArticleHtml } from "@web/lib/articleHtml";
 import { toast } from "sonner";
 import { trpcClient } from "@web/lib/trpc-client";
@@ -42,6 +42,39 @@ export default function ArticleView({ post, related, comments: initialComments, 
 
   useEffect(() => {
     trpcClient.blog.track.mutate({ postId: post.id, eventType: "article_view", referrerHost: document.referrer ? new URL(document.referrer).hostname : undefined }).catch(() => undefined);
+  }, [post.id]);
+
+  const engagementFlags = useRef({ depth75: false, complete: false });
+
+  useEffect(() => {
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - window.innerHeight;
+      if (max <= 0) return;
+      const ratio = Math.min(1, Math.max(0, window.scrollY / max));
+      if (!engagementFlags.current.depth75 && ratio >= 0.75) {
+        engagementFlags.current.depth75 = true;
+        trpcClient.blog.track.mutate({ postId: post.id, eventType: "scroll_depth", properties: { depth_percent: 75 } }).catch(() => undefined);
+      }
+      if (!engagementFlags.current.complete && ratio >= 0.95) {
+        engagementFlags.current.complete = true;
+        trpcClient.blog.track.mutate({ postId: post.id, eventType: "reading_complete", properties: { depth_percent: 100 } }).catch(() => undefined);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [post.id]);
+
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest(".gravity-code-copy")) {
+        const block = target.closest<HTMLElement>(".gravity-code");
+        trpcClient.blog.track.mutate({ postId: post.id, eventType: "code_copy", properties: { lang: block?.dataset.lang ?? null } }).catch(() => undefined);
+      }
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
   }, [post.id]);
 
   const readingTime = useMemo(() => Math.max(3, Math.ceil((post.rendered_html.replace(/<[^>]*>/g, " ").split(/\s+/).length ?? 180) / 220)), [post.rendered_html]);

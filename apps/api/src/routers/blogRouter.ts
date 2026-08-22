@@ -241,7 +241,7 @@ export const blogRouter = router({
     return { success: true };
   }),
 
-  track: publicProcedure.input(z.object({ postId: z.string().uuid().optional(), eventType: z.enum(["page_view", "article_view", "scroll_depth", "reading_complete", "comment_submitted", "subscription_created"]), sessionHash: z.string().max(120).optional(), referrerHost: z.string().max(255).optional(), properties: z.record(z.string(), z.unknown()).default({}) })).mutation(async ({ input }) => {
+  track: publicProcedure.input(z.object({ postId: z.string().uuid().optional(), eventType: z.enum(["page_view", "article_view", "scroll_depth", "reading_complete", "code_copy", "comment_submitted", "subscription_created"]), sessionHash: z.string().max(120).optional(), referrerHost: z.string().max(255).optional(), properties: z.record(z.string(), z.unknown()).default({}) })).mutation(async ({ input }) => {
     const site = await publicSiteOrThrow();
     if (!site) return { success: false };
     const { error } = await getSupabase().from("analytics_events").insert({ organization_id: site.organization_id, site_id: site.id, post_id: input.postId ?? null, event_type: input.eventType, session_hash: input.sessionHash ?? null, referrer_host: input.referrerHost ?? null, properties: input.properties });

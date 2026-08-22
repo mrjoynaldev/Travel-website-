@@ -146,12 +146,17 @@ CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
 #   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, reddit-comments.md,
 #     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url,
 #     newsletter-tip.md, checklist.md) — run after every publish
+CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
+#   → enqueues devto + bluesky + mastodon into the Studio Distribution queue;
+#     the editor approves there. HARD CAP: 3 posts/day across all channels.
 #
 # dev.to API notes (verified live):
 #   POST https://dev.to/api/articles  with header `api-key` AND a browser-like
 #   User-Agent (e.g. "Mozilla/5.0") — default library UAs get an empty 403 from
 #   Cloudflare. Full-copy syndication waits for the indexing window (§9); create
-#   as draft (published:false) immediately, flip to published:true after.
+#   as draft (published:false) immediately, then either flip it later via the
+#   queue item's payload {"articleId": "<devto draft id>"} + Approve in Studio,
+#   or PUT {"article":{"published":true}} to /api/articles/<id>.
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**

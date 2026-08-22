@@ -98,6 +98,9 @@ async function postMastodon(text: string): Promise<string> {
 
 async function dispatch(row: any): Promise<{ url?: string }> {
   if (row.channel === "devto") {
+    if (row.payload?.articleId) {
+      return { url: await flipDevtoDraft(String(row.payload.articleId)) };
+    }
     const bodyMarkdown = row.payload?.bodyMarkdown;
     if (!bodyMarkdown) throw new Error("devto payload is missing bodyMarkdown");
     return { url: await postDevto(String(bodyMarkdown)) };

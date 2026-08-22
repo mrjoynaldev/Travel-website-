@@ -266,11 +266,14 @@ Golden rules:
 2. **Wait for indexing before full-copy syndication**: as a new site wait
    7–10 days after publish (verify with GSC), then syndicate. Link drops and
    social posts are exempt — only full-text copies wait.
-3. **Never hand-paste raw markdown into platforms.** Generate the share kit:
+3. **Never hand-paste raw markdown into platforms.** Two-step flow:
    `node distribute.mjs kit <slug>` writes `~/crg-cli/kits/<slug>/` with
    per-platform files (`devto.md`, `bluesky.txt`, `reddit-comments.md`,
    `linkedin.md`, `hn-title.txt` + `hn-firstcomment.md`, `medium-import.url`,
-   `newsletter-tip.md`, `checklist.md`).
+   `newsletter-tip.md`, `checklist.md`); then
+   `node distribute.mjs push <slug>` enqueues the auto channels into the
+   Studio Distribution queue, where the editor approves each post (hard cap:
+   3 posts/day across all channels).
 
 Channel tiers:
 - **AUTO** (system posts inside a hard daily cap): dev.to (canonical_url set),
