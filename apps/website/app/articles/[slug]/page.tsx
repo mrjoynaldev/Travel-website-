@@ -16,7 +16,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = post.meta_title?.trim() || post.title;
     const description = post.meta_description?.trim() || post.excerpt?.trim() || undefined;
     const canonical = post.canonical_url?.trim() || `${siteUrl()}/articles/${post.slug}`;
-    const image = post.og_image_url?.trim() || post.featuredMedia?.url || `${siteUrl()}/og-default.png`;
+  const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
+  const image = uploadedImage || `${siteUrl()}/api/og?title=${encodeURIComponent(title)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
     const keywords = (post.tags ?? []).map((tag: { name: string }) => tag.name);
     return {
       title,
@@ -66,7 +67,9 @@ export default async function ArticlePage({ params }: Props) {
 
   const pageUrl = `${siteUrl()}/articles/${post.slug}`;
   const canonical = post.canonical_url?.trim() || pageUrl;
-  const image = post.og_image_url?.trim() || post.featuredMedia?.url || `${siteUrl()}/og-default.png`;
+  const articleTitle = post.meta_title?.trim() || post.title;
+  const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
+  const image = uploadedImage || `${siteUrl()}/api/og?title=${encodeURIComponent(articleTitle)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
