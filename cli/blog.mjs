@@ -201,6 +201,9 @@ Research:
   research trends [--geo <US>]          Google Trends trending searches by country
   research hn [--query <q>]             Hacker News front page or topic search
 
+Ranking review:
+  rankings [--days <28>]                Per-article engagement + §8 verdict table (weekly ritual)
+
 Posts:
   posts list [--status <s>] [--search <q>]          List posts (draft|review|published|archived)
   posts get <id>                                    Fetch one post with taxonomy
@@ -410,6 +413,24 @@ async function main() {
 
     if (cmd === "subscribers" && (!sub || sub === "list")) return print(await client.studio.subscribers.list.query());
     if (cmd === "analytics") return print(await client.studio.analytics.query({}));
+
+    if (cmd === "rankings") {
+      const days = Number(argValue("--days")) || 28;
+      const data = await client.studio.rankings.query({ days });
+      const t = data.totals;
+      console.log(`✓ Weekly ranking review — last ${t.windowDays} days across ${t.posts} published post(s)`);
+      console.log(`  views ${t.views} · 75%-scrolls ${t.depth75} · finished reads ${t.readingComplete} · code copies ${t.codeCopies} · comments ${t.comments} · subscribers ${t.subscribers}`);
+      if (!data.rows.length) return print("No published posts yet.");
+      for (const row of data.rows) {
+        console.log(`\n• ${row.title}`);
+        console.log(`  /articles/${row.slug}  (${row.ageDays ?? "?"}d old, updated ${row.updatedAt ? new Date(row.updatedAt).toISOString().slice(0, 10) : "?"})`);
+        console.log(`  views ${row.views} · depth75 ${row.depth75} · finished ${row.complete} · copies ${row.copies} · engagement ${row.engagementRate}%`);
+        console.log(`  → VERDICT: ${row.verdict}`);
+      }
+      console.log("\nApply POST-WRITING-SKILL.md §8 next: one highest-leverage move for the week.");
+      return;
+    }
+
     if (cmd === "export") return print(await client.studio.exportContent.query({ format: argValue("--format") || "json" }));
 
     console.log(HELP);

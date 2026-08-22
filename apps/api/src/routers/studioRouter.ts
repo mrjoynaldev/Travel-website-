@@ -215,6 +215,71 @@ export const studioRouter = router({
 
   analytics: protectedProcedure.input(z.object({ from: z.string().datetime().optional(), to: z.string().datetime().optional() })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor", "author"]); const to = input.to ?? new Date().toISOString(); const from = input.from ?? new Date(Date.now() - 30 * 86400000).toISOString(); return getAnalyticsSummary(actor, from, to); }),
 
+  rankings: protectedProcedure.input(z.object({ days: z.number().int().min(1).max(365).default(28) })).query(async ({ ctx, input }) => {
+    const actor = await actorFor(ctx);
+    assertRole(actor, ["admin", "editor", "author"]);
+    const db = getSupabase();
+    const since = new Date(Date.now() - input.days * 86400000).toISOString();
+    const [{ data: posts, error: postsError }, { data: events, error: eventsError }] = await Promise.all([
+      db.from("posts").select("id,title,slug,status,published_at,updated_at").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).eq("status", "published").order("published_at", { ascending: false }),
+      db.from("analytics_events").select("event_type,post_id,occurred_at").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).gte("occurred_at", since),
+    ]);
+    if (postsError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load posts." });
+    if (eventsError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load analytics events." });
+
+    const stats = new Map<string, { views: number; depth75: number; complete: number; copies: number; comments: number; subs: number }>();
+    for (const event of events ?? []) {
+      if (!event.post_id) continue;
+      const row = stats.get(event.post_id) ?? { views: 0, depth75: 0, complete: 0, copies: 0, comments: 0, subs: 0 };
+      switch (event.event_type) {
+        case "article_view":
+        case "page_view": row.views += 1; break;
+        case "scroll_depth": row.depth75 += 1; break;
+        case "reading_complete": row.complete += 1; break;
+        case "code_copy": row.copies += 1; break;
+        case "comment_submitted": row.comments += 1; break;
+        case "subscription_created": row.subs += 1; break;
+      }
+      stats.set(event.post_id, row);
+    }
+
+    const now = Date.now();
+    const rows = (posts ?? []).map((post: any) => {
+      const s = stats.get(post.id) ?? { views: 0, depth75: 0, complete: 0, copies: 0, comments: 0, subs: 0 };
+      const engagementRate = s.views ? Number((((s.depth75 + s.complete + s.comments + s.subs) / s.views) * 100).toFixed(1)) : 0;
+      const ageDays = post.published_at ? Math.floor((now - new Date(post.published_at).getTime()) / 86400000) : null;
+      let verdict = "COLLECT — too early, no reliable signal yet";
+      if (ageDays !== null && ageDays > 21 && s.views === 0) verdict = "REWRITE or MERGE — zero reads past week 3";
+      else if (s.views >= 10 && engagementRate >= 40) verdict = "NEW companion spoke — demand proven";
+      else if (s.views >= 10 && engagementRate < 20) verdict = "UPDATE title/intro — readers bounce early";
+      else if (s.copies >= 3 && s.copies >= s.views * 0.15) verdict = "NEW how-to companion — code gets copied";
+      else if (ageDays !== null && ageDays > 120) verdict = "REFRESH candidate — aging, check GSC position";
+      return {
+        postId: post.id as string,
+        title: post.title as string,
+        slug: post.slug as string,
+        publishedAt: post.published_at as string | null,
+        updatedAt: post.updated_at as string | null,
+        ageDays,
+        ...s,
+        engagementRate,
+        verdict,
+      };
+    });
+    rows.sort((a: any, b: any) => b.views - a.views || b.engagementRate - a.engagementRate);
+    const totals = {
+      windowDays: input.days,
+      posts: rows.length,
+      views: rows.reduce((acc: number, r: any) => acc + r.views, 0),
+      depth75: rows.reduce((acc: number, r: any) => acc + r.depth75, 0),
+      readingComplete: rows.reduce((acc: number, r: any) => acc + r.complete, 0),
+      codeCopies: rows.reduce((acc: number, r: any) => acc + r.copies, 0),
+      comments: rows.reduce((acc: number, r: any) => acc + r.comments, 0),
+      subscribers: rows.reduce((acc: number, r: any) => acc + r.subs, 0),
+    };
+    return { totals, rows };
+  }),
+
   notifications: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("notification_outbox").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }).limit(100); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load notification outbox." }); return data ?? []; }),
 
   settings: router({
