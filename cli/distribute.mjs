@@ -182,6 +182,8 @@ function buildKit(post) {
 
   const files = {};
 
+  // Teaser drives traffic to canonical — never dump full article on dev.to (see https://developers.forem.com/api/v0 + forem/forem#front-matter-beats-API).
+  const teaserPreview = truncateWords(textOf(markdown.replace(/[#*_`>\-\n]+/g, " ").replace(/\s+/g, " ").trim()), 320);
   files["devto.md"] = `---
 title: ${title}
 published: false
@@ -190,11 +192,26 @@ tags: ${tags.join(", ")}
 canonical_url: ${url}${cover ? `\ncover_image: ${cover}` : ""}
 ---
 
-${markdown}
+${summary}
+
+> Originally published at **CodeReport Global** — read the full guide with code, screenshots and benchmarks at **${url}**.
+
+## Why this matters
+
+${teaserPreview}…
+
+## What you'll get in the full article
+
+${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkthrough`}
+- Copy-paste commands + expected output + common errors
+- Verified on the exact versions mentioned — no fluff
+
+👉 **Read the full article:** ${url}
+
+*If this saved you time, a reaction on dev.to helps — discussion continues on the original post.*
 
 ---
-
-Originally published at [CodeReport Global](${url}). If you found this useful, reactions and comments here are appreciated — the discussion continues on the original post.
+*Canonical: ${url}*
 `;
 
   files["bluesky.txt"] = `${blueskyTitle}${blueskyTail}\n`;

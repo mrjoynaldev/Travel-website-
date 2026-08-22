@@ -362,10 +362,8 @@ link-preview card from the article's OpenGraph tags), so `bluesky.txt` MUST
 always contain the full article URL plus 2–3 relevant #hashtags. Never shorten
 URLs on any channel (Mastodon/dev.to format natively).
 
-Verified per-channel rules (official docs, checked 2026-08-22):
-- dev.to: front matter wins on updates; keep ≤4 lowercase tags, canonical_url
-  = our URL, cover_image REQUIRED (largest CTR lever). Publish state flips via
-  JSON {"published":true} only. Drafts are invisible to /api/articles/:id.
+Verified per-channel rules (official docs, checked 2026-08-22 — https://developers.forem.com/api/v0 + https://github.com/forem/forem#front-matter-beats-API):
+- dev.to: **teaser drives traffic, never full copy**. `devto.md` is a 320-word hook + 3 bullets + `👉 Read full at canonical_url` + `cover_image` REQUIRED (largest CTR lever, re-served 1000×420). Keep ≤4 lowercase tags, `canonical_url = our URL` always. Front matter wins on update — you MUST resend full `body_markdown` with updated front matter; `published` flips via JSON `{"published":true}` **plus** front matter `published:true`. Drafts invisible to `GET /api/articles/:id` — use `PUT` with `body_markdown` to fix (see `apps/api/src/routers/distributionRouter.ts:50` fallback).
 - Mastodon: plain text auto-links URLs + hashtags. URLs always count as 23
   chars inside the 500-char budget — never shorten. Hashtags: letters, digits,
   underscores; not digits-only. Posts go out public / language en via API.
@@ -374,8 +372,7 @@ Verified per-channel rules (official docs, checked 2026-08-22):
 
 Media options (use where the platform rewards it, never replacing the
 canonical link):
-- dev.to: cover_image is mandatory in front matter (largest single CTR lever;
-  dev.to re-serves at 1000x420). Reuse the article's featured/og image.
+- dev.to: teaser only — `cover_image` mandatory in front matter (largest CTR lever; dev.to re-serves at 1000×420). Reuse the article's featured/og image; hard CTA with canonical URL is required.
 - Bluesky: nothing to attach — the API builds the link-preview card from the
   article's og:image + og:title automatically.
 - Mastodon: text-only today; one optional image can be attached later via the

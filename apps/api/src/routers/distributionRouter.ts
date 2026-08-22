@@ -47,16 +47,57 @@ async function postDevto(bodyMarkdown: string): Promise<string> {
   return data.url as string;
 }
 
-async function flipDevtoDraft(articleId: string): Promise<string> {
+async function flipDevtoDraft(articleId: string, slug?: string, siteId?: string): Promise<string> {
   const apiKey = requireEnv("DEVTO_API_KEY");
-  const response = await fetch(`https://dev.to/api/articles/${articleId}`, {
+  // Official doc: front matter beats JSON on update (developers.forem.com/api/v0 + forem/forem#front-matter-beats-API).
+  // A draft created with front matter `published:false` ignores `{published:true}` alone — must resend full body_markdown with front matter `published:true`.
+  // Try fast path first; if front matter blocks it we fall back to rebuilding teaser body from our DB.
+  const fast = await fetch(`https://dev.to/api/articles/${articleId}`, {
     method: "PUT",
     headers: { "api-key": apiKey, "Content-Type": "application/json", "User-Agent": BROWSER_UA },
     body: JSON.stringify({ article: { published: true } }),
   });
-  const data = (await response.json().catch(() => ({}))) as any;
-  if (!response.ok) throw new TRPCError({ code: "BAD_GATEWAY", message: `dev.to refused to publish draft ${articleId} (${response.status})` });
-  return data.url as string;
+  const fastData = (await fast.json().catch(() => ({}))) as any;
+  if (fast.ok && fastData.published) return fastData.url as string;
+
+  // Fallback: rebuild teaser body_markdown from canonical post (teaser drives traffic, not full copy)
+  if (slug && siteId) {
+    const db = getSupabase();
+    const { data: post } = await db
+      .from("posts")
+      .select("title, slug, excerpt, meta_description, rendered_html, og_image_url, featured_media_id, tags:post_tags(tag:tags(name,slug))")
+      .eq("site_id", siteId)
+      .eq("slug", slug)
+      .maybeSingle();
+    // Also fetch featured media url if needed
+    let cover: string | undefined;
+    if (post) {
+      const rawCover = (post as any).og_image_url as string | null;
+      if (rawCover) cover = optimizedSocialImage(rawCover) || rawCover;
+      else if ((post as any).featured_media_id) {
+        const { data: media } = await db.from("media").select("url").eq("id", (post as any).featured_media_id).maybeSingle();
+        if (media?.url) cover = optimizedSocialImage(media.url) || media.url;
+      }
+      const title = String((post as any).title || slug).trim();
+      const summary = String((post as any).meta_description || (post as any).excerpt || "").slice(0, 140) || title.slice(0, 130);
+      const url = `https://codereportglobal.indevs.in/articles/${(post as any).slug}`;
+      const tagList = ((post as any).tags as any[] | null)?.map((r: any) => String(r.tag?.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")).filter((t: string) => t.length >= 3) ?? [];
+      const tags = [...new Set([...tagList, "ai", "webdev", "programming", "news"])].slice(0, 4);
+      const text = String((post as any).rendered_html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600);
+      const teaser = `${summary}\n\n> Originally published at **CodeReport Global** — read the full guide at **${url}**.\n\n${text}…\n\n👉 **Read the full article:** ${url}`;
+      const bodyMarkdown = `---\ntitle: ${title.replace(/\n/g, " ")}\npublished: true\ndescription: ${summary.replace(/\n/g, " ")}\ntags: ${tags.join(", ")}\ncanonical_url: ${url}${cover ? `\ncover_image: ${cover}` : ""}\n---\n\n${teaser}\n\n---\n*Canonical: ${url}*\n`;
+      const retry = await fetch(`https://dev.to/api/articles/${articleId}`, {
+        method: "PUT",
+        headers: { "api-key": apiKey, "Content-Type": "application/json", "User-Agent": BROWSER_UA },
+        body: JSON.stringify({ article: { body_markdown: bodyMarkdown, published: true } }),
+      });
+      const retryData = (await retry.json().catch(() => ({}))) as any;
+      if (retry.ok) return retryData.url as string;
+      throw new TRPCError({ code: "BAD_GATEWAY", message: `dev.to publish retry failed (${retry.status}): ${retryData?.error ?? "unknown"}` });
+    }
+  }
+  if (fast.ok) return fastData.url as string;
+  throw new TRPCError({ code: "BAD_GATEWAY", message: `dev.to refused to publish draft ${articleId} (${fast.status})` });
 }
 
 // Bluesky renders links/hashtags only when the record carries rich-text facets
@@ -178,7 +219,7 @@ async function postMastodon(text: string): Promise<string> {
 async function dispatch(row: any): Promise<{ url?: string }> {
   if (row.channel === "devto") {
     if (row.payload?.articleId) {
-      return { url: await flipDevtoDraft(String(row.payload.articleId)) };
+      return { url: await flipDevtoDraft(String(row.payload.articleId), String(row.slug), String(row.site_id)) };
     }
     const bodyMarkdown = row.payload?.bodyMarkdown;
     if (!bodyMarkdown) throw new Error("devto payload is missing bodyMarkdown");
@@ -310,7 +351,7 @@ export const distributionRouter = router({
       }
       let url: string;
       try {
-        url = await flipDevtoDraft(input.articleId);
+        url = await flipDevtoDraft(input.articleId, input.slug, actor.siteId);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         throw new TRPCError({ code: "BAD_GATEWAY", message });
