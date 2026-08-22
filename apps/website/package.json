@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
+    "prebuild": "cp ../../docs/AI-EDITOR-AGENT.md ../../docs/API-ACCESS.md ../../docs/POST-WRITING-SKILL.md ../../docs/SEO-GOOGLE.md public/docs/ && cp ../../cli/distribute.mjs public/docs/distribute.mjs",
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "check": "tsc --noEmit"

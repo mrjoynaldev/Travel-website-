@@ -44,15 +44,15 @@ node cli/blog.mjs whoami                                          # ALWAYS run f
 
 ```bash
 mkdir -p ~/crg-cli && cd ~/crg-cli
-curl -fsSL https://codereportglobal.indevs.in/docs/setup.sh -o setup.sh && bash setup.sh
+curl -fsSL https://codereportglobal-backend.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
 export CRG_TOKEN="crg_…"
 export CRG_API_URL="https://codereportglobal-backend.onrender.com"
 node blog.mjs whoami                                              # ALWAYS run first
 ```
 
-The bootstrap downloads `blog.mjs` + `gravity.mjs` from this site and installs
-the two npm dependencies. All documentation lives at
-`https://codereportglobal.indevs.in/docs/<filename>`.
+The bootstrap downloads `blog.mjs` + `gravity.mjs` + `distribute.mjs` from this
+site and installs the two npm dependencies. All documentation lives at
+`https://codereportglobal-backend.onrender.com/docs/<filename>`.
 
 If `whoami` fails, stop and report — never attempt to work around auth.
 
@@ -140,6 +140,23 @@ node cli/blog.mjs posts update <id> --meta-description "Improved copy"   # any f
 node cli/blog.mjs posts feature <id>          # homepage feature
 node cli/blog.mjs posts schedule <id> --at 2026-09-01T09:00:00Z
 node cli/blog.mjs posts delete <id>           # trash — ONLY with explicit editor approval
+
+# Distribution (POST-WRITING-SKILL.md §9)
+CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
+#   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, reddit-comments.md,
+#     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url,
+#     newsletter-tip.md, checklist.md) — run after every publish
+CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
+#   → enqueues devto + bluesky + mastodon into the Studio Distribution queue;
+#     the editor approves there. HARD CAP: 3 posts/day across all channels.
+#
+# dev.to API notes (verified live):
+#   POST https://dev.to/api/articles  with header `api-key` AND a browser-like
+#   User-Agent (e.g. "Mozilla/5.0") — default library UAs get an empty 403 from
+#   Cloudflare. Full-copy syndication waits for the indexing window (§9); create
+#   as draft (published:false) immediately, then either flip it later via the
+#   queue item's payload {"articleId": "<devto draft id>"} + Approve in Studio,
+#   or PUT {"article":{"published":true}} to /api/articles/<id>.
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**
@@ -206,6 +223,8 @@ Run through this before every `submit`/`publish`:
       (or archive/topic pages while the library is small)
 - [ ] All images have descriptive alt text; cover/thumbnail set; og-image set
 - [ ] At least one code block for developer topics; all facts sourced
+- [ ] Every fenced block has an explicit language tag and contains zero UI
+      artifacts — no "Copy"/"yamlCopy"/"ChatGPT said" residue anywhere
 - [ ] Direct answer to the target question within the first two paragraphs
 - [ ] GEO pass: quotable opening answer, concrete facts/numbers, named sources,
       full entity names, no generic intro fluff (see §3b)
