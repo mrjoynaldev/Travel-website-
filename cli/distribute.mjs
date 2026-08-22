@@ -276,6 +276,15 @@ Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after pub
 - [ ] Mastodon — reuse bluesky.txt content (drop hashtags beyond 2 if noisy)
 - [ ] Hashnode — RSS import picks it up automatically once feed connected; verify canonical shows
 
+## Verified channel rules (official docs, 2026-08-22)
+| Channel | Format | Link rule | Media |
+|---|---|---|---|
+| dev.to | markdown + front matter | canonical_url = our URL; ≤4 lowercase tags | cover_image REQUIRED (1000x420 render) |
+| Bluesky | plain text ≤300 graphemes incl. URL+hashtags | API injects facets automatically | link-preview card auto-built from og:image |
+| Mastodon | plain text ≤500 chars | URLs always count as 23 chars — never shorten | optional: 1 image via Studio media library first |
+| HN | title + first comment with bare URL | links must be https:// | no media |
+| LinkedIn/X | short prose + bare URL on its own line | native auto-linking | optional image boosts CTR |
+
 ## QUEUE channel
 - [ ] Reddit — pick ONE fresh thread (<24h) matching drafts in reddit-comments.md; approve in Studio queue (cap 3/day)
 

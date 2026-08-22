@@ -372,6 +372,18 @@ Verified per-channel rules (official docs, checked 2026-08-22):
 - Bluesky: ≤300 graphemes including URL + hashtags; facets + link-preview card
   are injected by our API automatically.
 
+Media options (use where the platform rewards it, never replacing the
+canonical link):
+- dev.to: cover_image is mandatory in front matter (largest single CTR lever;
+  dev.to re-serves at 1000x420). Reuse the article's featured/og image.
+- Bluesky: nothing to attach — the API builds the link-preview card from the
+  article's og:image + og:title automatically.
+- Mastodon: text-only today; one optional image can be attached later via the
+  Studio queue payload (media v2 upload) if a post needs it.
+- LinkedIn / X: attach one strong image when pasting manually — posts with
+  images earn meaningfully more impressions; keep the bare URL on its own line.
+- HN: no media, ever. Title + URL + first comment only.
+
 Channel tiers:
 - **AUTO** (system posts inside a hard daily cap): dev.to (canonical_url set),
   Bluesky, Mastodon, Hashnode (RSS import respects canonicals).
