@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
 
-export const contentType = "image/png";
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const title = (searchParams.get("title") || "CodeReport Global").slice(0, 120);
