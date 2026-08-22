@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ArticleView from "@web/components/ArticleView";
 import { serverTrpc } from "@web/lib/trpc-server";
+import { optimizedSocialImage } from "@web/lib/social-image";
 
 export const revalidate = 300;
 
@@ -17,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = post.meta_description?.trim() || post.excerpt?.trim() || undefined;
     const canonical = post.canonical_url?.trim() || `${siteUrl()}/articles/${post.slug}`;
   const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
-  const image = uploadedImage || `${siteUrl()}/api/og?title=${encodeURIComponent(title)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
+    const image = optimizedSocialImage(uploadedImage) || `${siteUrl()}/api/og?title=${encodeURIComponent(title)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
     const keywords = (post.tags ?? []).map((tag: { name: string }) => tag.name);
     return {
       title,

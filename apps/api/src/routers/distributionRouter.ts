@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertRole, getActor, recordAudit } from "../blog";
 import { getSupabase } from "../supabase";
+import { optimizedSocialImage } from "../lib/social-image";
 import { protectedProcedure, router } from "../_core/trpc";
 
 const CHANNELS = ["devto", "bluesky", "mastodon"] as const;
@@ -100,9 +101,10 @@ async function fetchBlueskyLinkCard(url: string, auth: string): Promise<any | un
     const description = (meta("og:description") || "").trim().slice(0, 300);
     if (!title) return undefined;
     const imageUrl = meta("og:image");
+    const optimized = optimizedSocialImage(imageUrl);
     let thumb: any;
-    if (imageUrl && /^https?:\/\//.test(imageUrl)) {
-      const imageResponse = await fetch(imageUrl, { signal: AbortSignal.timeout(8000) });
+    if (optimized && /^https?:\/\//.test(optimized)) {
+      const imageResponse = await fetch(optimized, { signal: AbortSignal.timeout(8000) });
       if (imageResponse.ok) {
         const bytes = Buffer.from(await imageResponse.arrayBuffer());
         if (bytes.length > 0 && bytes.length <= 900_000) {
