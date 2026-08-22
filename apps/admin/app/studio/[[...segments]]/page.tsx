@@ -11,6 +11,7 @@ import { StudioAIProviders } from "@/admin-site/pages/StudioAI";
 import StudioResearch from "@/admin-site/pages/StudioResearch";
 import {
   StudioApiTokens,
+  StudioDistribution,
   StudioSubscribers,
 } from "@/admin-site/pages/StudioDeveloper";
 import { StudioEditor } from "@/admin-site/pages/StudioEditor";
@@ -79,6 +80,8 @@ function resolveStudioView(pathname: string) {
       return StudioSubscribers;
     case "api-tokens":
       return StudioApiTokens;
+    case "distribution":
+      return StudioDistribution;
     default:
       return StudioOverview;
   }

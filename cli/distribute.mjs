@@ -21,7 +21,7 @@
  *   MANUAL Hacker News · LinkedIn · X · Medium import · Quora · newsletter tips
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import superjson from "superjson";
@@ -323,10 +323,40 @@ async function resolvePost(slug) {
 function requireSlug(args) {
   const slug = args[0];
   if (!slug) {
-    console.error("Usage: node distribute.mjs kit <slug> [--out <dir>]");
+    console.error("Usage: node distribute.mjs <kit|push> <slug> [--out <dir>]");
     process.exit(1);
   }
   return slug;
+}
+
+function kitDirFor(args, slug) {
+  const outFlagIndex = args.indexOf("--out");
+  if (outFlagIndex >= 0 && args[outFlagIndex + 1]) return resolve(args[outFlagIndex + 1]);
+  if (process.env.CRG_KITS_DIR) return resolve(process.env.CRG_KITS_DIR, slug);
+  return join(homedir(), "crg-cli", "kits", slug);
+}
+
+async function pushKit(slug) {
+  const dir = kitDirFor(process.argv.slice(2), slug);
+  let devtoMd;
+  let blueskyTxt;
+  try {
+    devtoMd = readFileSync(join(dir, "devto.md"), "utf8");
+    blueskyTxt = readFileSync(join(dir, "bluesky.txt"), "utf8").trim();
+  } catch {
+    console.error(`✗ Kit not found in ${dir}. Run \`node distribute.mjs kit ${slug}\` first.`);
+    process.exit(1);
+  }
+  console.error("-> Enqueuing devto + bluesky + mastodon into the Studio distribution queue...");
+  const items = [
+    { channel: "devto", payload: { bodyMarkdown: devtoMd } },
+    { channel: "bluesky", payload: { text: blueskyTxt } },
+    { channel: "mastodon", payload: { text: blueskyTxt } },
+  ];
+  const rows = await client.distribution.push.mutate({ slug, items });
+  console.error(`   queued ${rows.length} item(s):`);
+  for (const row of rows) console.error(`   - [${row.status}] ${row.channel}`);
+  console.log("\nQueued. Approve them in Studio → Distribution (hard cap: 3 posts/day).");
 }
 
 async function main() {
@@ -334,31 +364,36 @@ async function main() {
   const command = args[0];
 
   if (!command || command === "help" || command === "--help") {
-    console.log(`Usage: node distribute.mjs kit <slug> [--out <dir>]
+    console.log(`Usage: node distribute.mjs <command> <slug> [--out <dir>]
 
-Generates a distribution kit (dev.to draft, Bluesky post, Reddit comment drafts,
-LinkedIn post, HN submission files, Medium import URL, newsletter pitch,
-placement checklist) for one published article.
+  kit <slug>    Generate a distribution kit (dev.to draft, Bluesky post, Reddit
+                comment drafts, LinkedIn post, HN submission files, Medium import
+                URL, newsletter pitch, placement checklist) for one published article.
+  push <slug>   Enqueue devto + bluesky + mastodon payloads from an existing kit
+                into the Studio distribution queue (approve-then-post, cap 3/day).
 
 Env: CRG_TOKEN (required), CRG_API_URL, CRG_SITE_URL, CRG_KITS_DIR.`);
     return;
   }
 
-  if (command !== "kit") {
-    console.error(`Unknown command "${command}". Try: kit <slug>`);
+  if (command !== "kit" && command !== "push") {
+    console.error(`Unknown command "${command}". Try: kit <slug> | push <slug>`);
     process.exit(1);
   }
 
   const slug = requireSlug(args.slice(1));
-  const outFlagIndex = args.indexOf("--out");
-  const outDir = outFlagIndex >= 0 && args[outFlagIndex + 1]
-    ? resolve(args[outFlagIndex + 1])
-    : process.env.CRG_KITS_DIR
-      ? resolve(process.env.CRG_KITS_DIR, slug)
-      : join(homedir(), "crg-cli", "kits", slug);
+  const outDir = kitDirFor(args, slug);
 
   console.error(`-> Fetching published post "${slug}"...`);
   const post = await resolvePost(slug);
+  console.error(`-> Found: ${post.title}`);
+
+  if (command === "push") {
+    await pushKit(slug);
+    return;
+  }
+
+  console.error(`-> Generating kit in ${outDir} ...`);
   console.error(`-> Found: ${post.title}`);
   console.error(`-> Generating kit in ${outDir} ...`);
 

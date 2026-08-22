@@ -7,6 +7,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { aiRouter } from "./routers/aiRouter";
 import { agentRouter } from "./routers/agentRouter";
 import { blogRouter } from "./routers/blogRouter";
+import { distributionRouter } from "./routers/distributionRouter";
 import { llmRouter } from "./routers/llmRouter";
 import { studioRouter } from "./routers/studioRouter";
 
@@ -58,6 +59,7 @@ export const appRouter = router({
 
   blog: blogRouter,
   studio: studioRouter,
+  distribution: distributionRouter,
   ai: aiRouter,
   agent: agentRouter,
   llm: llmRouter,

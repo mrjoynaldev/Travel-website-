@@ -28,6 +28,7 @@ import {
   Loader2,
   PenLine,
   Plus,
+  Send,
   Sparkles,
   Trash2,
   TrendingUp,
@@ -400,6 +401,132 @@ export function StudioApiTokens() {
           </p>
         </DialogContent>
       </Dialog>
+    </Workspace>
+  );
+}
+
+export function StudioDistribution() {
+  const queue = trpc.distribution.list.useQuery();
+  const invalidate = () => queue.refetch();
+  const approve = trpc.distribution.approve.useMutation({
+    onSuccess: data => {
+      invalidate();
+      toast.success(`Posted: ${data?.posted_url ?? "done"}`);
+    },
+    onError: error => toast.error(error.message),
+  });
+  const skip = trpc.distribution.skip.useMutation({
+    onSuccess: () => {
+      invalidate();
+      toast.success("Skipped.");
+    },
+    onError: error => toast.error(error.message),
+  });
+  const reset = trpc.distribution.reset.useMutation({
+    onSuccess: () => {
+      invalidate();
+      toast.success("Back to pending.");
+    },
+    onError: error => toast.error(error.message),
+  });
+
+  const items = queue.data?.items ?? [];
+  const cap = queue.data?.dailyCap ?? 3;
+  const used = queue.data?.postedToday ?? 0;
+
+  const statusStyle: Record<string, string> = {
+    pending: "bg-amber-100 text-amber-800",
+    approved: "bg-blue-100 text-blue-800",
+    posted: "bg-emerald-100 text-emerald-800",
+    failed: "bg-red-100 text-red-700",
+    skipped: "bg-muted text-muted-foreground",
+  };
+  const channelLabel: Record<string, string> = {
+    devto: "dev.to",
+    bluesky: "Bluesky",
+    mastodon: "Mastodon",
+  };
+
+  return (
+    <Workspace title="Distribution" eyebrow="Syndication · approve-then-post">
+      <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
+        Auto channels for the syndication engine. Generate kits and enqueue
+        them with{" "}
+        <code>node distribute.mjs push &lt;slug&gt;</code>, then approve here.
+        Hard cap {cap} posts/day (resets 00:00 UTC).
+      </p>
+      <div className="mb-5 inline-flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2 shadow-sm">
+        <Send className="h-4 w-4 text-primary" />
+        <span className="text-sm font-medium">
+          {used} / {cap} posts sent today
+        </span>
+      </div>
+      <section className="overflow-hidden rounded-xl border border-border bg-white shadow-sm">
+        {queue.isLoading ? (
+          <div className="grid min-h-32 place-items-center">
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          </div>
+        ) : items.length ? (
+          items.map(item => (
+            <div
+              key={item.id}
+              className="flex flex-col gap-3 border-b border-border p-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded bg-primary/10 px-2 py-0.5 font-mono text-[11px] font-medium text-primary">
+                    {channelLabel[item.channel] ?? item.channel}
+                  </span>
+                  <span className={`rounded px-2 py-0.5 text-[11px] font-medium capitalize ${statusStyle[item.status] ?? ""}`}>
+                    {item.status}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(item.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <a
+                  href={`https://codereportglobal.indevs.in/articles/${item.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 block truncate text-sm font-medium hover:underline"
+                >
+                  {item.slug}
+                </a>
+                {item.posted_url && (
+                  <a href={item.posted_url} target="_blank" rel="noreferrer" className="mt-0.5 block truncate text-xs text-primary hover:underline">
+                    {item.posted_url}
+                  </a>
+                )}
+                {item.error && (
+                  <p className="mt-0.5 truncate text-xs text-red-600">{item.error}</p>
+                )}
+              </div>
+              <div className="flex shrink-0 gap-2">
+                {(item.status === "pending" || item.status === "failed") && (
+                  <>
+                    <Button size="sm" onClick={() => approve.mutate({ id: item.id })} disabled={approve.isPending}>
+                      Approve &amp; post
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => skip.mutate({ id: item.id })}>
+                      Skip
+                    </Button>
+                  </>
+                )}
+                {(item.status === "failed" || item.status === "skipped") && (
+                  <Button size="sm" variant="ghost" onClick={() => reset.mutate({ id: item.id })}>
+                    Reset
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="p-12 text-center text-sm text-muted-foreground">
+            Nothing queued yet. Run <code>node distribute.mjs kit &lt;slug&gt;</code>{" "}
+            then <code>push &lt;slug&gt;</code> from the CLI toolkit.
+          </p>
+        )}
+      </section>
     </Workspace>
   );
 }

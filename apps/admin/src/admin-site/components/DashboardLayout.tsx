@@ -46,6 +46,7 @@ import {
   PanelLeft,
   ScrollText,
   Search,
+  Send,
   Settings2,
   ShieldCheck,
   Tags,
@@ -140,6 +141,7 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
       { icon: ScrollText, label: "Audit log", path: "/studio/audit" },
       { icon: Download, label: "Export", path: "/studio/export" },
       { icon: KeyRound, label: "API tokens", path: "/studio/api-tokens" },
+      { icon: Send, label: "Distribution", path: "/studio/distribution" },
     ],
   },
 ];
