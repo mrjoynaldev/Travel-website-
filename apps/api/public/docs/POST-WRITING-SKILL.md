@@ -322,3 +322,11 @@ Publish-gate (all YES or rewrite):
 Discover/AI Overviews eligibility is inherited automatically once a page is
 indexed + snippet-eligible; do not build special pages for AI queries (that IS
 scaled abuse). Weekly Ranking Review reads GSC per SEO-GOOGLE.md §10.
+
+## 11. Credentials policy
+
+You carry exactly ONE credential: `CRG_TOKEN`. Social-platform secrets
+(dev.to, Bluesky, Mastodon) live server-side in the API's environment and are
+applied automatically when the editor approves a queue item. Never request,
+store, or use platform API keys directly; never place credentials inside kit
+files. Distribution = `kit` + `push` + human approval, nothing else.

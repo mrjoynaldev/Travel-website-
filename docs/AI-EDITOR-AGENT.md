@@ -150,13 +150,14 @@ CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
 #   → enqueues devto + bluesky + mastodon into the Studio Distribution queue;
 #     the editor approves there. HARD CAP: 3 posts/day across all channels.
 #
-# dev.to API notes (verified live):
-#   POST https://dev.to/api/articles  with header `api-key` AND a browser-like
-#   User-Agent (e.g. "Mozilla/5.0") — default library UAs get an empty 403 from
-#   Cloudflare. Full-copy syndication waits for the indexing window (§9); create
-#   as draft (published:false) immediately, then either flip it later via the
-#   queue item's payload {"articleId": "<devto draft id>"} + Approve in Studio,
-#   or PUT {"article":{"published":true}} to /api/articles/<id>.
+# CREDENTIALS POLICY (strict):
+#   You need EXACTLY ONE credential: CRG_TOKEN. All social-platform secrets
+#   (dev.to api key, Bluesky app password, Mastodon token) are injected
+#   server-side by the API from its own environment when the editor approves
+#   a queue item. NEVER ask the user for platform API keys, NEVER call
+#   platform APIs directly, NEVER put keys in kit files or prompts.
+#   Draft-flip flow: set the queue item's payload {"articleId": "<devto draft
+#   id>"} (via SQL or ask the maintainer) and the same Approve click flips it.
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**
