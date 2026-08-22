@@ -356,6 +356,12 @@ Golden rules:
    Studio Distribution queue, where the editor approves each post (hard cap:
    3 posts/day across all channels).
 
+Bluesky formatting rule: links and hashtags are clickable/searchable ONLY via
+ATProto facets — our API injects them server-side from the post text, so
+`bluesky.txt` MUST always contain the full article URL plus 2–3 relevant
+#hashtags. Never shorten URLs on any channel (Mastodon/dev.to format
+natively).
+
 Channel tiers:
 - **AUTO** (system posts inside a hard daily cap): dev.to (canonical_url set),
   Bluesky, Mastodon, Hashnode (RSS import respects canonicals).

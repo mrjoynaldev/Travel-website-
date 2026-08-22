@@ -150,6 +150,13 @@ CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
 #   → enqueues devto + bluesky + mastodon into the Studio Distribution queue;
 #     the editor approves there. HARD CAP: 3 posts/day across all channels.
 #
+# Bluesky rich-text rule (handled server-side since 2026-08-22): links and
+#   hashtags ONLY render blue/clickable + searchable when the post record has
+#   ATProto facets. Our API adds them automatically from the text — your job:
+#   ALWAYS include the full article URL and 2–3 relevant #hashtags inside
+#   bluesky.txt (kit generator does this). Mastodon formats natively; dev.to is
+#   markdown. Never shorten URLs on any channel.
+#
 # CREDENTIALS POLICY (strict):
 #   You need EXACTLY ONE credential: CRG_TOKEN. All social-platform secrets
 #   (dev.to api key, Bluesky app password, Mastodon token) are injected
