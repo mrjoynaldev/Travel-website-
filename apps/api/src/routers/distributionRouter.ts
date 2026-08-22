@@ -58,6 +58,34 @@ async function flipDevtoDraft(articleId: string): Promise<string> {
   return data.url as string;
 }
 
+// Bluesky renders links/hashtags only when the record carries rich-text facets
+// with UTF-8 byte offsets — plain text stays dead-grey forever.
+function detectBlueskyFacets(text: string): any[] {
+  const facets: any[] = [];
+  const encoder = new TextEncoder();
+  const byteLength = (value: string) => encoder.encode(value).length;
+  const pushFacet = (charStart: number, charEnd: number, feature: Record<string, unknown>) => {
+    const segment = text.slice(charStart, charEnd);
+    if (!segment) return;
+    const byteStart = byteLength(text.slice(0, charStart));
+    facets.push({ index: { byteStart, byteEnd: byteStart + byteLength(segment) }, features: [feature] });
+  };
+  for (const match of text.matchAll(/https?:\/\/\S+/g)) {
+    let url = match[0];
+    let end = match.index! + url.length;
+    url = url.replace(/[.,;:!?)\]}'"]+$/, "");
+    end -= match[0].length - url.length;
+    if (!/^https?:\/\//.test(url)) continue;
+    pushFacet(match.index!, end, { $type: "app.bsky.richtext.facet#link", uri: url });
+  }
+  for (const match of text.matchAll(/(^|[\s(])#([\p{L}\p{N}_]{1,64})/gu)) {
+    const hashOffset = match[0].indexOf("#");
+    const start = match.index! + hashOffset;
+    pushFacet(start, start + 1 + match[2].length, { $type: "app.bsky.richtext.facet#tag", tag: match[2].toLowerCase() });
+  }
+  return facets.sort((a, b) => a.index.byteStart - b.index.byteStart);
+}
+
 async function postBluesky(text: string): Promise<string> {
   const handle = requireEnv("BLUESKY_HANDLE");
   const password = requireEnv("BLUESKY_APP_PASSWORD");
@@ -74,7 +102,13 @@ async function postBluesky(text: string): Promise<string> {
     body: JSON.stringify({
       repo: session.did,
       collection: "app.bsky.feed.post",
-      record: { $type: "app.bsky.feed.post", text, createdAt: new Date().toISOString() },
+      record: {
+        $type: "app.bsky.feed.post",
+        text,
+        langs: ["en"],
+        ...(detectBlueskyFacets(text).length ? { facets: detectBlueskyFacets(text) } : {}),
+        createdAt: new Date().toISOString(),
+      },
     }),
   });
   const record = (await postResponse.json().catch(() => ({}))) as any;
