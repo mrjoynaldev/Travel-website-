@@ -5,7 +5,7 @@ import { getSupabase } from "../supabase";
 import { optimizedSocialImage } from "../lib/social-image";
 import { protectedProcedure, router } from "../_core/trpc";
 
-const CHANNELS = ["devto", "bluesky", "mastodon"] as const;
+const CHANNELS = ["devto", "bluesky", "mastodon", "facebook"] as const;
 export const MAX_DAILY_POSTS = 3;
 
 type Actor = Awaited<ReturnType<typeof getActor>>;
@@ -216,6 +216,26 @@ async function postMastodon(text: string): Promise<string> {
   return data.url as string;
 }
 
+async function postFacebook(text: string): Promise<string> {
+  const pageId = requireEnv("FACEBOOK_PAGE_ID");
+  const token = requireEnv("FACEBOOK_PAGE_ACCESS_TOKEN");
+  const linkMatch = text.match(/https?:\/\/[^\s)]+/);
+  const link = linkMatch ? linkMatch[0].replace(/[.,;:!?)\]}'"]+$/, "") : undefined;
+  const params = new URLSearchParams();
+  params.set("message", text);
+  if (link) params.set("link", link);
+  params.set("access_token", token);
+  const response = await fetch(`https://graph.facebook.com/v26.0/${pageId}/feed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+  const data = (await response.json().catch(() => ({}))) as any;
+  if (!response.ok || !data.id) throw new TRPCError({ code: "BAD_GATEWAY", message: `Facebook post failed (${response.status}): ${data?.error?.message ?? "unknown"}` });
+  const postId = String(data.id).split("_").pop();
+  return `https://www.facebook.com/${pageId}/posts/${postId}`;
+}
+
 async function dispatch(row: any): Promise<{ url?: string }> {
   if (row.channel === "devto") {
     if (row.payload?.articleId) {
@@ -234,6 +254,11 @@ async function dispatch(row: any): Promise<{ url?: string }> {
     const text = row.payload?.text;
     if (!text) throw new Error("mastodon payload is missing text");
     return { url: await postMastodon(String(text)) };
+  }
+  if (row.channel === "facebook") {
+    const text = row.payload?.text;
+    if (!text) throw new Error("facebook payload is missing text");
+    return { url: await postFacebook(String(text)) };
   }
   throw new Error(`Unknown channel ${row.channel}`);
 }

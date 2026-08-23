@@ -216,6 +216,9 @@ ${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkth
 
   files["bluesky.txt"] = `${blueskyTitle}${blueskyTail}\n`;
 
+  // Facebook Page: link on its own line so Graph API creates link preview via og:image (1200×630)
+  files["facebook.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nRead the full guide: ${url}\n\n#AI #SoftwareDevelopment ${tags.slice(0, 2).map(t => `#${t}`).join(" ")}\n`;
+
   files["reddit-comments.md"] = `# Reddit kit — ${title}
 URL: ${url}
 
@@ -288,17 +291,19 @@ Published: ${post.published_at ? new Date(post.published_at).toISOString().slice
 Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
 
 ## AUTO channels (system posts within hard daily cap)
-- [ ] dev.to — review devto.md, flip published:true (or paste into DEV editor), confirm canonical_url renders
+- [ ] dev.to — review devto.md (teaser), flip published:true, confirm canonical_url renders
 - [ ] Bluesky — post bluesky.txt verbatim
 - [ ] Mastodon — reuse bluesky.txt content (drop hashtags beyond 2 if noisy)
+- [ ] Facebook Page — post facebook.txt (auto via Graph API, link preview via og:image)
 - [ ] Hashnode — RSS import picks it up automatically once feed connected; verify canonical shows
 
 ## Verified channel rules (official docs, 2026-08-22)
 | Channel | Format | Link rule | Media |
 |---|---|---|---|
-| dev.to | markdown + front matter | canonical_url = our URL; ≤4 lowercase tags | cover_image REQUIRED (1000x420 render) |
+| dev.to | teaser markdown + front matter | canonical_url = our URL; ≤4 lowercase tags | cover_image REQUIRED (1000×420 render) |
 | Bluesky | plain text ≤300 graphemes incl. URL+hashtags | API injects facets automatically | link-preview card auto-built from og:image |
 | Mastodon | plain text ≤500 chars | URLs always count as 23 chars — never shorten | optional: 1 image via Studio media library first |
+| Facebook Page | message + link param | link on own line → og:image preview | link preview auto via og:image |
 | HN | title + first comment with bare URL | links must be https:// | no media |
 | LinkedIn/X | short prose + bare URL on its own line | native auto-linking | optional image boosts CTR |
 
@@ -373,11 +378,14 @@ async function pushKit(slug) {
     console.error(`✗ Kit not found in ${dir}. Run \`node distribute.mjs kit ${slug}\` first.`);
     process.exit(1);
   }
-  console.error("-> Enqueuing devto + bluesky + mastodon into the Studio distribution queue...");
+  let facebookTxt = "";
+  try { facebookTxt = readFileSync(join(dir, "facebook.txt"), "utf8").trim(); } catch {}
+  console.error("-> Enqueuing devto + bluesky + mastodon + facebook into the Studio distribution queue...");
   const items = [
     { channel: "devto", payload: { bodyMarkdown: devtoMd } },
     { channel: "bluesky", payload: { text: blueskyTxt } },
     { channel: "mastodon", payload: { text: blueskyTxt } },
+    ...(facebookTxt ? [{ channel: "facebook", payload: { text: facebookTxt } }] : []),
   ];
   const rows = await client.distribution.enqueue.mutate({ slug, items });
   console.error(`   queued ${rows.length} item(s):`);
