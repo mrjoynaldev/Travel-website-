@@ -388,7 +388,7 @@ AI rule: use 1 strong image (cover) everywhere it helps CTR; add 2nd image or 15
 - **Instagram:** `https://developers.facebook.com/docs/instagram-api/content-publishing` — Business `17841430858092702 codereportglobal` linked to Page. `POST /{IG_ID}/media {image_url: 1080×1350, caption: link in bio}` → `media_publish`. Captions not clickable — always `Link in bio: {url}`.
 
 Channel tiers:
-- **AUTO system (queue approve, hard cap 10/day (default 10) `MAX_DAILY_POSTS` `distributionRouter.ts:9` 00:00 UTC):** dev.to (teaser + canonical), Bluesky (facets+card), Mastodon (auto-link), Facebook Page (link preview), Instagram (image+caption)
+- **AUTO system (queue approve, auto post — no limit `MAX_DAILY_POSTS` `distributionRouter.ts:9` 00:00 UTC):** dev.to (teaser + canonical), Bluesky (facets+card), Mastodon (auto-link), Facebook Page (link preview), Instagram (image+caption)
 - **QUEUE + APPROVE:** Reddit comments — approve-then-post only, cap 3/day. Find threads <24h; value first; link only when relevant; never same community twice/week.
 - **MANUAL (paste from kit):** Hacker News (title + first comment drafted; automating = ban), LinkedIn, X, Medium (Import-a-story sets canonical — never closed API), Quora, newsletter tips (TLDR AI, Ben's Bites, Console.dev).
 - **ONE-TIME checklist:** GitHub awesome-list PRs, Source of Sources signup, daily.dev Squad (corporate blogs ineligible).

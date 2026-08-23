@@ -405,7 +405,7 @@ async function pushKit(slug) {
   const rows = await client.distribution.enqueue.mutate({ slug, items });
   console.error(`   queued ${rows.length} item(s):`);
   for (const row of rows) console.error(`   - [${row.status}] ${row.channel}`);
-  console.log("\nQueued. Approve them in Studio → Distribution (hard cap: 10/day (env DISTRIBUTION_DAILY_CAP, default 10 — not strictly aggressive)).");
+  console.log("\nQueued. Approve them in Studio → Distribution (auto post — no daily limit).");
 }
 
 async function main() {

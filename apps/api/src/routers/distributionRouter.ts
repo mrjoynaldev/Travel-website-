@@ -6,7 +6,7 @@ import { optimizedSocialImage } from "../lib/social-image";
 import { protectedProcedure, router } from "../_core/trpc";
 
 const CHANNELS = ["devto", "bluesky", "mastodon", "facebook", "instagram"] as const;
-export const MAX_DAILY_POSTS = parseInt(process.env.DISTRIBUTION_DAILY_CAP || process.env.MAX_DAILY_POSTS || "10", 10); // default 10, not aggressively strict — override via Render env
+export const MAX_DAILY_POSTS = parseInt(process.env.DISTRIBUTION_DAILY_CAP || process.env.MAX_DAILY_POSTS || "0", 10); // 0 = no limit (auto post) — set env to e.g. 10 to cap
 
 type Actor = Awaited<ReturnType<typeof getActor>>;
 
@@ -373,7 +373,7 @@ export const distributionRouter = router({
       if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Queue item not found." });
       if (row.status === "posted") return row;
       const postedToday = await postedCountToday(actor.siteId);
-      if (postedToday >= MAX_DAILY_POSTS) {
+      if (MAX_DAILY_POSTS > 0 && postedToday >= MAX_DAILY_POSTS) {
         throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: `Daily cap reached: ${postedToday}/${MAX_DAILY_POSTS} posts already sent today. The cap resets at 00:00 UTC.` });
       }
       await db.from("distribution_queue").update({ status: "approved", updated_at: new Date().toISOString() }).eq("id", row.id);
@@ -429,7 +429,7 @@ export const distributionRouter = router({
       const actor = await actorFor(ctx);
       assertRole(actor, ["admin", "editor"]);
       const postedToday = await postedCountToday(actor.siteId);
-      if (postedToday >= MAX_DAILY_POSTS) {
+      if (MAX_DAILY_POSTS > 0 && postedToday >= MAX_DAILY_POSTS) {
         throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: `Daily cap reached (${postedToday}/${MAX_DAILY_POSTS}).` });
       }
       let url: string;
