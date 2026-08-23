@@ -219,6 +219,10 @@ ${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkth
   // Facebook Page: link on its own line so Graph API creates link preview via og:image (1200×630)
   files["facebook.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nRead the full guide: ${url}\n\n#AI #SoftwareDevelopment ${tags.slice(0, 2).map(t => `#${t}`).join(" ")}\n`;
 
+  // Instagram: caption not clickable — drive to link in bio + image via cover
+  const instaTags = tags.slice(0, 3).map(t => `#${t}`).join(" ");
+  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #codereportglobal\n`;
+
   files["reddit-comments.md"] = `# Reddit kit — ${title}
 URL: ${url}
 
@@ -295,6 +299,7 @@ Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after pub
 - [ ] Bluesky — post bluesky.txt verbatim
 - [ ] Mastodon — reuse bluesky.txt content (drop hashtags beyond 2 if noisy)
 - [ ] Facebook Page — post facebook.txt (auto via Graph API, link preview via og:image)
+- [ ] Instagram — post instagram.txt + cover 1080×1350 (auto via Graph API, caption link in bio)
 - [ ] Hashnode — RSS import picks it up automatically once feed connected; verify canonical shows
 
 ## Verified channel rules (official docs, 2026-08-22)
@@ -304,6 +309,7 @@ Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after pub
 | Bluesky | plain text ≤300 graphemes incl. URL+hashtags | API injects facets automatically | link-preview card auto-built from og:image |
 | Mastodon | plain text ≤500 chars | URLs always count as 23 chars — never shorten | optional: 1 image via Studio media library first |
 | Facebook Page | message + link param | link on own line → og:image preview | link preview auto via og:image |
+| Instagram | caption + 1080×1350 image | link in bio (captions not clickable) | image REQUIRED 1080×1350 |
 | HN | title + first comment with bare URL | links must be https:// | no media |
 | LinkedIn/X | short prose + bare URL on its own line | native auto-linking | optional image boosts CTR |
 
@@ -379,13 +385,22 @@ async function pushKit(slug) {
     process.exit(1);
   }
   let facebookTxt = "";
+  let instagramTxt = "";
   try { facebookTxt = readFileSync(join(dir, "facebook.txt"), "utf8").trim(); } catch {}
-  console.error("-> Enqueuing devto + bluesky + mastodon + facebook into the Studio distribution queue...");
+  try { instagramTxt = readFileSync(join(dir, "instagram.txt"), "utf8").trim(); } catch {}
+  // Instagram needs cover image URL at 1080x1350 — parse from devto front matter
+  const coverMatch = devtoMd.match(/cover_image:\s*(.+)/);
+  const rawCover = coverMatch ? coverMatch[1].trim() : "";
+  const instaImageFinal = rawCover
+    ? rawCover.split("?")[0].replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + "?width=1080&height=1350&resize=cover&quality=75"
+    : "";
+  console.error("-> Enqueuing devto + bluesky + mastodon + facebook + instagram into the Studio distribution queue...");
   const items = [
     { channel: "devto", payload: { bodyMarkdown: devtoMd } },
     { channel: "bluesky", payload: { text: blueskyTxt } },
     { channel: "mastodon", payload: { text: blueskyTxt } },
     ...(facebookTxt ? [{ channel: "facebook", payload: { text: facebookTxt } }] : []),
+    ...(instagramTxt ? [{ channel: "instagram", payload: { caption: instagramTxt, imageUrl: instaImageFinal || cover } }] : []),
   ];
   const rows = await client.distribution.enqueue.mutate({ slug, items });
   console.error(`   queued ${rows.length} item(s):`);

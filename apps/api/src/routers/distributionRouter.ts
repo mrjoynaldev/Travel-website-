@@ -5,7 +5,7 @@ import { getSupabase } from "../supabase";
 import { optimizedSocialImage } from "../lib/social-image";
 import { protectedProcedure, router } from "../_core/trpc";
 
-const CHANNELS = ["devto", "bluesky", "mastodon", "facebook"] as const;
+const CHANNELS = ["devto", "bluesky", "mastodon", "facebook", "instagram"] as const;
 export const MAX_DAILY_POSTS = 3;
 
 type Actor = Awaited<ReturnType<typeof getActor>>;
@@ -236,6 +236,58 @@ async function postFacebook(text: string): Promise<string> {
   return `https://www.facebook.com/${pageId}/posts/${postId}`;
 }
 
+async function postInstagram(caption: string, imageUrl: string | undefined, slug: string): Promise<string> {
+  const igUserId = requireEnv("FACEBOOK_IG_USER_ID");
+  const token = process.env.INSTAGRAM_ACCESS_TOKEN || requireEnv("FACEBOOK_PAGE_ACCESS_TOKEN");
+  // Resolve image: explicit payload → og:image from canonical URL → error
+  let image = imageUrl?.trim();
+  if (!image) {
+    const linkMatch = caption.match(/https?:\/\/[^\s)]+/);
+    if (linkMatch) {
+      try {
+        const page = await fetch(linkMatch[0].replace(/[.,;:!?)\]}'"]+$/, ""), { headers: { "User-Agent": "Mozilla/5.0" }, signal: AbortSignal.timeout(8000) });
+        if (page.ok) {
+          const html = await page.text();
+          const m = html.match(/<meta[^>]+property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+          if (m?.[1]) image = m[1].replace(/&amp;/g, "&");
+        }
+      } catch {}
+    }
+  }
+  if (!image) throw new TRPCError({ code: "BAD_REQUEST", message: "Instagram requires an image — provide payload.imageUrl or ensure caption contains canonical URL with og:image." });
+  const optimized = optimizedSocialImage(image) || image;
+  // Instagram needs 1080x1350 (4:5) — use 1080x1350 render if source is Supabase, else use as-is
+  let igImage = optimized;
+  if (optimized.includes("supabase.co/storage/v1/render/image/public/") && !optimized.includes("height=1350")) {
+    igImage = optimized.replace(/width=\d+&height=\d+/, "width=1080&height=1350");
+  } else if (optimized.includes("supabase.co/storage/v1/object/public/")) {
+    igImage = optimizedSocialImage(image, 1080, 1350) || optimized;
+  }
+  const create = await fetch(`https://graph.facebook.com/v26.0/${igUserId}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ image_url: igImage, caption: caption.slice(0, 2200), access_token: token }).toString(),
+  });
+  const cData = (await create.json().catch(() => ({}))) as any;
+  if (!create.ok || !cData.id) throw new TRPCError({ code: "BAD_GATEWAY", message: `Instagram container failed (${create.status}): ${cData?.error?.message ?? "unknown"}` });
+  // Poll status up to 10s (IG processes image)
+  for (let i = 0; i < 5; i++) {
+    await new Promise(r => setTimeout(r, 2000));
+    const statusRes = await fetch(`https://graph.facebook.com/v26.0/${cData.id}?fields=status_code&access_token=${encodeURIComponent(token)}`);
+    const sData = (await statusRes.json().catch(() => ({}))) as any;
+    if (sData.status_code === "FINISHED" || sData.status_code === "PUBLISHED") break;
+    if (sData.status_code === "ERROR") throw new TRPCError({ code: "BAD_GATEWAY", message: `Instagram media error: ${sData.status_code}` });
+  }
+  const publish = await fetch(`https://graph.facebook.com/v26.0/${igUserId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ creation_id: cData.id, access_token: token }).toString(),
+  });
+  const pData = (await publish.json().catch(() => ({}))) as any;
+  if (!publish.ok || !pData.id) throw new TRPCError({ code: "BAD_GATEWAY", message: `Instagram publish failed (${publish.status}): ${pData?.error?.message ?? "unknown"}` });
+  return `https://www.instagram.com/p/${pData.id}/`;
+}
+
 async function dispatch(row: any): Promise<{ url?: string }> {
   if (row.channel === "devto") {
     if (row.payload?.articleId) {
@@ -259,6 +311,12 @@ async function dispatch(row: any): Promise<{ url?: string }> {
     const text = row.payload?.text;
     if (!text) throw new Error("facebook payload is missing text");
     return { url: await postFacebook(String(text)) };
+  }
+  if (row.channel === "instagram") {
+    const text = row.payload?.caption || row.payload?.text;
+    const imageUrl = row.payload?.imageUrl;
+    if (!text) throw new Error("instagram payload is missing caption/text");
+    return { url: await postInstagram(String(text), imageUrl ? String(imageUrl) : undefined, String(row.slug)) };
   }
   throw new Error(`Unknown channel ${row.channel}`);
 }
