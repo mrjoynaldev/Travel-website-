@@ -356,44 +356,44 @@ Golden rules:
    Studio Distribution queue, where the editor approves each post (hard cap:
    3 posts/day across all channels).
 
-Bluesky formatting rule: links and hashtags are clickable/searchable ONLY via
-ATProto facets — our API injects them server-side from the post text (plus a
-link-preview card from the article's OpenGraph tags), so `bluesky.txt` MUST
-always contain the full article URL plus 2–3 relevant #hashtags. Never shorten
-URLs on any channel (Mastodon/dev.to format natively).
+**COMPREHENSIVE POST SKILL — every integrated platform, official docs, blue links + photos/video (AI must learn this table).**
 
-Verified per-channel rules (official docs, checked 2026-08-22 — https://developers.forem.com/api/v0 + https://github.com/forem/forem#front-matter-beats-API):
-- dev.to: **teaser drives traffic, never full copy**. `devto.md` is a 320-word hook + 3 bullets + `👉 Read full at canonical_url` + `cover_image` REQUIRED (largest CTR lever, re-served 1000×420). Keep ≤4 lowercase tags, `canonical_url = our URL` always. Front matter wins on update — you MUST resend full `body_markdown` with updated front matter; `published` flips via JSON `{"published":true}` **plus** front matter `published:true`. Drafts invisible to `GET /api/articles/:id` — use `PUT` with `body_markdown` to fix (see `apps/api/src/routers/distributionRouter.ts:50` fallback).
-- Mastodon: plain text auto-links URLs + hashtags. URLs always count as 23
-  chars inside the 500-char budget — never shorten. Hashtags: letters, digits,
-  underscores; not digits-only. Posts go out public / language en via API.
-- Bluesky: ≤300 graphemes including URL + hashtags; facets + link-preview card
-  are injected by our API automatically.
+**Link embedding (blue clickable) — how each platform makes links blue:**
+| Platform | Official doc | Blue link method | AI job (what you write) | System does |
+|---|---|---|---|---|
+| **dev.to** | `https://developers.forem.com/api/v0` | Markdown `[text](url)` + `canonical_url` front matter | `devto.md` teaser with `👉 Read full: [Title](url)` + `canonical_url: https://codereportglobal.indevs.in/articles/<slug>` | `POST /api/articles {body_markdown}` — front matter `published` ignored, JSON `published` controls state |
+| **Bluesky** | `https://docs.bsky.app/docs/advanced-guides/posts` `atproto.com/specs/lexicon#app.bsky.feed.post` | `app.bsky.richtext.facet#link` (UTF-8 byte offsets) + `app.bsky.embed.external` card | `bluesky.txt` **MUST** contain full `https://...` URL + 2–3 `#hashtags` on its own lines, ≤300 graphemes total | `apps/api/src/routers/distributionRouter.ts:62` `detectBlueskyFacets()` builds link/tag facets + `fetchBlueskyLinkCard()` builds `embed.external` from `og:image/og:title` (Supabase 1200×630 `apps/website/src/lib/social-image.ts:1`) |
+| **Mastodon** | `https://docs.joinmastodon.org/methods/statuses/` | Server auto-links `https://` + `#hashtag` | Plain text with full URL + 2 `#tags` — never shorten (URLs count as 23 chars in 500 budget) | `POST /api/v1/statuses {status, visibility:public, language:en}` — server creates `<a href>` + `tags[]` entities |
+| **Facebook Page** | `https://developers.facebook.com/docs/graph-api/reference/page/feed` `v26.0` | `link` param → blue link preview via `og:image` | `facebook.txt` with `Read full: {url}` on its own line + hashtags | `POST /{PAGE_ID}/feed {message, link, access_token}` → `https://www.facebook.com/{PAGE_ID}/posts/{id}` — preview uses our `og:image` |
+| **Instagram** | `https://developers.facebook.com/docs/instagram-api/content-publishing` | **Captions NOT clickable** — `Link in bio: {url}` + bio `https://...` | `instagram.txt` caption with `Full guide — link in bio: {url}` + 3 hashtags | `POST /{IG_ID}/media {image_url: 1080×1350, caption}` → `POST /{IG_ID}/media_publish {creation_id}` — image REQUIRED |
 
-Media options (use where the platform rewards it, never replacing the
-canonical link):
-- dev.to: teaser only — `cover_image` mandatory in front matter (largest CTR lever; dev.to re-serves at 1000×420). Reuse the article's featured/og image; hard CTA with canonical URL is required.
-- Bluesky: nothing to attach — the API builds the link-preview card from the
-  article's og:image + og:title automatically.
-- Mastodon: text-only today; one optional image can be attached later via the
-  Studio queue payload (media v2 upload) if a post needs it.
-- LinkedIn / X: attach one strong image when pasting manually — posts with
-  images earn meaningfully more impressions; keep the bare URL on its own line.
-- HN: no media, ever. Title + URL + first comment only.
+Never shorten URLs on any channel. Always include the full canonical URL.
+
+**Photos (1–2) + Video — per platform (official limits, AI selects 0–2 optional but never replaces canonical link):**
+| Platform | Photo | Video | How system handles it |
+|---|---|---|---|
+| **dev.to** | `cover_image: https://...` front matter REQUIRED — 1000×420 via `optimizedSocialImage()` — biggest CTR lever (2→45 reads) | Liquid `{% youtube <id> %}` / `{% embed <url> %}` in `body_markdown` | Cover via Supabase render; ori `publish_video` not needed |
+| **Bluesky** | `app.bsky.embed.images` (up to 4, each `uploadBlob` <976KB) — our `fetchBlueskyLinkCard` uploads `og:image` thumbnail for link card | `app.bsky.embed.video` via `uploadBlob` `video/mp4` <50MB | System currently uses link card thumb; 1–2 extra images can be added via `payload.imageUrls` (upload + `embed.images`) |
+| **Mastodon** | `POST /api/v1/media` → `media_ids[]` in `statuses` (1–4 images) | Same `media` endpoint `video/mp4` <40MB | Text-only today; optional `payload.mediaIds` via Studio media library |
+| **Facebook Page** | `POST /{PAGE_ID}/photos {url, caption}` or `feed {link}` preview | `POST /{PAGE_ID}/videos {file_url, description}` | `facebook.txt` link preview uses `og:image`; explicit `imageUrl` can be sent as `picture` param |
+| **Instagram** | **REQUIRED** 1080×1350 (4:5) `image_url` via Supabase render `?width=1080&height=1350&resize=cover&quality=75` | `POST /{IG_ID}/media {video_url, caption, media_type:VIDEO}` | `instagram.txt` + `payload.imageUrl` (cover) → carousel `media_type:CAROUSEL` for 2 images |
+
+AI rule: use 1 strong image (cover) everywhere it helps CTR; add 2nd image or 15–60s video only if it proves a claim (benchmark, terminal recording). Never post video without caption + link.
+
+**Verified per-channel official rules (checked 2026-08-23):**
+- **dev.to:** `https://developers.forem.com/api/v0` + `https://github.com/forem/forem#front-matter-beats-API` — **teaser drives traffic, never full copy** (`devto.md` 320-word hook + 3 bullets + `👉 Read full at canonical_url` + `cover_image` REQUIRED). Keep ≤4 lowercase tags, `canonical_url = our URL` always. Front matter wins on update — you MUST resend full `body_markdown` with updated front matter; `published` flips via JSON `{"published":true}` **plus** front matter `published:true`. Drafts invisible to `GET /api/articles/:id` — fallback rebuilds teaser from DB `apps/api/src/routers/distributionRouter.ts:50`.
+- **Bluesky:** `https://docs.bsky.app/docs/advanced-guides/posts` — ≤300 graphemes incl. URL+hashtags; facets + link-preview card (`og:image` Supabase 1200×630) injected automatically. Hashtags `[a-z0-9_]` only. `langs:["en"]`.
+- **Mastodon:** `https://docs.joinmastodon.org/methods/statuses/` — plain text auto-links, URLs =23 chars in 500 budget — never shorten. Hashtags letters/digits/_ not digits-only. `visibility:public, language:en` via API.
+- **Facebook Page:** `https://developers.facebook.com/docs/graph-api/reference/page/feed` `v26.0` — `POST /{PAGE_ID}/feed {message, link}` with System User `61593649201642` Page token (never expires, `pages_manage_posts` + `pages_read_engagement`). Link must be `https://` on own line for preview. Page `1194345043773378`.
+- **Instagram:** `https://developers.facebook.com/docs/instagram-api/content-publishing` — Business `17841430858092702 codereportglobal` linked to Page. `POST /{IG_ID}/media {image_url: 1080×1350, caption: link in bio}` → `media_publish`. Captions not clickable — always `Link in bio: {url}`.
 
 Channel tiers:
-- **AUTO** (system posts inside a hard daily cap): dev.to (canonical_url set),
-  Bluesky, Mastodon, Hashnode (RSS import respects canonicals).
-- **QUEUE + APPROVE**: Reddit comments — approve-then-post only, global cap
-  3 posts/day enforced in code. Find threads younger than 24h; contribute
-  value first; link only when genuinely relevant; never the same community
-  twice in one week.
-- **MANUAL** (paste from kit): Hacker News (title + first comment drafted;
-  automating story posts = ban), LinkedIn, X, Medium (Import-a-story sets the
-  canonical automatically — never use their closed API), Quora, newsletter
-  tips (TLDR AI, Ben's Bites, Console.dev).
-- **ONE-TIME checklist**: GitHub awesome-list PRs, Source of Sources signup,
-  daily.dev Squad (corporate blogs are ineligible as plain sources).
+- **AUTO system (queue approve, hard cap 3/day `MAX_DAILY_POSTS` `distributionRouter.ts:9` 00:00 UTC):** dev.to (teaser + canonical), Bluesky (facets+card), Mastodon (auto-link), Facebook Page (link preview), Instagram (image+caption)
+- **QUEUE + APPROVE:** Reddit comments — approve-then-post only, cap 3/day. Find threads <24h; value first; link only when relevant; never same community twice/week.
+- **MANUAL (paste from kit):** Hacker News (title + first comment drafted; automating = ban), LinkedIn, X, Medium (Import-a-story sets canonical — never closed API), Quora, newsletter tips (TLDR AI, Ben's Bites, Console.dev).
+- **ONE-TIME checklist:** GitHub awesome-list PRs, Source of Sources signup, daily.dev Squad (corporate blogs ineligible).
+
+Smoke: `CRG_TOKEN=... bash cli/smoke.sh` tests every auto channel (public site, `/docs`, `/healthz`, `distribution.list`, `blog.bySlug`, `blog.track`, queue `pending/posted`, and per-channel link-embed + cover + facets/card). Must be `31+` passed before deploy is considered ready.
 
 Discipline: reply to every serious comment on our syndicated copies within
 24h — engagement outweighs the drop itself. Log every placement in the kit's

@@ -38,6 +38,8 @@ for f in SEO-GOOGLE.md POST-WRITING-SKILL.md AI-EDITOR-AGENT.md API-ACCESS.md di
   check "/docs/$f" 200 "$(code "$SITE/docs/$f")"
 done
 check "SKILL §10 publish-gate"   1   "$(atleast "$(body "$SITE/docs/POST-WRITING-SKILL.md" | grep -c 'Official Google Search compliance')" 1)"
+check "SKILL §9 comprehensive"   1   "$(atleast "$(grep -c 'COMPREHENSIVE POST SKILL' docs/POST-WRITING-SKILL.md)" 1)"
+check "SKILL §9 blue links"      1   "$(atleast "$(grep -c 'Blue link method' docs/POST-WRITING-SKILL.md)" 1)"
 
 echo "== Backend API =="
 check "healthz"                  200 "$(code "$API/healthz")"
@@ -73,6 +75,21 @@ d=json.load(sys.stdin)['result']['data']['json']
 items=d if isinstance(d,list) else d.get('items',[])
 rows=[i for i in items if i.get('channel')=='devto' and i.get('status')=='pending']
 print(rows[0].get('payload',{}).get('articleId','missing') if rows else 'no-row')")"
+check "og:image render 1200x630" 1   "$(atleast "$(body "$SITE/articles/$SLUG" | grep -c 'render/image.*width=1200.*height=630')" 1)"
+
+# Kit generation — comprehensive link + media skill per POST-WRITING-SKILL.md §9
+if [ -n "$TOKEN" ]; then
+  rm -rf /tmp/smoke-kit && CRG_TOKEN="$TOKEN" node cli/distribute.mjs kit "$SLUG" --out /tmp/smoke-kit >/dev/null 2>&1
+  check "kit devto.md teaser"        1 "$(test -f /tmp/smoke-kit/devto.md && grep -q 'canonical_url:' /tmp/smoke-kit/devto.md && awk 'END{print (NR<80)?1:0}' /tmp/smoke-kit/devto.md)"
+  check "kit devto cover 1000x420"   1 "$(grep -c 'cover_image:' /tmp/smoke-kit/devto.md 2>/dev/null | awk '{print ($1>=1)?1:0}')"
+  check "kit bluesky blue link"      1 "$(grep -c 'https://codereportglobal.indevs.in/articles/' /tmp/smoke-kit/bluesky.txt 2>/dev/null | awk '{print ($1>=1)?1:0}')"
+  check "kit bluesky ≤300 graphemes" 1 "$(python3 -c "import sys; t=open('/tmp/smoke-kit/bluesky.txt',encoding='utf-8').read() if __import__('os').path.exists('/tmp/smoke-kit/bluesky.txt') else sys.exit(1); import unicodedata; print(1 if len(unicodedata.normalize('NFC',t))<=300 else 0)" 2>/dev/null || echo 0)"
+  check "kit facebook txt"           1 "$(test -f /tmp/smoke-kit/facebook.txt && grep -q 'https://' /tmp/smoke-kit/facebook.txt && echo 1 || echo 0)"
+  check "kit instagram txt"          1 "$(test -f /tmp/smoke-kit/instagram.txt && grep -q 'https://' /tmp/smoke-kit/instagram.txt && echo 1 || echo 0)"
+  check "instagram 1080x1350 render" 1 "$(grep -q '1080.*1350' cli/distribute.mjs && echo 1 || echo 0)"
+  check "facebook API channel"       1 "$(grep -q '\"facebook\"' apps/api/src/routers/distributionRouter.ts && echo 1 || echo 0)"
+  check "instagram API channel"      1 "$(grep -q '\"instagram\"' apps/api/src/routers/distributionRouter.ts && echo 1 || echo 0)"
+fi
 
 BYSLUG=$(curl -s --max-time 30 "$TRPC/blog.bySlug?input=%7B%22json%22%3A%7B%22slug%22%3A%22$SLUG%22%7D%7D")
 check "blog.bySlug published"    1   "$(echo "$BYSLUG" | python3 -c "

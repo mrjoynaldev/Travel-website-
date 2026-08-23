@@ -141,41 +141,37 @@ node cli/blog.mjs posts feature <id>          # homepage feature
 node cli/blog.mjs posts schedule <id> --at 2026-09-01T09:00:00Z
 node cli/blog.mjs posts delete <id>           # trash — ONLY with explicit editor approval
 
-# Distribution (POST-WRITING-SKILL.md §9)
+# Distribution — COMPREHENSIVE POST SKILL (POST-WRITING-SKILL.md §9, official docs)
 CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
-#   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, reddit-comments.md,
-#     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url,
-#     newsletter-tip.md, checklist.md) — run after every publish
+#   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, facebook.txt, instagram.txt, reddit-comments.md,
+#     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url, newsletter-tip.md, checklist.md) — run after every publish
 CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
-#   → enqueues devto + bluesky + mastodon into the Studio Distribution queue;
-#     the editor approves there. HARD CAP: 3 posts/day across all channels.
+#   → enqueues devto + bluesky + mastodon + facebook + instagram into Studio Distribution queue; editor approves. HARD CAP: 3 posts/day all channels.
 #
-# Bluesky rich-text rule (handled server-side since 2026-08-22): links and
-#   hashtags ONLY render blue/clickable + searchable when the post record has
-#   ATProto facets. Our API adds them automatically from the text, plus a
-#   link-preview card built from the article's OpenGraph tags. Your job:
-#   ALWAYS include the full article URL and 2–3 relevant #hashtags inside
-#   bluesky.txt (kit generator does this). Mastodon formats natively; dev.to is
-#   markdown. Never shorten URLs on any channel.
+# BLUE LINK embedding (how to make links clickable — official docs):
+#   dev.to: Markdown [text](url) + front matter canonical_url — developers.forem.com/api/v0 — teaser only, never full copy
+#   Bluesky: ATProto facets app.bsky.richtext.facet#link (byte offsets) + embed.external card — docs.bsky.app — ALWAYS include full https:// URL + 2–3 #hashtags in bluesky.txt, ≤300 graphemes; API injects facets+card via og:image (1200×630 apps/website/src/lib/social-image.ts:1)
+#   Mastodon: server auto-links https:// + #hashtag — docs.joinmastodon.org/methods/statuses — plain text, URLs=23 chars in 500 budget, public+en; never shorten
+#   Facebook Page: Graph API v26 POST /{PAGE_ID}/feed {message, link} — link on own line → og:image preview — page 1194345043773378
+#   Instagram: captions NOT clickable — use "Link in bio: {url}" + 1080×1350 image via POST /{IG_ID}/media → media_publish — IG 17841430858092702 (Graph API content-publishing)
 #
-# Verified per-channel rules (from official docs, checked 2026-08-22 — https://developers.forem.com/api/v0):
-#   dev.to: TEASER ONLY — drives to canonical (never full copy). Front matter is source of truth — keep ≤4 lowercase tags, canonical_url = our URL, cover_image REQUIRED (1000×420). Publishing: front matter + JSON both need {"published":true} plus full body_markdown (front matter beats JSON on update per forem/forem). Drafts NOT fetchable via /api/articles/:id — API fallback rebuilds teaser from DB (apps/api/src/routers/distributionRouter.ts:50).
-#   Mastodon: plain text; server auto-links URLs and #hashtags. URLs count as
-#     exactly 23 chars regardless of length (500-char budget) — shorteners are
-#     actively discouraged. Hashtags may contain letters/digits/underscores but
-#     cannot be digits-only. API posts as public + language en automatically.
-#   Bluesky: ≤300 graphemes total including URL + hashtags; facets and the
-#     link-preview card (og:title/og:image from our page) are injected by our
-#     API. Hashtags: letters/digits only in tag facet text.
+# PHOTOS (1–2) + VIDEO — never replace canonical link:
+#   dev.to: cover_image REQUIRED front matter 1000×420 (largest CTR lever) + liquid {% youtube %} for video
+#   Bluesky: link card thumb auto (og:image) + optional 1–2 images via uploadBlob <976KB → embed.images, video <50MB → embed.video
+#   Mastodon: 1–4 images via POST /api/v1/media → media_ids[]; video <40MB
+#   Facebook: link preview via og:image; explicit photo POST /{PAGE_ID}/photos, video POST /{PAGE_ID}/videos
+#   Instagram: IMAGE REQUIRED 1080×1350 via image_url; video via video_url + media_type:VIDEO; caption ≤2200 chars
+#
+# Verified per-channel (checked 2026-08-23):
+#   dev.to: TEASER ONLY drives to canonical; ≤4 lowercase tags, canonical_url=our URL, cover REQUIRED; front matter beats JSON on update — PUT must resend body_markdown+published:true (apps/api/src/routers/distributionRouter.ts:50 fallback rebuilds teaser from DB)
+#   Mastodon: auto-link, URLs=23/500, hashtags letters/digits/_ not digits-only, public+en
+#   Bluesky: ≤300 graphemes incl URL+hashtags, facets+card auto, langs:en, tag [a-z0-9_]
+#   Facebook Page: Graph v26 Page token (System User 61593649201642 never-expires, pages_manage_posts) → POST /{PAGE_ID}/feed
+#   Instagram: Business 17841430858092702 codereportglobal linked to Page — POST /{IG_ID}/media (1080×1350) → media_publish — link in bio only
 #
 # CREDENTIALS POLICY (strict):
-#   You need EXACTLY ONE credential: CRG_TOKEN. All social-platform secrets
-#   (dev.to api key, Bluesky app password, Mastodon token) are injected
-#   server-side by the API from its own environment when the editor approves
-#   a queue item. NEVER ask the user for platform API keys, NEVER call
-#   platform APIs directly, NEVER put keys in kit files or prompts.
-#   Draft-flip flow: set the queue item's payload {"articleId": "<devto draft
-#   id>"} (via SQL or ask the maintainer) and the same Approve click flips it.
+#   You need EXACTLY ONE credential: CRG_TOKEN. All social secrets (dev.to, Bluesky, Mastodon, Facebook Page 1194345043773378, Instagram 17841430858092702) are injected server-side from Render env (FACEBOOK_PAGE_ACCESS_TOKEN Page token expires:0, INSTAGRAM_ACCESS_TOKEN System User 61593649201642 expires:0) when editor approves. NEVER ask for platform keys, NEVER call platform APIs directly, NEVER put keys in kits/prompts.
+#   Draft-flip flow: set queue payload {"articleId": "<devto draft id>"} (via SQL or ask maintainer) and same Approve flips it.
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**
