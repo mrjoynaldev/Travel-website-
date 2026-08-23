@@ -106,39 +106,22 @@ async function handleAutomation(auto: any, ctx: { commentId: string; text: strin
       let fullMessage = dmText;
       if (buttonUrl) fullMessage += `\n\n${buttonText}: ${buttonUrl}`;
 
-      if (platform === "instagram") {
-        const pageId = process.env.FACEBOOK_PAGE_ID;
-        const token = process.env.FACEBOOK_PAGE_ACCESS_TOKEN || process.env.INSTAGRAM_ACCESS_TOKEN;
-        if (!pageId || !token) throw new Error("Missing FB Page token");
-        const res = await fetch(`https://graph.facebook.com/v26.0/${pageId}/messages`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            recipient: { comment_id: ctx.commentId },
-            message: { text: fullMessage },
-            access_token: token,
-          }),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(j?.error?.message || `IG private reply ${res.status}`);
-        await db.from("automation_logs").update({ status: "sent" }).eq("id", log?.id);
-      } else if (platform === "facebook") {
-        const pageId = process.env.FACEBOOK_PAGE_ID;
-        const token = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
-        if (!pageId || !token) throw new Error("Missing FB token");
-        const res = await fetch(`https://graph.facebook.com/v26.0/${pageId}/messages`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            recipient: { comment_id: ctx.commentId },
-            message: { text: fullMessage },
-            access_token: token,
-          }),
-        });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(j?.error?.message || `FB private reply ${res.status}`);
-        await db.from("automation_logs").update({ status: "sent" }).eq("id", log?.id);
-      }
+      // Instagram only per request — Facebook cut from DM automation (distribution Facebook Page posting still live)
+      const pageId = process.env.FACEBOOK_PAGE_ID;
+      const token = process.env.INSTAGRAM_ACCESS_TOKEN || process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+      if (!pageId || !token) throw new Error("Missing IG token");
+      const res = await fetch(`https://graph.facebook.com/v26.0/${pageId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipient: { comment_id: ctx.commentId },
+          message: { text: fullMessage },
+          access_token: token,
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(j?.error?.message || `IG private reply ${res.status}`);
+      await db.from("automation_logs").update({ status: "sent" }).eq("id", log?.id);
     } catch (e: any) {
       await db.from("automation_logs").update({ status: "failed", error: String(e?.message || e).slice(0, 500) }).eq("id", log?.id);
     }

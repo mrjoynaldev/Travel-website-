@@ -10,25 +10,21 @@ import { toast } from "sonner";
 
 export function StudioAutomations() {
   const autos = trpc.studio.automations.list.useQuery();
-  const postsFB = trpc.studio.automations.listPosts.useQuery({ platform: "facebook", limit: 20 });
   const postsIG = trpc.studio.automations.listPosts.useQuery({ platform: "instagram", limit: 20 });
   const create = trpc.studio.automations.create.useMutation({ onSuccess: () => { autos.refetch(); toast.success("Automation created"); }, onError: e => toast.error(e.message) });
   const del = trpc.studio.automations.delete.useMutation({ onSuccess: () => { autos.refetch(); toast.success("Deleted"); }, onError: e => toast.error(e.message) });
-  const [form, setForm] = useState({ platform: "instagram" as "facebook"|"instagram", post_id: "", post_title: "", keyword: "GUIDE", dm_template: "Hey! Here’s your guide:", button_text: "Read Full Guide", button_url: "https://codereportglobal.indevs.in/articles/", follow_required: true, search: "" });
+  const [form, setForm] = useState({ platform: "instagram" as "instagram", post_id: "", post_title: "", keyword: "GUIDE", dm_template: "Hey! Here’s your guide:", button_text: "Read Full Guide", button_url: "https://codereportglobal.indevs.in/articles/", follow_required: true, search: "" });
 
-  const filteredPosts = (form.platform === "instagram" ? postsIG.data : postsFB.data)?.filter((p: any) => !form.search || p.title.toLowerCase().includes(form.search.toLowerCase()) || p.caption.toLowerCase().includes(form.search.toLowerCase())) ?? [];
+  const filteredPosts = postsIG.data?.filter((p: any) => !form.search || p.title.toLowerCase().includes(form.search.toLowerCase()) || p.caption.toLowerCase().includes(form.search.toLowerCase())) ?? [];
 
   return <DashboardLayout>
     <div className="mx-auto max-w-5xl">
-      <header className="mb-6 border-b border-border pb-6"><p className="font-label text-[10px] text-primary">AUTOMATION</p><h1 className="mt-2 font-display text-3xl font-semibold">Comment → DM (private replies)</h1><p className="mt-2 text-sm text-muted-foreground">User comments keyword on your post/reel → DM with button in 3s (only if following when toggle on). 750/hour, 1/user/24h, 7-day window. Free API: 2 active automations unlimited DMs.</p></header>
+      <header className="mb-6 border-b border-border pb-6"><p className="font-label text-[10px] text-primary">AUTOMATION — INSTAGRAM ONLY</p><h1 className="mt-2 font-display text-3xl font-semibold">Comment → DM (private replies)</h1><p className="mt-2 text-sm text-muted-foreground">Instagram only — user comments keyword on your reel/post → DM with button in 3s (follow gate). 750/hour, 1/user/24h, 7-day window. Free API: 2 active automations. Facebook cut.</p></header>
 
       <section className="rounded-xl border border-border bg-white p-6">
         <h3 className="font-semibold">New automation</h3>
         <div className="mt-4 grid gap-4">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div><Label>Platform</Label><select value={form.platform} onChange={e=>setForm({...form, platform:e.target.value as any})} className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm"><option value="instagram">Instagram (17841430858092702)</option><option value="facebook">Facebook Page (1194345043773378)</option></select></div>
-            <div><Label>Search posts by title</Label><Input value={form.search} onChange={e=>setForm({...form, search:e.target.value})} placeholder="Type to filter, e.g. GUIDE" className="mt-1" /></div>
-          </div>
+          <div><Label>Search posts by title</Label><Input value={form.search} onChange={e=>setForm({...form, search:e.target.value})} placeholder="Type to filter, e.g. GUIDE" className="mt-1" /><p className="mt-1 text-xs text-muted-foreground">Instagram only — Facebook cut per your request. Shows 20 last + search filters by title.</p></div>
           <div><Label>Select post *</Label><select value={form.post_id} onChange={e=>{ const p=filteredPosts.find((x:any)=>x.id===e.target.value); setForm({...form, post_id:e.target.value, post_title:p?.title||""}); }} className="mt-1 w-full rounded-md border border-input px-3 py-2 text-sm"><option value="">— pick a post/reel —</option>{filteredPosts.map((p:any)=><option key={p.id} value={p.id}>{p.title.slice(0,70)} — {p.id.slice(0,12)}</option>)}</select><p className="mt-1 text-xs text-muted-foreground">{filteredPosts.length} posts loaded. Instead of 20 last, search filters by title.</p></div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><Label>Keyword (custom comment title) *</Label><Input value={form.keyword} onChange={e=>setForm({...form, keyword:e.target.value})} placeholder="GUIDE" className="mt-1" /></div>
