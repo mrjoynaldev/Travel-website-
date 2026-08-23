@@ -146,7 +146,7 @@ CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
 #   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, facebook.txt, instagram.txt, reddit-comments.md,
 #     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url, newsletter-tip.md, checklist.md) — run after every publish
 CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
-#   → enqueues devto + bluesky + mastodon + facebook + instagram into Studio Distribution queue; editor approves. HARD CAP: 3 posts/day all channels.
+#   → enqueues devto + bluesky + mastodon + facebook + instagram into Studio Distribution queue; editor approves. HARD CAP: 10/day (env DISTRIBUTION_DAILY_CAP, default 10 — not aggressively strict) all channels.
 #
 # BLUE LINK embedding (how to make links clickable — official docs):
 #   dev.to: Markdown [text](url) + front matter canonical_url — developers.forem.com/api/v0 — teaser only, never full copy

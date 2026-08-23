@@ -6,7 +6,7 @@ import { optimizedSocialImage } from "../lib/social-image";
 import { protectedProcedure, router } from "../_core/trpc";
 
 const CHANNELS = ["devto", "bluesky", "mastodon", "facebook", "instagram"] as const;
-export const MAX_DAILY_POSTS = 3;
+export const MAX_DAILY_POSTS = parseInt(process.env.DISTRIBUTION_DAILY_CAP || process.env.MAX_DAILY_POSTS || "10", 10); // default 10, not aggressively strict — override via Render env
 
 type Actor = Awaited<ReturnType<typeof getActor>>;
 
