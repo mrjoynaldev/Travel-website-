@@ -120,6 +120,7 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
     items: [
       { icon: Bot, label: "AI Agent", path: "/studio/agent" },
       { icon: Cpu, label: "AI Providers", path: "/studio/ai" },
+      { icon: Send, label: "DM Automations", path: "/studio/automations" },
     ],
   },
   {
