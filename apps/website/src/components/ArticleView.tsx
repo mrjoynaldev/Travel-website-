@@ -41,13 +41,33 @@ export default function ArticleView({ post, related, comments: initialComments, 
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [submitting, setSubmitting] = useState(false);
 
+  const getSessionHash = (): string | undefined => {
+    try {
+      const existing = localStorage.getItem("crg_sid");
+      if (existing) return existing;
+      const sid = (crypto as any).randomUUID ? (crypto as any).randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem("crg_sid", sid);
+      return sid;
+    } catch { return undefined; }
+  };
+  const isAdminView = () => {
+    try {
+      return !!localStorage.getItem("crg_token") || !!localStorage.getItem("crg_admin") || document.cookie.includes("admin") || window.location.search.includes("preview") || (document.referrer && new URL(document.referrer).pathname.startsWith("/studio"));
+    } catch { return false; }
+  };
+
   useEffect(() => {
-    trpcClient.blog.track.mutate({ postId: post.id, eventType: "article_view", referrerHost: document.referrer ? new URL(document.referrer).hostname : undefined }).catch(() => undefined);
+    const sid = getSessionHash();
+    const admin = isAdminView();
+    if (admin) return;
+    trpcClient.blog.track.mutate({ postId: post.id, eventType: "article_view", sessionHash: sid, referrerHost: document.referrer ? new URL(document.referrer).hostname : undefined, properties: { is_admin: admin } }).catch(() => undefined);
   }, [post.id]);
 
   const engagementFlags = useRef({ depth75: false, complete: false });
 
   useEffect(() => {
+    const sid = getSessionHash();
+    if (isAdminView()) return;
     const onScroll = () => {
       const doc = document.documentElement;
       const max = doc.scrollHeight - window.innerHeight;
@@ -55,11 +75,11 @@ export default function ArticleView({ post, related, comments: initialComments, 
       const ratio = Math.min(1, Math.max(0, window.scrollY / max));
       if (!engagementFlags.current.depth75 && ratio >= 0.75) {
         engagementFlags.current.depth75 = true;
-        trpcClient.blog.track.mutate({ postId: post.id, eventType: "scroll_depth", properties: { depth_percent: 75 } }).catch(() => undefined);
+        trpcClient.blog.track.mutate({ postId: post.id, eventType: "scroll_depth", sessionHash: sid, properties: { depth_percent: 75, is_admin: false } }).catch(() => undefined);
       }
       if (!engagementFlags.current.complete && ratio >= 0.95) {
         engagementFlags.current.complete = true;
-        trpcClient.blog.track.mutate({ postId: post.id, eventType: "reading_complete", properties: { depth_percent: 100 } }).catch(() => undefined);
+        trpcClient.blog.track.mutate({ postId: post.id, eventType: "reading_complete", sessionHash: sid, properties: { depth_percent: 100, is_admin: false } }).catch(() => undefined);
       }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -67,11 +87,13 @@ export default function ArticleView({ post, related, comments: initialComments, 
   }, [post.id]);
 
   useEffect(() => {
+    if (isAdminView()) return;
+    const sid = getSessionHash();
     const onClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       if (target?.closest(".gravity-code-copy")) {
         const block = target.closest<HTMLElement>(".gravity-code");
-        trpcClient.blog.track.mutate({ postId: post.id, eventType: "code_copy", properties: { lang: block?.dataset.lang ?? null } }).catch(() => undefined);
+        trpcClient.blog.track.mutate({ postId: post.id, eventType: "code_copy", sessionHash: sid, properties: { lang: block?.dataset.lang ?? null, is_admin: false } }).catch(() => undefined);
       }
     };
     document.addEventListener("click", onClick);

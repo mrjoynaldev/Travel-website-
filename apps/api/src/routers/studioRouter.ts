@@ -222,13 +222,18 @@ export const studioRouter = router({
     const since = new Date(Date.now() - input.days * 86400000).toISOString();
     const [{ data: posts, error: postsError }, { data: events, error: eventsError }] = await Promise.all([
       db.from("posts").select("id,title,slug,status,published_at,updated_at").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).eq("status", "published").order("published_at", { ascending: false }),
-      db.from("analytics_events").select("event_type,post_id,occurred_at").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).gte("occurred_at", since),
+      db.from("analytics_events").select("event_type,post_id,occurred_at,properties,session_hash").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).gte("occurred_at", since),
     ]);
     if (postsError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load posts." });
     if (eventsError) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load analytics events." });
 
+    const isReal = (e: any) => {
+      const p = (e.properties ?? {}) as any;
+      return p.is_admin !== true && p.qa !== true && p.smoke !== true && p.is_admin !== "true";
+    };
+    const realEvents = (events ?? []).filter(isReal);
     const stats = new Map<string, { views: number; depth75: number; complete: number; copies: number; comments: number; subs: number }>();
-    for (const event of events ?? []) {
+    for (const event of realEvents) {
       if (!event.post_id) continue;
       const row = stats.get(event.post_id) ?? { views: 0, depth75: 0, complete: 0, copies: 0, comments: 0, subs: 0 };
       switch (event.event_type) {

@@ -386,17 +386,22 @@ export async function queueWorkflowNotifications(
 export async function getAnalyticsSummary(actor: BlogActor, from: string, to: string) {
   const { data: events, error } = await getSupabase()
     .from("analytics_events")
-    .select("event_type, post_id, occurred_at, posts(title, slug)")
+    .select("event_type, post_id, occurred_at, properties, session_hash, posts(title, slug)")
     .eq("organization_id", actor.organizationId)
     .eq("site_id", actor.siteId)
     .gte("occurred_at", from)
     .lte("occurred_at", to);
   if (error) dbError("Could not load analytics", error);
 
-  const totalViews = (events ?? []).filter((event: any) => event.event_type === "article_view" || event.event_type === "page_view").length;
-  const engagementEvents = (events ?? []).filter((event: any) => ["scroll_depth", "reading_complete", "comment_submitted", "subscription_created"].includes(event.event_type)).length;
+  const isReal = (e: any) => {
+    const p = (e.properties ?? {}) as any;
+    return p.is_admin !== true && p.qa !== true && p.smoke !== true && p.is_admin !== "true";
+  };
+  const realEvents = (events ?? []).filter(isReal);
+  const totalViews = realEvents.filter((event: any) => event.event_type === "article_view" || event.event_type === "page_view").length;
+  const engagementEvents = realEvents.filter((event: any) => ["scroll_depth", "reading_complete", "comment_submitted", "subscription_created"].includes(event.event_type)).length;
   const topPosts = new Map<string, { postId: string; title: string; slug: string; views: number; engagement: number }>();
-  for (const event of events ?? []) {
+  for (const event of realEvents) {
     if (!event.post_id) continue;
     const raw = event.posts as unknown as { title?: string; slug?: string } | Array<{ title: string; slug: string }> | null;
     const resolved = Array.isArray(raw) ? raw[0] : raw;
