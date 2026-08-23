@@ -37,10 +37,12 @@ async function postedCountToday(siteId: string): Promise<number> {
 
 async function postDevto(bodyMarkdown: string): Promise<string> {
   const apiKey = requireEnv("DEVTO_API_KEY");
+  // Publish teaser immediately — front matter published:false is ignored, JSON published:true controls state per https://developers.forem.com/api/v0
+  const publishedBody = bodyMarkdown.replace(/^published:\s*false/m, "published: true");
   const response = await fetch("https://dev.to/api/articles", {
     method: "POST",
     headers: { "api-key": apiKey, "Content-Type": "application/json", "User-Agent": BROWSER_UA },
-    body: JSON.stringify({ article: { body_markdown: bodyMarkdown } }),
+    body: JSON.stringify({ article: { body_markdown: publishedBody, published: true } }),
   });
   const data = (await response.json().catch(() => ({}))) as any;
   if (!response.ok) throw new TRPCError({ code: "BAD_GATEWAY", message: `dev.to rejected the post (${response.status}): ${data?.error ?? "unknown error"}` });
