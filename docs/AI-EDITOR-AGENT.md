@@ -9,7 +9,10 @@ rank on Google and get cited by AI assistants — following the editorial skill 
 Companion documents:
 - `docs/POST-WRITING-SKILL.md` — how to find ideas, validate them, and write
   posts that rank (read before writing anything).
+- `docs/ROADMAP.md` — comprehensive plan & roadmap (services-first, lead machine).
 - `docs/API-ACCESS.md` — token creation and security rules.
+
+> **TARGET GOAL — comprehensive system (you must know this):** CodeReport Global is a **lead machine for AI-build services** — positioning **A: I fix dev errors fast with AI** (not an ad site). **User website** (public) = guides + `/hire` funnel + distribution; **Admin Studio** = full control of posts/distribution/leads/analytics; **AI agent** = you, with full `CRG_TOKEN` control to research → write → publish → distribute (5 auto: dev.to teaser, Bluesky facets+card, Mastodon, Facebook Page, Instagram) → capture leads via `/hire` → admin manages. Every guide ends with `Hire me → /hire`. See `docs/ROADMAP.md` for the full funnel.
 
 ---
 

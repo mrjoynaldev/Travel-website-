@@ -241,6 +241,14 @@ export const blogRouter = router({
     return { success: true };
   }),
 
+  submitLead: publicProcedure.input(z.object({ name: z.string().trim().min(2).max(120), email: z.string().email().max(320), need: z.string().trim().min(10).max(2000), source: z.string().max(80).optional() })).mutation(async ({ input }) => {
+    const site = await publicSiteOrThrow();
+    if (!site) throw new TRPCError({ code: "NOT_FOUND", message: "Publication not found." });
+    const { error } = await getSupabase().from("leads").insert({ organization_id: site.organization_id, site_id: site.id, name: input.name, email: input.email.toLowerCase(), need: input.need, source: input.source ?? "hire-page" });
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not send lead." });
+    return { success: true };
+  }),
+
   track: publicProcedure.input(z.object({ postId: z.string().uuid().optional(), eventType: z.enum(["page_view", "article_view", "scroll_depth", "reading_complete", "code_copy", "comment_submitted", "subscription_created"]), sessionHash: z.string().max(120).optional(), referrerHost: z.string().max(255).optional(), properties: z.record(z.string(), z.unknown()).default({}) })).mutation(async ({ input }) => {
     const site = await publicSiteOrThrow();
     if (!site) return { success: false };

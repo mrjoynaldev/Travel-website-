@@ -1,10 +1,12 @@
 # SKILL: Post Writing for CodeReport Global
 
+> **GOAL — comprehensive system:** Every post is a **lead funnel for services** (`Fix dev errors fast with AI` → `/hire`), not an ad play. You serve the **user website** (public guides + hire CTA), via **Admin Studio** control, as the **AI agent** with full `CRG_TOKEN` systematic control. See `docs/ROADMAP.md` and `docs/AI-EDITOR-AGENT.md: TARGET GOAL`.
+
 Editorial operating system for the AI Editor Agent. Derived from a full SEO
 course (search-intent-first keyword strategy, topic clusters, on-page
 checklists, link-worthy content, AI-search visibility). Follow it in order:
 **find → validate → interrogate → angle → structure → write → optimize →
-publish → distribute.**
+publish → distribute → capture lead.**
 
 ---
 

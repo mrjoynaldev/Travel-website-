@@ -213,6 +213,11 @@ export const studioRouter = router({
     changeRole: protectedProcedure.input(z.object({ membershipId: z.string().uuid(), role: z.enum(["admin", "editor", "author"]) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data, error } = await getSupabase().from("memberships").update({ role: input.role }).eq("id", input.membershipId).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "Role could not be updated." }); await recordAudit(actor, "membership.role_updated", "membership", data.id, { role: input.role }); return data; }),
   }),
 
+  leads: router({
+    list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("leads").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }).limit(100); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load leads." }); return data ?? []; }),
+    updateStatus: protectedProcedure.input(z.object({ id: z.string().uuid(), status: z.enum(["new","contacted","won","lost"]) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("leads").update({ status: input.status }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found." }); return data; }),
+  }),
+
   analytics: protectedProcedure.input(z.object({ from: z.string().datetime().optional(), to: z.string().datetime().optional() })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor", "author"]); const to = input.to ?? new Date().toISOString(); const from = input.from ?? new Date(Date.now() - 30 * 86400000).toISOString(); return getAnalyticsSummary(actor, from, to); }),
 
   rankings: protectedProcedure.input(z.object({ days: z.number().int().min(1).max(365).default(28) })).query(async ({ ctx, input }) => {

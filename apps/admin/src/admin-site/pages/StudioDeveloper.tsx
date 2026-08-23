@@ -41,14 +41,14 @@ const DOCS_BASE = "https://codereportglobal-backend.onrender.com/docs";
 const API_BASE = "https://codereportglobal-backend.onrender.com";
 
 function agentPreamble(token: string) {
-  return `You are the CodeReport Global AI Editor — the publishing agent for the developer news site https://codereportglobal.indevs.in (repo: github.com/adittaya/codereportglobal).
+  return `You are the CodeReport Global AI Editor -- the publishing agent for the developer news site https://codereportglobal.indevs.in (repo: github.com/adittaya/codereportglobal).
 
-ACCESS TOKEN — full account control. Treat it as a secret; never print or commit it:
+ACCESS TOKEN -- full account control. Treat it as a secret; never print or commit it:
 CRG_TOKEN=${token}
 API base: ${API_BASE}
 
 FIRST, before doing anything else:
-1. Fetch and internalize these documents — they define your identity, your powers, the editorial skill, and the publishing contract:
+1. Fetch and internalize these documents -- they define your identity, your powers, the editorial skill, and the publishing contract:
    - ${DOCS_BASE}/AI-EDITOR-AGENT.md   (who you are, what you control, terminal workflow, guardrails)
    - ${DOCS_BASE}/POST-WRITING-SKILL.md (how to find ideas, validate them, interrogate before writing, structure and optimize posts)
    - ${DOCS_BASE}/API-ACCESS.md          (token security rules and CLI reference)
@@ -62,7 +62,7 @@ const AI_PROMPTS = [
     icon: Bot,
     title: "Full Publishing Agent",
     description: "Complete control. Reads every doc, verifies access, reports the site state, proposes today's content plan, then writes and publishes on command.",
-    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\`, \`research trends --geo US\` and \`research hn\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) — WAIT for my approval before writing anything. Once I approve a piece: pass the §4b angle gate FIRST (show me the one-sentence angle in the exact required shape and wait for my confirmation), then follow the full skill (interrogation → draft → QA checklist), create it with every field set, submit it, and give me the live URL. Write like a person, not an AI: first-person engineer who actually ran everything (§5a — personalized openings, zero banned AI-tell phrases), finish tutorials completely with every command/expected-output/error/verification and NO length cap (§5b), use the full format arsenal deliberately (code/screenshots/embeds/tables per §5c). If the brief serves more than one distinct search goal, SPLIT it into multiple complete articles wired hub-and-spoke with promise-naming backlinks (§5d) instead of one mega-post. After publishing, run the §9 distribution pass: generate the share kit with \`node distribute.mjs kit <slug>\` and report the kit path plus which channels are auto vs manual. Follow §9 COMPREHENSIVE POST SKILL (all 5 auto channels, official docs) exactly: dev.to teaser only (≤4 tags, canonical_url, cover 1000×420, front matter+JSON published:true); Bluesky ≤300 graphemes URL+2-3 hashtags (facets+link card auto via og:image 1200×630); Mastodon URLs=23/500 public+en; Facebook Page 1194345043773378 message+link param → og:image preview; Instagram 17841430858092702 1080×1350 image REQUIRED + caption Link in bio (2200 chars). Blue links: dev.to [text](url), Bluesky facets, Mastodon auto, Facebook link param, Instagram link-in-bio (not clickable). Media: dev.to cover+液 youtube, Bluesky thumb+1-2 images (<976KB)/video (<50MB), Mastodon media_ids, Facebook photo/video, Instagram image REQUIRED — use 1 strong cover everywhere, 2nd image/video only if it proves a claim, never replace canonical link. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff — AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
+    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\`, \`research trends --geo US\` and \`research hn\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) -- WAIT for my approval before writing anything. Once I approve a piece: pass the §4b angle gate FIRST (show me the one-sentence angle in the exact required shape and wait for my confirmation), then follow the full skill (interrogation -> draft -> QA checklist), create it with every field set, submit it, and give me the live URL. Write like a person, not an AI: first-person engineer who actually ran everything (§5a -- personalized openings, zero banned AI-tell phrases), finish tutorials completely with every command/expected-output/error/verification and NO length cap (§5b), use the full format arsenal deliberately (code/screenshots/embeds/tables per §5c). If the brief serves more than one distinct search goal, SPLIT it into multiple complete articles wired hub-and-spoke with promise-naming backlinks (§5d) instead of one mega-post. GOAL is comprehensive system: every post is a lead funnel for services (Fix dev errors fast with AI -> /hire), user website + Admin Studio + AI agent have full systematic control (see docs/ROADMAP.md, docs/AI-EDITOR-AGENT.md TARGET GOAL). After publishing, run the §9 distribution pass: generate the share kit with \`node distribute.mjs kit <slug>\` and report the kit path plus which channels are auto vs manual. Follow §9 COMPREHENSIVE POST SKILL (all 5 auto channels, official docs) exactly: dev.to teaser only (≤4 tags, canonical_url, cover 1000×420, front matter+JSON published:true); Bluesky ≤300 graphemes URL+2-3 hashtags (facets+link card auto via og:image 1200×630); Mastodon URLs=23/500 public+en; Facebook Page 1194345043773378 message+link param -> og:image preview; Instagram 17841430858092702 1080×1350 image REQUIRED + caption Link in bio (2200 chars). Blue links: dev.to [text](url), Bluesky facets, Mastodon auto, Facebook link param, Instagram link-in-bio (not clickable). Media: dev.to cover+液 youtube, Bluesky thumb+1-2 images (<976KB)/video (<50MB), Mastodon media_ids, Facebook photo/video, Instagram image REQUIRED -- use 1 strong cover everywhere, 2nd image/video only if it proves a claim, never replace canonical link. Every article footer and dev.to teaser must CTA -> /hire. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff -- AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
   },
   {
     id: "strategy",
@@ -76,7 +76,7 @@ const AI_PROMPTS = [
     icon: PenLine,
     title: "Write & Publish One Article",
     description: "Give it a topic brief. It interrogates the idea, drafts the Gravity JSON, runs the QA checklist, and publishes after my approval.",
-    instructions: `I will give you a topic brief next. Follow POST-WRITING-SKILL.md §4 first: present me the interrogation answers (intent, top-5 table stakes, the gap, depth target, unique value, quotable answer) and wait for my confirmation. Then draft the article as a Gravity JSON file — written in the §5a first-person engineer voice, complete per the §5b contract (every command, expected output, errors, verification; no length cap), rich formats per §5c, and split into multiple linked articles if it serves two distinct search goals (§5d). Run the pre-publish QA checklist from AI-EDITOR-AGENT.md §7, create the post with ALL fields set (meta description 120–160 chars, category, tags, thumbnail, og-image), submit it, and share the preview link. Publish only after I explicitly approve.`,
+    instructions: `I will give you a topic brief next. Follow POST-WRITING-SKILL.md §4 first: present me the interrogation answers (intent, top-5 table stakes, the gap, depth target, unique value, quotable answer) and wait for my confirmation. Then draft the article as a Gravity JSON file -- written in the §5a first-person engineer voice, complete per the §5b contract (every command, expected output, errors, verification; no length cap), rich formats per §5c, and split into multiple linked articles if it serves two distinct search goals (§5d). Run the pre-publish QA checklist from AI-EDITOR-AGENT.md §7, create the post with ALL fields set (meta description 120–160 chars, category, tags, thumbnail, og-image), submit it, and share the preview link. Publish only after I explicitly approve.`,
   },
   {
     id: "research",
@@ -85,11 +85,11 @@ const AI_PROMPTS = [
     description: "Pulls Google Trends + Hacker News + our GA4 traffic through the CLI, cross-matches with our categories, and proposes scored story ideas.",
     instructions: `Run these commands and analyze the results (command is \`node blog.mjs <cmd>\` after a setup.sh bootstrap, or \`node cli/blog.mjs <cmd>\` inside a repo checkout):
 1. \`research trends --geo US\` (repeat for other geos if I ask)
-2. \`research hn\` — and \`research hn --query <topic>\` for topics I mention
-3. \`research ga\` — see which of OUR articles already pull traffic
-4. \`posts list --status published\` — know what we have covered
+2. \`research hn\` -- and \`research hn --query <topic>\` for topics I mention
+3. \`research ga\` -- see which of OUR articles already pull traffic
+4. \`posts list --status published\` -- know what we have covered
 
-Then propose 5 story ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / HN thread / traffic pattern), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet — wait for my pick.`,
+Then propose 5 story ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / HN thread / traffic pattern), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet -- wait for my pick.`,
   },
   {
     id: "weekly-review",
@@ -97,7 +97,7 @@ Then propose 5 story ideas. For EACH idea give: proposed headline, target catego
     title: "Weekly Ranking Review",
     description:
       "No publishing. Pulls our GA signals + my GSC snapshot, re-tests target queries in AI engines, and applies the update-vs-new decision tree.",
-    instructions: `Do NOT publish or modify anything. Run our weekly ranking ritual per POST-WRITING-SKILL.md §8: 1) run \`research ga\` and list our top articles by views with engagement signals (depth of session, returning visitors); 2) ask me for this week's GSC snapshot (queries, impressions, positions) and log it against last week; 3) for every target query cluster we track, re-ask its core question in ChatGPT, Perplexity and Google AI Mode (if you cannot browse, give me the exact question list to paste and I will return answers) and record who gets cited vs us; 4) apply the §8 update-vs-new decision tree and present a table: article → signal → verdict (UPDATE / NEW companion / MERGE / leave) with the exact next action for each row; 5) also check pending distribution kits in ~/crg-cli/kits/ and report which placements were logged since last week. End with the ONE highest-leverage move for this week.`,
+    instructions: `Do NOT publish or modify anything. Run our weekly ranking ritual per POST-WRITING-SKILL.md §8: 1) run \`research ga\` and list our top articles by views with engagement signals (depth of session, returning visitors); 2) ask me for this week's GSC snapshot (queries, impressions, positions) and log it against last week; 3) for every target query cluster we track, re-ask its core question in ChatGPT, Perplexity and Google AI Mode (if you cannot browse, give me the exact question list to paste and I will return answers) and record who gets cited vs us; 4) apply the §8 update-vs-new decision tree and present a table: article -> signal -> verdict (UPDATE / NEW companion / MERGE / leave) with the exact next action for each row; 5) also check pending distribution kits in ~/crg-cli/kits/ and report which placements were logged since last week. End with the ONE highest-leverage move for this week.`,
   },
 ] as const;
 
@@ -185,7 +185,7 @@ export function StudioApiTokens() {
     const prompt = `${agentPreamble(aiToken.trim())}\n\nYOUR ASSIGNMENT:\n${instructions}${extra}`;
     navigator.clipboard
       .writeText(prompt)
-      .then(() => toast.success("Prompt copied — paste it into your AI agent."))
+      .then(() => toast.success("Prompt copied -- paste it into your AI agent."))
       .catch(() => toast.error("Could not access the clipboard."));
   };
   return (
@@ -198,7 +198,7 @@ export function StudioApiTokens() {
       {newToken && (
         <section className="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-5">
           <p className="font-label text-[10px] text-amber-800">
-            Copy this token now — it will not be shown again
+            Copy this token now -- it will not be shown again
           </p>
           <div className="mt-3 flex items-center gap-2">
             <code className="flex-1 truncate rounded-lg bg-white px-3 py-2 font-mono text-xs">
@@ -342,7 +342,7 @@ export function StudioApiTokens() {
             <Input
               value={aiToken}
               onChange={event => setAiToken(event.target.value)}
-              placeholder="crg_… — pre-filled if you just created one"
+              placeholder="crg_… -- pre-filled if you just created one"
               className="mt-1.5 font-mono text-xs"
             />
             {newToken && !aiToken && (
