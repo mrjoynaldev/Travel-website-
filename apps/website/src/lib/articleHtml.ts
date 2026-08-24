@@ -41,7 +41,9 @@ function wrapPre(preHtml: string, langHint?: string): string {
   const codeText = decodeEntities(stripTags(inner)).replace(/\n$/, "");
   const classLang = inner.match(/class="language-([a-z0-9+#-]{1,16})"/i);
   const lang = detectLang(codeText, (classLang && classLang[1]) || langHint);
-  return `<div class="gravity-code" data-lang="${lang}" data-code="${escapeAttr(codeText)}"><div class="gravity-code-head"><span class="gravity-code-lang">${lang}</span><button type="button" class="gravity-code-copy" aria-label="Copy code" onclick="${COPY_BUTTON}">Copy</button></div><pre><code>${escapeAttr(codeText)}</code></pre></div>`;
+  // WAF-safe: data-code as base64 to avoid ModSecurity blocking on "/*", "/index.html", "_redirects", etc. in JSON payload
+  const b64 = typeof Buffer !== "undefined" ? Buffer.from(codeText, "utf-8").toString("base64") : btoa(unescape(encodeURIComponent(codeText)));
+  return `<div class="gravity-code" data-lang="${lang}" data-code-b64="${b64}"><div class="gravity-code-head"><span class="gravity-code-lang">${lang}</span><button type="button" class="gravity-code-copy" aria-label="Copy code" onclick="var b=this,n=this.closest('.gravity-code');var c=n.dataset.codeB64?atob(n.dataset.codeB64):n.dataset.code||'';navigator.clipboard.writeText(c).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)})">Copy</button></div><pre><code>${escapeAttr(codeText)}</code></pre></div>`;
 }
 
 export function enhanceArticleHtml(html: string): string {
