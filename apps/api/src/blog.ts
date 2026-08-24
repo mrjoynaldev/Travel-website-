@@ -38,7 +38,7 @@ export function sanitizeArticleHtml(html: string) {
     allowedTags: [
       "p", "br", "h1", "h2", "h3", "h4", "blockquote", "ul", "ol", "li", "strong", "em",
       "s", "del", "u", "mark", "a", "img", "pre", "code", "hr", "table", "thead", "tbody", "tr", "th", "td",
-      "figure", "figcaption", "audio", "video", "source", "iframe", "span",
+      "figure", "figcaption", "audio", "video", "source", "iframe", "span", "div", "button",
     ],
     allowedAttributes: {
       a: ["href", "target", "rel", "class"],
@@ -46,6 +46,8 @@ export function sanitizeArticleHtml(html: string) {
       code: ["class"],
       span: ["class"],
       pre: ["class"],
+      div: ["class", "data-lang", "data-code", "data-code-b64"],
+      button: ["type", "class", "aria-label", "onclick"],
       th: ["colspan", "rowspan"],
       td: ["colspan", "rowspan"],
       figure: ["class"],
