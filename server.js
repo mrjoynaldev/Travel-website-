@@ -9,11 +9,11 @@ const server = http.createServer((req, res) => {
   <form id="login-form" onsubmit="event.preventDefault(); window.location.href='/studio';">
     <div>
       <label>Email</label>
-      <input id="email" type="email" value="qa.browser.1786554198@example.test" required />
+      <input id="email" type="email" placeholder="you@example.com" required />
     </div>
     <div>
       <label>Password</label>
-      <input id="password" type="password" value="CrgBrowserQA!1786554198A" required />
+      <input id="password" type="password" placeholder="Enter your password" required />
     </div>
     <button id="submit" type="submit">Sign In</button>
   </form>
