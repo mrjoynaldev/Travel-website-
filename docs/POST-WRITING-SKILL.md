@@ -10,27 +10,27 @@ publish → distribute → capture lead.**
 
 ---
 
-## 1. How to find content ideas
+## 1. How to find content ideas — manual demand check (no SEMrush needed, your own brain)
 
-Work only inside the current cluster plan (one topical funnel at a time — see
-§3). Sources, best first:
+Work only inside the current cluster plan (one topical funnel at a time — see §3). You don’t need tools to know demand — use signals developers already leave.
 
-1. **News hooks** (this is a news/analysis site): model releases, dev-tool
-   launches, benchmark drops, funding, regressions, deprecations, security
-   incidents. Freshness wins the news-sitemap window (48h).
-2. **Search Console**: once traffic exists, mine real queries (impressions with
-   low CTR = title/description problem; positions 5–15 = update candidates).
-3. **Google autocomplete + People Also Ask**: type the cluster seed, harvest
-   every suggestion; each PAA box is a ready-made H2 or standalone post.
-4. **Reddit / Hacker News / GitHub issues**: capture the exact phrasing
-   developers use when describing the problem — that phrasing is the keyword.
-5. **Competitor gaps**: paste a competitor sitemap into an LLM and list what
-   they cover that we do not; invert it too (what everyone misses).
-6. **AI-assistant mining**: ask ChatGPT, Perplexity AND Google AI Mode the
-   cluster's buying-style questions. Record which brands get cited (your real
-   competitors) and which source pages get quoted (the formats to beat). If a
-   rival is cited and we are not, study exactly what their page does that ours
-   does not — then do it better.
+**CORE IDEA:** You’re answering: 1. Do people search this? 2. How many (rough)? 3. Is it worth writing?
+
+**Method 1 — Google Autocomplete (BEST free signal):** Type `ai code fails` / `nextjs auth` in Google. If Google suggests `ai code fails in production` / `nextjs auth not working` → ✅ people search it.
+
+**Method 2 — People Also Ask:** Search your topic. If you see 3+ related questions/variations → 🔥 strong demand cluster.
+
+**Method 3 — Scroll to bottom Related searches:** `ai code bugs`, `ai coding problems` etc. More variations = more volume.
+
+**Method 4 — Reddit / StackOverflow / X:** Search your keyword. If same problem appears again and again → ✅ HIGH NEED. Weak current answers (generic, outdated, no fix) = 🔥 gap you can beat.
+
+**Sources, best first (now with manual check):**
+1. **News hooks** (this is a news/analysis site): model releases, dev-tool launches, benchmark drops, funding, regressions, deprecations, security incidents. Freshness wins the news-sitemap window (48h).
+2. **Search Console**: once traffic exists, mine real queries (impressions with low CTR = title/description problem; positions 5–15 = update candidates).
+3. **Google autocomplete + People Also Ask + Related searches** (manual demand check above) — harvest every suggestion; each PAA box is a ready-made H2 or standalone post.
+4. **Reddit / Hacker News / GitHub issues**: capture the exact phrasing developers use when describing the problem — that phrasing is the keyword. Check if answers are bad → your gap.
+5. **Competitor gaps**: paste a competitor sitemap into an LLM and list what they cover that we do not; invert it too (what everyone misses).
+6. **AI-assistant mining**: ask ChatGPT, Perplexity AND Google AI Mode the cluster's buying-style questions. Record which brands get cited (your real competitors) and which source pages get quoted (the formats to beat). If a rival is cited and we are not, study exactly what their page does that ours does not — then do it better.
 
 ## 2. Validate before writing (keyword sweet spot)
 
@@ -45,6 +45,23 @@ A topic earns a post only when it scores on all four:
 
 Rule of thumb: shorter keyword = higher volume, vaguer intent, brutal
 competition. Start long-tail; build up as authority grows.
+
+**Manual volume estimation (no SEMrush — use SERP strength):**
+- 🟢 LOW (0–100/mo): Weak blogs rank, no big sites, poor content → Easy to rank, fast indexing
+- 🟡 MEDIUM (100–1K/mo): Mix of blogs + some authority, decent content → Good target for you
+- 🔴 HIGH (1K+): Big sites (Medium, HubSpot), very strong content → Avoid for now
+
+**Is content actually NEEDED? (most important):**
+1. Are people asking this repeatedly? (Reddit/StackOverflow/X) Same problem again and again → HIGH NEED
+2. Are current answers bad? (generic, outdated, no fix) → 🔥 gap
+3. Can you add something NEW? (real test, real failure, better explanation) If not → don’t write
+
+**Demand prediction formula (your own SEMrush brain — 10 min before writing):**
+- Autocomplete exists (+2) + People Also Ask (+2) + Reddit discussions (+2) + Weak competitors (+2) = **Demand Score**
+- 6–8 → 🔥 WRITE THIS | 3–5 → ⚠️ Maybe | 0–2 → ❌ Skip
+- **Problem-based = HIGH demand** (`why X fails`, `how to fix X`) vs **Info-based = LOW** (`what is X`) → Problem = clicks + indexing
+
+**Fast workflow (10 min):** 1. Type keyword in Google → 2. Check suggestions → 3. Check Reddit → 4. Check top results → 5. Ask: Can I beat them? Is this a real problem?
 
 Search behavior shift: users increasingly paste **full conversational
 questions** into Google and assistants ("I want to pick up a new hobby… can you
