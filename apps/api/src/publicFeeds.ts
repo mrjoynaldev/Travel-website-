@@ -2,15 +2,16 @@ import { getSupabase } from "./supabase";
 
 const xmlEscape = (value: string) =>
   value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/"/g, """)
+    .replace(/'/g, "'");
 
 const stripHtml = (value: string) => value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
-const origin = () => (process.env.CANONICAL_ORIGIN || "").replace(/\/$/, "");
+const origin = () =>
+  (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
 
 async function latestPosts() {
   const db = getSupabase();
@@ -82,7 +83,7 @@ export async function robotsTxt(): Promise<FeedResult> {
     "Amazonbot",
     "Bytespider",
     "cohere-ai",
-    "MistralAI-User",
+    "MistralAIUser",
     "DuckAssistBot",
     "YouBot",
     "Diffbot",
@@ -98,7 +99,7 @@ export async function newsSitemapXml(): Promise<FeedResult> {
   try {
     const { posts } = await latestPosts();
     const base = origin();
-    if (!base) return { body: "CANONICAL_ORIGIN must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
+    if (!base) return { body: "CANONICAL_ORIGIN or NEXT_PUBLIC_SITE_URL must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
     const cutoff = Date.now() - 48 * 60 * 60 * 1000;
     const withDates = posts
       .map((post: any) => ({ post, published: new Date(post.published_at || post.updated_at).getTime() }))
@@ -121,7 +122,7 @@ export async function sitemapXml(): Promise<FeedResult> {
   try {
     const { posts, pages, categories, tags, authors } = await latestPosts();
     const base = origin();
-    if (!base) return { body: "CANONICAL_ORIGIN must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
+    if (!base) return { body: "CANONICAL_ORIGIN or NEXT_PUBLIC_SITE_URL must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
     const urls = [
       `<url><loc>${xmlEscape(`${base}/`)}</loc></url>`,
       ...posts.map(post => `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><lastmod>${new Date(post.updated_at || post.published_at).toISOString()}</lastmod></url>`),
@@ -141,8 +142,8 @@ export async function rssXml(): Promise<FeedResult> {
   try {
     const { site, posts } = await latestPosts();
     const base = origin();
-    if (!base) return { body: "CANONICAL_ORIGIN must be configured before RSS generation.", contentType: "text/plain", status: 503 };
-    const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]&gt;")}]]>`;
+    if (!base) return { body: "CANONICAL_ORIGIN or NEXT_PUBLIC_SITE_URL must be configured before RSS generation.", contentType: "text/plain", status: 503 };
+    const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]>")}]]>`;
     const items = posts
       .slice(0, 50)
       .map(post => `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`)
