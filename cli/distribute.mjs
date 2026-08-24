@@ -11,7 +11,7 @@
  *
  * Env vars:
  *   CRG_TOKEN     Required. API access token (shown once at creation).
- *   CRG_API_URL   Optional. Defaults to https://codereportglobal-backend.onrender.com
+ *   CRG_API_URL   Optional. Defaults to https://codereportglobal-admin.vercel.app
  *   CRG_SITE_URL  Optional. Defaults to https://codereportglobal.indevs.in
  *   CRG_KITS_DIR  Optional. Defaults to ~/crg-cli/kits/<slug>/
  *
@@ -26,7 +26,7 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import superjson from "superjson";
 
-const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
+const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-admin.vercel.app").replace(/\/+$/, "");
 const PUBLIC_SITE = (process.env.CRG_SITE_URL || "https://codereportglobal.indevs.in").replace(/\/+$/, "");
 const TOKEN = process.env.CRG_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
 

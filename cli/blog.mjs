@@ -9,7 +9,7 @@
  *
  * Env vars:
  *   CRG_TOKEN     Required. API access token (shown once at creation).
- *   CRG_API_URL   Optional. Defaults to https://codereportglobal-backend.onrender.com
+ *   CRG_API_URL   Optional. Defaults to https://codereportglobal-admin.vercel.app
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { readFileSync } from "node:fs";
@@ -17,7 +17,7 @@ import { extname } from "node:path";
 import superjson from "superjson";
 import { gravityToHtml } from "./gravity.mjs";
 
-const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
+const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-admin.vercel.app").replace(/\/+$/, "");
 const PUBLIC_SITE = (process.env.CRG_SITE_URL || "https://codereportglobal.indevs.in").replace(/\/+$/, "");
 const TOKEN = process.env.CRG_TOKEN || parseFlag("--token");
 

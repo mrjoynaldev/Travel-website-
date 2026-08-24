@@ -41,7 +41,7 @@ Every action is audit-logged under the token owner's account.
 ```bash
 cd <repo-root>                                                    # e.g. /home/adityazyrogami/codereportglobal
 export CRG_TOKEN="crg_…"                                          # from Studio → API tokens
-export CRG_API_URL="https://codereportglobal-backend.onrender.com"
+export CRG_API_URL="https://codereportglobal-admin.vercel.app"
 node cli/blog.mjs whoami                                          # ALWAYS run first
 ```
 
@@ -49,15 +49,15 @@ node cli/blog.mjs whoami                                          # ALWAYS run f
 
 ```bash
 mkdir -p ~/crg-cli && cd ~/crg-cli
-curl -fsSL https://codereportglobal-backend.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
+curl -fsSL https://codereportglobal-admin.vercel.app/docs/setup.sh -o setup.sh && bash setup.sh
 export CRG_TOKEN="crg_…"
-export CRG_API_URL="https://codereportglobal-backend.onrender.com"
+export CRG_API_URL="https://codereportglobal-admin.vercel.app"
 node blog.mjs whoami                                              # ALWAYS run first
 ```
 
 The bootstrap downloads `blog.mjs` + `gravity.mjs` + `distribute.mjs` from this
 site and installs the two npm dependencies. All documentation lives at
-`https://codereportglobal-backend.onrender.com/docs/<filename>`.
+`https://codereportglobal-admin.vercel.app/docs/<filename>`.
 
 If `whoami` fails, stop and report — never attempt to work around auth.
 

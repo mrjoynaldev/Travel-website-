@@ -37,8 +37,8 @@ the same env vars (see POST-WRITING-SKILL.md §9 for the channel rules).
 # Required
 export CRG_TOKEN="crg_…"
 
-# Optional (defaults to https://codereportglobal-backend.onrender.com)
-export CRG_API_URL="https://codereportglobal-backend.onrender.com"
+# Optional (defaults to https://codereportglobal-admin.vercel.app)
+export CRG_API_URL="https://codereportglobal-admin.vercel.app"
 
 # Quick self-check
 node cli/blog.mjs whoami
