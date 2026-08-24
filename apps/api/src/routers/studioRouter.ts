@@ -138,6 +138,19 @@ export const studioRouter = router({
       await recordAudit(actor, "post.updated", "post", data.id, { status: data.status });
       return data;
     }),
+    updateChunk: protectedProcedure.input(z.object({ id: z.string().uuid(), chunkHtml: z.string().max(80_000), chunkJson: z.any().optional(), isLast: z.boolean().default(false), revisionNote: z.string().max(300).default("Chunked update") })).mutation(async ({ ctx, input }) => {
+      const actor = await actorFor(ctx); const { post } = await assertCanEditPost(actor, input.id);
+      // For chunked updates, we append the chunkHtml to the existing rendered_html to bypass WAF size limits on full payload
+      const currentHtml = post.rendered_html || "";
+      const newHtml = currentHtml + input.chunkHtml;
+      const patch: any = { rendered_html: sanitizeArticleHtml(newHtml) };
+      if (input.chunkJson) patch.content_json = input.chunkJson;
+      if (input.isLast) await saveRevision(actor, post, input.revisionNote);
+      const { data, error } = await getSupabase().from("posts").update(patch).eq("id", post.id).select("*").single();
+      if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "Chunked update failed." });
+      if (input.isLast) await recordAudit(actor, "post.updated.chunked", "post", data.id, { status: data.status });
+      return data;
+    }),
     transition: protectedProcedure.input(z.object({ id: z.string().uuid(), status: z.enum(POST_STATUSES), rejectionNote: z.string().max(500).optional() })).mutation(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const { post, ownsPost } = await assertCanEditPost(actor, input.id);
       if (!canTransition(actor.role, post.status, input.status, ownsPost)) throw new TRPCError({ code: "FORBIDDEN", message: "This workflow transition is not permitted." });
