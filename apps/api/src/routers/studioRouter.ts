@@ -9,8 +9,14 @@ import { researchRouter } from "./studioResearch";
 
 const postInput = z.object({
   title: z.string().trim().min(1).max(180), slug: z.string().trim().max(180).optional(), excerpt: z.string().max(500).optional(),
-  contentJson: editorDocumentSchema, renderedHtml: z.string().max(500_000), metaTitle: z.string().max(180).optional(), metaDescription: z.string().max(320).optional(), canonicalUrl: z.string().url().max(2048).optional().or(z.literal("")), ogImageUrl: z.string().url().max(2048).optional().or(z.literal("")), featuredMediaId: z.string().uuid().nullable().optional(), categoryIds: z.array(z.string().uuid()).max(8).default([]), tagIds: z.array(z.string().uuid()).max(20).default([]),
+  contentJson: editorDocumentSchema, renderedHtml: z.string().max(700_000), metaTitle: z.string().max(180).optional(), metaDescription: z.string().max(320).optional(), canonicalUrl: z.string().url().max(2048).optional().or(z.literal("")), ogImageUrl: z.string().url().max(2048).optional().or(z.literal("")), featuredMediaId: z.string().uuid().nullable().optional(), categoryIds: z.array(z.string().uuid()).max(8).default([]), tagIds: z.array(z.string().uuid()).max(20).default([]),
 });
+function decodeHtmlInput(html: string): string {
+  if (html.startsWith("b64:")) {
+    try { return Buffer.from(html.slice(4), "base64").toString("utf-8"); } catch { return html; }
+  }
+  return html;
+}
 
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 150) || "untitled-post";
 
@@ -124,7 +130,8 @@ export const studioRouter = router({
     create: protectedProcedure.input(postInput).mutation(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor", "author"]); const db = getSupabase();
       const slug = slugify(input.slug || input.title);
-      const { data, error } = await db.from("posts").insert({ organization_id: actor.organizationId, site_id: actor.siteId, author_id: actor.profileId, title: input.title, slug, excerpt: input.excerpt ?? null, content_json: input.contentJson, rendered_html: sanitizeArticleHtml(input.renderedHtml), meta_title: input.metaTitle ?? null, meta_description: input.metaDescription ?? null, canonical_url: input.canonicalUrl || null, og_image_url: input.ogImageUrl || null, featured_media_id: input.featuredMediaId ?? null }).select("*").single();
+      const html = sanitizeArticleHtml(decodeHtmlInput(input.renderedHtml));
+      const { data, error } = await db.from("posts").insert({ organization_id: actor.organizationId, site_id: actor.siteId, author_id: actor.profileId, title: input.title, slug, excerpt: input.excerpt ?? null, content_json: input.contentJson, rendered_html: html, meta_title: input.metaTitle ?? null, meta_description: input.metaDescription ?? null, canonical_url: input.canonicalUrl || null, og_image_url: input.ogImageUrl || null, featured_media_id: input.featuredMediaId ?? null }).select("*").single();
       if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The post could not be created. The slug may already exist." });
       await syncTaxonomy(data.id, input.categoryIds, input.tagIds);
       await recordAudit(actor, "post.created", "post", data.id, { status: data.status });
@@ -132,17 +139,18 @@ export const studioRouter = router({
     }),
     update: protectedProcedure.input(z.object({ id: z.string().uuid(), data: postInput, revisionNote: z.string().max(300).default("Content updated") })).mutation(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const { post } = await assertCanEditPost(actor, input.id); await saveRevision(actor, post, input.revisionNote);
-      const { data, error } = await getSupabase().from("posts").update({ title: input.data.title, slug: slugify(input.data.slug || input.data.title), excerpt: input.data.excerpt ?? null, content_json: input.data.contentJson, rendered_html: sanitizeArticleHtml(input.data.renderedHtml), meta_title: input.data.metaTitle ?? null, meta_description: input.data.metaDescription ?? null, canonical_url: input.data.canonicalUrl || null, og_image_url: input.data.ogImageUrl || null, featured_media_id: input.data.featuredMediaId ?? null }).eq("id", post.id).select("*").single();
+      const html = sanitizeArticleHtml(decodeHtmlInput(input.data.renderedHtml));
+      const { data, error } = await getSupabase().from("posts").update({ title: input.data.title, slug: slugify(input.data.slug || input.data.title), excerpt: input.data.excerpt ?? null, content_json: input.data.contentJson, rendered_html: html, meta_title: input.data.metaTitle ?? null, meta_description: input.data.metaDescription ?? null, canonical_url: input.data.canonicalUrl || null, og_image_url: input.data.ogImageUrl || null, featured_media_id: input.data.featuredMediaId ?? null }).eq("id", post.id).select("*").single();
       if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The post could not be saved. The slug may already exist." });
       await syncTaxonomy(data.id, input.data.categoryIds, input.data.tagIds);
       await recordAudit(actor, "post.updated", "post", data.id, { status: data.status });
       return data;
     }),
-    updateChunk: protectedProcedure.input(z.object({ id: z.string().uuid(), chunkHtml: z.string().max(80_000), chunkJson: z.any().optional(), isLast: z.boolean().default(false), revisionNote: z.string().max(300).default("Chunked update") })).mutation(async ({ ctx, input }) => {
+    updateChunk: protectedProcedure.input(z.object({ id: z.string().uuid(), chunkHtml: z.string().max(500_000), chunkJson: z.any().optional(), isLast: z.boolean().default(false), revisionNote: z.string().max(300).default("Chunked update") })).mutation(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const { post } = await assertCanEditPost(actor, input.id);
-      // For chunked updates, we append the chunkHtml to the existing rendered_html to bypass WAF size limits on full payload
       const currentHtml = post.rendered_html || "";
-      const newHtml = currentHtml + input.chunkHtml;
+      const chunk = decodeHtmlInput(input.chunkHtml);
+      const newHtml = currentHtml + chunk;
       const patch: any = { rendered_html: sanitizeArticleHtml(newHtml) };
       if (input.chunkJson) patch.content_json = input.chunkJson;
       if (input.isLast) await saveRevision(actor, post, input.revisionNote);

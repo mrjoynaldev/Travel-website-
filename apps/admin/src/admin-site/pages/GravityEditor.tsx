@@ -244,6 +244,11 @@ export function GravityEditor() {
     onError: error => toast.error(error.message),
   });
 
+  const encodeForWaf = (html: string) => {
+    const needsB64 = html.includes("/*") || html.includes("_redirects") || html.includes("/index.html") || html.length > 12000;
+    if (!needsB64) return html;
+    try { return "b64:" + btoa(unescape(encodeURIComponent(html))); } catch { return html; }
+  };
   const buildPayload = () => ({
     ...draft,
     categoryIds: draft.categoryIds,
@@ -252,10 +257,10 @@ export function GravityEditor() {
       useEditorStore.getState().blocks,
       useEditorStore.getState().sections
     ),
-    renderedHtml: blocksToHtml(
+    renderedHtml: encodeForWaf(blocksToHtml(
       useEditorStore.getState().blocks,
       useEditorStore.getState().sections
-    ),
+    )),
   });
   const save = () => {
     const payload = buildPayload();
