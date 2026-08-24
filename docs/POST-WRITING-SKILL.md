@@ -433,6 +433,49 @@ Discover/AI Overviews eligibility is inherited automatically once a page is
 indexed + snippet-eligible; do not build special pages for AI queries (that IS
 scaled abuse). Weekly Ranking Review reads GSC per SEO-GOOGLE.md §10.
 
+## 10b. Index-worthiness hard gate — 17 questions (fail → research more or switch idea, never publish generic)
+
+Before `studio.posts.create`, you MUST answer all 17. If any answer is `No/Weak`, **do not write** — run `research ga/hn/trends` again, pick a sharper angle, or switch to another topic from `docs/ROADMAP.md`. Publishing generic = not indexed.
+
+**Part 1 — Before writing (most important):**
+1. What EXACT question am I answering? One line. If you can’t → don’t write.
+2. Who is searching this? (beginner/dev/advanced) If vague → generic → not indexed.
+3. What are top 5 results missing? (shallow? no fix? no example?) Your information gain = your value.
+4. Is this problem-solving? (solves ✅ vs explains ❌) Problem-solving indexes faster.
+
+**Part 2 — During writing:**
+5. Did I answer the main question in first 100 words? If not → Google loses interest.
+6. Is my article better than top 3? (clearer, more actionable, more real examples) If not → no priority.
+7. Did I include a REAL example? (code, bug, scenario) Experience signal.
+8. Does every section answer something? (no filler intro)
+9. Can someone skim and still understand? (short paras, clear H2s, bullets)
+
+**Part 3 — Structure & SEO:**
+10. Is my keyword everywhere naturally? (Title, H1, first para, URL)
+11. Did I connect this article to others? (2–3 internal links, 1 backlink) No orphan pages.
+12. If Googlebot lands here, can it go deeper? (at least 2 outbound links to our posts)
+
+**Part 4 — After writing:**
+13. Why should Google index THIS page first? (unique, useful, better than others) If not → improve.
+14. Did I give it a reason to exist? (not repeating, adds new value)
+15. Will someone share this? (would you send to a friend/post on Reddit?) If not → weak.
+
+**Part 5 — Signals:**
+16. Who will visit in first 24h? If no one → Google ignores. Plan Reddit/X/Dev.to promo BEFORE publishing.
+17. Where will I promote this? (Reddit, X, Dev.to) No plan = no signals.
+
+**Gold:** `If this article didn’t exist, would the internet lose something?` If NO → don’t publish. Switch idea. **Fail closed:** Generic content is a defect — research more or pick another topic from `research` that passes all 17.
+
+**Topics that almost guarantee indexing (problem-solving + low competition + clear intent — pick from here first):**
+- Fix `npm 12 better-sqlite3 install scripts not running` (you already have — expand with `npm rebuild` + `allowScripts` table)
+- Fix `ACP agent failed JetBrains 2024.1` with `glancer --version` verification (you have)
+- Fix `Rust Glancer VS Code not indexing` with `rust-src` + `server.path` (you have — add `multi-root` spoke)
+- `Why AI code passes tests but fails in production — 7 checks` (your hub `ai-code-production-checks` — already indexed, now internal-linked)
+- `n8n MCP: Tool vs Client node — which to pick` (you have 2, link them hub-and-spoke)
+- `DeepSeek Vision image input error in OpenCode` (`400` fix)
+- `OpenAI–Hugging Face agent intrusion sandbox` (news + fix)
+- Next: `Fix `EACCES: permission denied` on `npm install -g` (nvm vs sudo)`, `Fix `Prisma P1001 Can't reach database` on Vercel`, `Fix `Next.js 15 async params` breaking change` — all problem-solving, keyword front-loaded, one question each, 2 internal links to hub.
+
 ## 11. Credentials policy
 
 You carry exactly ONE credential: `CRG_TOKEN`. Social-platform secrets
