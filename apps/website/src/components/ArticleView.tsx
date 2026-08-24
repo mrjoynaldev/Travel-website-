@@ -101,7 +101,27 @@ export default function ArticleView({ post, related, comments: initialComments, 
   }, [post.id]);
 
   const readingTime = useMemo(() => Math.max(3, Math.ceil((post.rendered_html.replace(/<[^>]*>/g, " ").split(/\s+/).length ?? 180) / 220)), [post.rendered_html]);
-  const bodyHtml = useMemo(() => enhanceArticleHtml(post.rendered_html), [post.rendered_html]);
+  const bodyHtml = useMemo(() => {
+    let html = enhanceArticleHtml(post.rendered_html);
+    // Inject 2 keyword-rich internal links (hub-and-spoke) if not already present — critical for crawl depth
+    const hasAlsoRead = /Also read:/i.test(html);
+    if (!hasAlsoRead && related.length >= 2) {
+      const hub = { slug: "ai-code-production-checks", title: "AI Code Passes Tests but Fails in Production — A Checklist" };
+      const a = related[0]; const b = related[1];
+      // Use keyword anchors, not "click here" — inject mid + end
+      const midLink = `<p class="gravity-text"><em>Also read:</em> <a href="/articles/${hub.slug}">${hub.title}</a> — the hub that ties this fix to production checks.</p>`;
+      const endLink = `<p class="gravity-text"><em>Also read:</em> <a href="/articles/${a.slug}">${a.title}</a> and <a href="/articles/${b.slug}">${b.title}</a> — next steps for this fix.</p>`;
+      const parts = html.split("</p>");
+      if (parts.length > 3) {
+        const mid = Math.floor(parts.length / 2);
+        parts.splice(mid, 0, midLink);
+        html = parts.join("</p>") + endLink;
+      } else {
+        html += midLink + endLink;
+      }
+    }
+    return html;
+  }, [post.rendered_html, related]);
 
   const submitComment = async () => {
     if (!name.trim() || !email.trim() || !body.trim()) return;
