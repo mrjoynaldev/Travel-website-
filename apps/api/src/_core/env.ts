@@ -5,7 +5,7 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
-  supabaseUrl: process.env.VIE_SUPABASE_URL ?? "",
-  supabasePublishableKey: process.env.VIEW_SUPABASE_PUBLISHABLE_KEY ?? "",
+  supabaseUrl: process.env.VITE_SUPABASE_URL ?? "",
+  supabasePublishableKey: process.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? "",
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
 };

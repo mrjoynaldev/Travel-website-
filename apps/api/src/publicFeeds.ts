@@ -2,11 +2,11 @@ import { getSupabase } from "./supabase";
 
 const xmlEscape = (value: string) =>
   value
-    .replace(/&/g, "&")
-    .replace(/</g, "<")
-    .replace(/>/g, ">")
-    .replace(/"/g, """)
-    .replace(/'/g, "'");
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 
 const stripHtml = (value: string) => value.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 
@@ -83,7 +83,7 @@ export async function robotsTxt(): Promise<FeedResult> {
     "Amazonbot",
     "Bytespider",
     "cohere-ai",
-    "MistralAIUser",
+    "MistralAI-User",
     "DuckAssistBot",
     "YouBot",
     "Diffbot",
@@ -143,7 +143,7 @@ export async function rssXml(): Promise<FeedResult> {
     const { site, posts } = await latestPosts();
     const base = origin();
     if (!base) return { body: "CANONICAL_ORIGIN or NEXT_PUBLIC_SITE_URL must be configured before RSS generation.", contentType: "text/plain", status: 503 };
-    const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]>")}]]>`;
+    const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]&gt;")}]]>`;
     const items = posts
       .slice(0, 50)
       .map(post => `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`)
