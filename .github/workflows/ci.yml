@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck API
+        run: pnpm --filter @fieldnote/api run check
+      - name: Typecheck website
+        run: pnpm --filter @fieldnote/website run check
+      - name: Typecheck admin
+        run: pnpm --filter @fieldnote/admin run check
