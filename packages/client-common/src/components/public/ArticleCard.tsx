@@ -1,6 +1,14 @@
 import { ArrowUpRight, Clock3 } from "lucide-react";
 import Link from "next/link";
 
+function optimizedCardImage(url: string | undefined | null): string | undefined {
+  if (!url || !/^https?:\/\//.test(url)) return url ?? undefined;
+  const clean = url.replace(/&amp;/g, "&").split(/[?#]/)[0];
+  const match = clean.match(/^(https:\/\/[^/]+\.supabase\.co)\/storage\/v1\/object\/public\/(.+)$/);
+  if (!match) return url;
+  return `${match[1]}/storage/v1/render/image/public/${match[2]}?width=800&height=600&resize=cover&quality=80`;
+}
+
 export type ArticleCardPost = {
   id: string;
   title: string;
@@ -51,10 +59,12 @@ export function ArticleCard({
       >
         {post.featuredMedia ? (
           <img
-            src={post.featuredMedia.url}
+            src={optimizedCardImage(post.featuredMedia.url) || post.featuredMedia.url}
             alt={post.featuredMedia.alt_text || ""}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.035]"
             loading="lazy"
+            width={800}
+            height={600}
           />
         ) : (
           <div className="paper-grid relative flex h-full items-end bg-gradient-to-br from-[#dce7d7] to-[#c5d6c0] p-6">

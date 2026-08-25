@@ -1,9 +1,31 @@
 import type { Metadata, Viewport } from "next";
+import { DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
 import { PublicShell, type PublicPageInfo, type PublicationInfo } from "@/components/public/PublicShell";
 import { GaTag } from "../components/GaTag";
 import { Toaster } from "@/components/ui/sonner";
 import { serverTrpc } from "@web/lib/trpc-server";
 import "./globals.css";
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-sans",
+  weight: ["400", "500", "600", "700"],
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-dm-mono",
+  weight: ["400", "500"],
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-playfair",
+  weight: ["500", "600", "700"],
+});
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
 
@@ -23,14 +45,14 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "CodeReport Global",
     locale: "en_US",
-    url: "/",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "CodeReport Global" }],
+    url: SITE_URL,
+    images: [{ url: `${SITE_URL}/og-default.png`, width: 1200, height: 630, alt: "CodeReport Global" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "CodeReport Global",
     description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
-    images: ["/og-default.png"],
+    images: [`${SITE_URL}/og-default.png`],
   },
   robots: {
     index: true,
@@ -59,14 +81,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en">
+    <html lang="en" className={`${dmSans.variable} ${dmMono.variable} ${playfair.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:opsz,wght@5..120,500;5..120,600;5..120,700&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -89,6 +105,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   alternateName: ["Code Report Global", "CodeReport", "The Code Report"],
                   description: publication?.description || "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
                   publisher: { "@id": `${SITE_URL}/#organization` },
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: `${SITE_URL}/?search={search_term_string}`,
+                    "query-input": "required name=search_term_string",
+                  },
                 },
               ],
             }),

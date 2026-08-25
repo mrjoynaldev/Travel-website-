@@ -26,7 +26,7 @@ async function latestPosts() {
   if (!site) return { site: null, posts: [] as any[], pages: [] as any[], categories: [] as any[], tags: [] as any[], authors: [] as any[] };
   const { data: posts, error: postError } = await db
     .from("posts")
-    .select("slug, title, excerpt, rendered_html, author_id, published_at, updated_at")
+    .select("slug, title, excerpt, rendered_html, author_id, published_at, updated_at, post_categories(categories(name)), profiles(display_name)")
     .eq("site_id", site.id)
     .eq("status", "published")
     .is("deleted_at", null)
@@ -146,10 +146,15 @@ export async function rssXml(): Promise<FeedResult> {
     const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]&gt;")}]]>`;
     const items = posts
       .slice(0, 50)
-      .map(post => `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`)
+      .map(post => {
+        const categories = (post as any).post_categories?.map((pc: any) => pc.categories?.name).filter(Boolean) ?? [];
+        const authorName = (post as any).profiles?.display_name || "CodeReport Global";
+        const categoryXml = categories.map((c: string) => `<category>${xmlEscape(c)}</category>`).join("");
+        return `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><dc:creator>${xmlEscape(authorName)}</dc:creator>${categoryXml}<description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`;
+      })
       .join("");
     const name = site?.name || process.env.SITE_NAME || "CodeReport Global";
-    const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description><atom:link href="${xmlEscape(`${base}/rss.xml`)}" rel="self" type="application/rss+xml" />${items}</channel></rss>`;
+    const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description><atom:link href="${xmlEscape(`${base}/rss.xml`)}" rel="self" type="application/rss+xml" />${items}</channel></rss>`;
     return { body, contentType: "application/rss+xml", status: 200 };
   } catch {
     return { body: "RSS is temporarily unavailable.", contentType: "text/plain", status: 503 };

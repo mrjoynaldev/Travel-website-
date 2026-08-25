@@ -20,3 +20,5 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
+      - key: CORS_ORIGINS
+        value: "https://codereportglobal.indevs.in,https://codereportglobal.vercel.app,https://codereportglobal-admin.vercel.app"

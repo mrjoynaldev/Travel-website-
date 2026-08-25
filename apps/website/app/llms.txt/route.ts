@@ -75,6 +75,9 @@ export async function GET() {
 
   return new Response(lines.join("\n"), {
     status: 200,
-    headers: { "content-type": "text/markdown; charset=utf-8" },
+    headers: {
+      "content-type": "text/markdown; charset=utf-8",
+      "Cache-Control": "public, max-age=3600, s-maxage=3600",
+    },
   });
 }
