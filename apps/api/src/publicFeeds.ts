@@ -26,25 +26,40 @@ async function latestPosts() {
   if (!site) return { site: null, posts: [] as any[], pages: [] as any[], categories: [] as any[], tags: [] as any[], authors: [] as any[] };
   const { data: posts, error: postError } = await db
     .from("posts")
-    .select("slug, title, excerpt, rendered_html, author_id, published_at, updated_at, post_categories(categories(name)), profiles(display_name)")
+    .select("slug, title, excerpt, rendered_html, author_id, published_at, updated_at")
     .eq("site_id", site.id)
     .eq("status", "published")
     .is("deleted_at", null)
     .order("published_at", { ascending: false })
     .limit(500);
   if (postError) throw postError;
-  const [pagesResult, categoriesResult, tagsResult, authorsResult] = await Promise.all([
+  const [pagesResult, categoriesResult, tagsResult, authorsResult, postCategoriesResult, profilesResult] = await Promise.all([
     db.from("site_pages").select("slug, updated_at, published_at").eq("site_id", site.id).eq("status", "published").order("published_at", { ascending: false }).limit(100),
-    db.from("categories").select("slug").eq("site_id", site.id),
+    db.from("categories").select("id, slug, name").eq("site_id", site.id),
     db.from("tags").select("slug").eq("site_id", site.id),
-    db.from("profiles").select("id").in("id", Array.from(new Set((posts ?? []).map((post: any) => post.author_id)))),
+    db.from("profiles").select("id, display_name").in("id", Array.from(new Set((posts ?? []).map((post: any) => post.author_id)))),
+    db.from("post_categories").select("post_id, categories(name)").eq("site_id", site.id),
+    Promise.resolve({ data: null, error: null }),
   ]);
   if (pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error) {
     throw pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error;
   }
+  const postCategoryMap = new Map<string, string[]>();
+  (postCategoriesResult.data ?? []).forEach((pc: any) => {
+    const existing = postCategoryMap.get(pc.post_id) ?? [];
+    if (pc.categories?.name) existing.push(pc.categories.name);
+    postCategoryMap.set(pc.post_id, existing);
+  });
+  const profileMap = new Map<string, string>();
+  (profilesResult.data ?? []).forEach((p: any) => profileMap.set(p.id, p.display_name));
+  const postsWithMeta = (posts ?? []).map((post: any) => ({
+    ...post,
+    categoryNames: postCategoryMap.get(post.id) ?? [],
+    authorName: profileMap.get(post.author_id) ?? "CodeReport Global",
+  }));
   return {
     site,
-    posts: posts ?? [],
+    posts: postsWithMeta,
     pages: pagesResult.data ?? [],
     categories: categoriesResult.data ?? [],
     tags: tagsResult.data ?? [],
@@ -113,7 +128,8 @@ export async function newsSitemapXml(): Promise<FeedResult> {
       return `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><news:news><news:publication><news:name>CodeReport Global</news:name><news:language>en</news:language></news:publication><news:publication_date>${date}</news:publication_date><news:title>${xmlEscape(title)}</news:title></news:news></url>`;
     }).join("");
     return { body: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">${urls}</urlset>`, contentType: "application/xml", status: 200 };
-  } catch {
+  } catch (error) {
+    console.error("[news-sitemap] generation failed:", error);
     return { body: "News sitemap is temporarily unavailable.", contentType: "text/plain", status: 503 };
   }
 }
@@ -133,7 +149,8 @@ export async function sitemapXml(): Promise<FeedResult> {
       `<url><loc>${xmlEscape(`${base}/archive`)}</loc></url>`,
     ].join("");
     return { body: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, contentType: "application/xml", status: 200 };
-  } catch {
+  } catch (error) {
+    console.error("[sitemap] generation failed:", error);
     return { body: "Sitemap is temporarily unavailable.", contentType: "text/plain", status: 503 };
   }
 }
@@ -146,17 +163,17 @@ export async function rssXml(): Promise<FeedResult> {
     const cdata = (value: string) => `<![CDATA[${value.replace(/\]\]>/g, "]]&gt;")}]]>`;
     const items = posts
       .slice(0, 50)
-      .map(post => {
-        const categories = (post as any).post_categories?.map((pc: any) => pc.categories?.name).filter(Boolean) ?? [];
-        const authorName = (post as any).profiles?.display_name || "CodeReport Global";
-        const categoryXml = categories.map((c: string) => `<category>${xmlEscape(c)}</category>`).join("");
+      .map((post: any) => {
+        const categoryXml = (post.categoryNames ?? []).map((c: string) => `<category>${xmlEscape(c)}</category>`).join("");
+        const authorName = post.authorName || "CodeReport Global";
         return `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><dc:creator>${xmlEscape(authorName)}</dc:creator>${categoryXml}<description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`;
       })
       .join("");
     const name = site?.name || process.env.SITE_NAME || "CodeReport Global";
     const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description><atom:link href="${xmlEscape(`${base}/rss.xml`)}" rel="self" type="application/rss+xml" />${items}</channel></rss>`;
     return { body, contentType: "application/rss+xml", status: 200 };
-  } catch {
+  } catch (error) {
+    console.error("[rss] generation failed:", error);
     return { body: "RSS is temporarily unavailable.", contentType: "text/plain", status: 503 };
   }
 }

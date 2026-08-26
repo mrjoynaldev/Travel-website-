@@ -50,6 +50,7 @@ export function enhanceArticleHtml(html: string): string {
   let out = html;
   out = out.replace(/(?:<p[^>]*>)?\s*<span[^>]*class="[^"]*gravity-code-lang[^"]*"[^>]*>\s*([a-zA-Z0-9+#-]{1,16})\s*<\/span>\s*[Cc]opy\s*(?:<\/p>)?(?=\s*<pre)/g, (_m, lang) => `\u0000LANG:${String(lang)}\u0000`);
   out = out.replace(/<p[^>]*>\s*([a-zA-Z0-9+#.-]{0,12})\s*[Cc]opy\s*<\/p>(?=\s*<pre)/g, (_m, prefix) => `\u0000LANG:${String(prefix) || ""}\u0000`);
+  out = out.replace(/<p[^>]*>\s*([a-zA-Z0-9+#.-]{0,12})[Cc]opy\s*<\/p>(?=\s*<pre)/g, (_m, prefix) => `\u0000LANG:${String(prefix) || ""}\u0000`);
   out = out.replace(/<pre[^>]*>[\s\S]*?<\/pre>/gi, (pre, offset, full) => {
     const before = full.slice(Math.max(0, offset - 260), offset);
     if (before.includes("gravity-code")) return pre;
@@ -58,5 +59,6 @@ export function enhanceArticleHtml(html: string): string {
     return wrapPre(pre, hint);
   });
   out = out.replace(/\u0000LANG:[a-zA-Z0-9+#-]{0,16}\u0000/g, "");
+  out = out.replace(/<p[^>]*>\s*(?:bash|text|sh|shell|javascript|typescript|json|yaml|python|sql|html|css|go|rust|java|c|cpp)\s*[Cc]opy\s*<\/p>/gi, "");
   return out;
 }
