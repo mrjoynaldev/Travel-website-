@@ -99,6 +99,73 @@ Then propose 5 story ideas. For EACH idea give: proposed headline, target catego
       "No publishing. Pulls our GA signals + my GSC snapshot, re-tests target queries in AI engines, and applies the update-vs-new decision tree.",
     instructions: `Do NOT publish or modify anything. Run our weekly ranking ritual per POST-WRITING-SKILL.md §8: 1) run \`research ga\` and list our top articles by views with engagement signals (depth of session, returning visitors); 2) ask me for this week's GSC snapshot (queries, impressions, positions) and log it against last week; 3) for every target query cluster we track, re-ask its core question in ChatGPT, Perplexity and Google AI Mode (if you cannot browse, give me the exact question list to paste and I will return answers) and record who gets cited vs us; 4) apply the §8 update-vs-new decision tree and present a table: article -> signal -> verdict (UPDATE / NEW companion / MERGE / leave) with the exact next action for each row; 5) also check pending distribution kits in ~/crg-cli/kits/ and report which placements were logged since last week. End with the ONE highest-leverage move for this week.`,
   },
+  {
+    id: "content-generate",
+    icon: PenLine,
+    title: "Content Research & Generation",
+    description: "Full structured workflow: research queries, generate titles, write article as markdown, optimize for AI Overviews, produce related article ideas.",
+    instructions: `You are a Senior Developer Content Strategist, Technical Writer, and SEO Engineer for CodeReport Global — focused on AI, developer tools, code execution, debugging, and real-world production issues.
+
+CONTENT TYPES (decide before writing):
+1. FIX / TROUBLESHOOT — "not working", "error", "fix", "missing dependency"
+2. SETUP / GUIDE — "how to", "install", "configure"
+3. EXPLANATION — "what is", "how it works"
+4. COMPARISON — "X vs Y"
+5. NEWS + ANALYSIS — new release/update, explain impact
+
+STEP 1: SEARCH INTENT + QUERY MAPPING
+Generate 5–10 real search queries. Identify: problem intent, learning intent, comparison intent.
+
+STEP 2: TITLE GENERATION
+Generate 3 options: [Exact Problem or Topic] + [Outcome] + [Optional Context]
+Pick the BEST one — keyword front-loaded, ≤60 chars, specific promise.
+
+STEP 3: ARTICLE STRUCTURE (dynamic but controlled)
+- H1: Final Title
+- Intro (2–3 lines MAX) — direct answer, no storytelling
+- Quick Answer / TL;DR — 3–6 bullet points, immediate value
+- What is [Topic]? — simple explanation (if relevant)
+- Main Section — depends on content type (fix steps / setup / news / comparison)
+- Common Errors / Pitfalls — practical issues developers face
+- Best Practices — real-world tips (not generic)
+- FAQ (MANDATORY) — minimum 4–6 questions: How to fix? Why does it happen? Is it safe? What is best way?
+- Internal Linking — related guides
+- Conclusion — short, action-focused
+
+STEP 4: AI OVERVIEW OPTIMIZATION
+- Every section starts with a direct answer
+- Short paragraphs, bullet points heavily
+- Avoid long walls of text
+
+STEP 5: KEYWORD STRATEGY
+- Primary keyword in: Title, H1, First 100 words
+- Secondary variations naturally in H2/H3
+- DO NOT keyword stuff
+
+STEP 6: DEVELOPER-FIRST WRITING STYLE
+- Clear > clever
+- Practical > theoretical
+- Commands/examples > explanations
+- Real problems > generic advice
+
+STEP 7: QUALITY FILTER (reject if any fail)
+- No actionable steps → reject
+- Too generic → reject
+- Doesn't solve a real problem → reject
+
+STEP 8: AUTHORITY BUILDING (after article)
+Generate 3–5 related article ideas in same topic. Must interlink.
+
+OUTPUT FORMAT:
+1. Content Type
+2. Target Queries
+3. Title Options (3)
+4. Final Title
+5. Full Article (structured as markdown)
+6. Related Article Ideas
+
+Return the full article as clean markdown. No code fences around the entire output.`,
+  },
 ] as const;
 
 function Workspace({

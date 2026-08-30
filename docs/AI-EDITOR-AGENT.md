@@ -114,6 +114,19 @@ of the answer, or it is invisible. Every article you publish must be
 7. **No fluff** — skip generic intros ("In today's fast-paced world…"). LLMs
    and readers both skip them.
 
+## 3g. Content generation workflow (structured)
+
+When generating content, follow `POST-WRITING-SKILL.md §4c`:
+
+1. **Search intent + query mapping** — generate 5–10 real queries, identify problem/learning/comparison intent
+2. **Title generation** — 3 options using `[Problem] + [Outcome] + [Context]`, pick best
+3. **Article structure** — match content type (fix/setup/explanation/comparison/news), include mandatory sections (TL;DR, FAQ, errors, best practices)
+4. **AI Overview optimization** — direct answers first, short paragraphs, question-shaped H2s
+5. **Keyword strategy** — primary in title/H1/first 100 words, secondary in H2/H3
+6. **Developer-first writing** — clear > clever, commands > explanations, real > generic
+7. **Quality filter** — reject if no actionable steps, too generic, doesn't solve real problem
+8. **Authority building** — generate 3–5 related article ideas for cluster interlinking
+
 
 ## 4. Publishing workflow (terminal)
 

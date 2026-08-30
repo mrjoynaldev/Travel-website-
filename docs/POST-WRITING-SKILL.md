@@ -144,6 +144,71 @@ Before any draft exists, complete this sentence and show it to the editor:
 - Re-check after drafting: if the draft does not deliver the promised angle,
   fix the draft, not the sentence.
 
+### 4c. Content generation system (research → structure → write → optimize)
+
+Before drafting, run this structured workflow:
+
+**STEP 1: Search intent + query mapping**
+Generate 5–10 real search queries. Identify:
+- Problem intent ("not working", "error", "fix", "missing dependency")
+- Learning intent ("how to", "install", "configure")
+- Comparison intent ("X vs Y")
+
+**STEP 2: Title generation**
+Generate 3 title options using: `[Exact Problem or Topic] + [Outcome] + [Optional Context]`
+- "Claude Code Sandbox Not Working? Fix Errors Fast"
+- "How to Run AI Code in a Sandbox (Safe Setup Guide)"
+- "Why AI Code Fails in Production (And How to Fix It)"
+Pick the BEST one — keyword front-loaded, ≤60 chars, specific promise.
+
+**STEP 3: Article structure (dynamic but controlled)**
+
+| Content Type | Structure |
+|---|---|
+| FIX / TROUBLESHOOT | Step-by-step fixes. Error → Cause → Solution. |
+| SETUP / GUIDE | Setup steps. Commands / config examples. |
+| EXPLANATION | Simple, clear explanation of concept. |
+| COMPARISON | Table or bullet comparison. When to use what. |
+| NEWS + ANALYSIS | What happened → Why it matters → Impact on developers. |
+
+**Required sections in every article:**
+1. H1: Final title
+2. Intro (2–3 lines MAX) — direct answer, no storytelling
+3. Quick Answer / TL;DR — 3–6 bullet points, immediate value
+4. What is [Topic]? — simple explanation (if relevant)
+5. Main Section — depends on content type (fix steps / setup / news / comparison)
+6. Common Errors / Pitfalls — practical issues developers face
+7. Best Practices — real-world tips (not generic)
+8. FAQ (MANDATORY) — minimum 4–6 questions: How to fix? Why does it happen? Is it safe? What is best way?
+9. Internal Linking — related guides (auto-injected by ArticleView if missed)
+10. Conclusion — short, action-focused
+
+**STEP 4: AI Overview optimization**
+- Every section starts with a direct answer
+- Use short paragraphs, bullet points heavily
+- Avoid long walls of text
+- Questions as H2 subheads (mirrors how users ask AI)
+
+**STEP 5: Keyword strategy**
+- Primary keyword in: Title, H1, First 100 words
+- Secondary variations naturally in H2/H3
+- DO NOT keyword stuff
+
+**STEP 6: Developer-first writing style**
+- Clear > clever
+- Practical > theoretical
+- Commands/examples > explanations
+- Real problems > generic advice
+
+**STEP 7: Quality filter (reject if any fail)**
+- No actionable steps → reject
+- Too generic → reject
+- Doesn't solve a real problem → reject
+- Doesn't match queries → reject
+
+**STEP 8: Authority building (after article)**
+Generate 3–5 related article ideas in same topic cluster. Must interlink.
+
 ## 5. Structure blueprint
 
 - **Title**: ≤60 chars, keyword front-loaded, specific promise. News: what
