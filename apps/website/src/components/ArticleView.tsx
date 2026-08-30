@@ -104,17 +104,17 @@ export default function ArticleView({ post, related, comments: initialComments, 
   const readingTime = useMemo(() => Math.max(3, Math.ceil((post.rendered_html.replace(/<[^>]*>/g, " ").split(/\s+/).length ?? 180) / 220)), [post.rendered_html]);
   const bodyHtml = useMemo(() => {
     let html = enhanceArticleHtml(post.rendered_html);
-    // Inject 2 keyword-rich internal links (hub-and-spoke) if not already present — critical for crawl depth
     const hasAlsoRead = /Also read:/i.test(html);
+    const hasRelated = /Related guides/i.test(html);
+    // Inject keyword-rich internal links at 40% scroll position + end
     if (!hasAlsoRead && related.length >= 2) {
       const hub = { slug: "ai-code-production-checks", title: "AI Code Passes Tests but Fails in Production — A Checklist" };
       const a = related[0]; const b = related[1];
-      // Use keyword anchors, not "click here" — inject mid + end
-      const midLink = `<p class="gravity-text"><em>Also read:</em> <a href="/articles/${hub.slug}">${hub.title}</a> — the hub that ties this fix to production checks.</p>`;
-      const endLink = `<p class="gravity-text"><em>Also read:</em> <a href="/articles/${a.slug}">${a.title}</a> and <a href="/articles/${b.slug}">${b.title}</a> — next steps for this fix.</p>`;
+      const midLink = `<div class="gravity-text" style="margin:2em 0;padding:1.2em 1.5em;border-left:3px solid #e4a741;background:#f5f9f3;border-radius:0 .5rem .5rem 0"><strong>Related guides:</strong><br/><a href="/articles/${hub.slug}">AI Code Production Checklist</a> — the hub that ties this fix to production checks.<br/><a href="/articles/${a.slug}">${a.title}</a></div>`;
+      const endLink = `<div class="gravity-text" style="margin:2em 0;padding:1.2em 1.5em;border-left:3px solid #1f4d3b;background:#eef4ea;border-radius:0 .5rem .5rem 0"><strong>Also read:</strong><br/><a href="/articles/${a.slug}">${a.title}</a><br/><a href="/articles/${b.slug}">${b.title}</a> — next steps for this fix.</div>`;
       const parts = html.split("</p>");
-      if (parts.length > 3) {
-        const mid = Math.floor(parts.length / 2);
+      if (parts.length > 5) {
+        const mid = Math.floor(parts.length * 0.4);
         parts.splice(mid, 0, midLink);
         html = parts.join("</p>") + endLink;
       } else {

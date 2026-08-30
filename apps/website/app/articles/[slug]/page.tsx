@@ -10,12 +10,27 @@ type Props = { params: Promise<{ slug: string }> };
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
 
+const titleOverrides: Record<string, string> = {
+  "ai-code-production-checks": "AI Code Passes Tests but Fails in Production — 15-Point Checklist (2026)",
+  "ai-deployment-fixes": "Why AI-Built Websites Break During Deployment: 15 Proven Fixes (2026)",
+  "claude-code-sandbox": "How to Sandbox Claude Code Without Breaking Git and MCP (2026)",
+  "n8n-mcp-production": "Deploy n8n MCP in Production: Proxy and Queue Setup Guide (2026)",
+  "deepseek-opencode-image-error": "DeepSeek Vision Image Input Error in OpenCode: Fix Guide (2026)",
+  "openai-hugging-face-agent-intrusion": "OpenAI–Hugging Face Agent Intrusion: 7 Sandbox Lessons (2026)",
+};
+
+const metaDescriptionOverrides: Record<string, string> = {
+  "ai-code-production-checks": "AI code passes tests but breaks in production? Use this 15-point checklist to catch edge cases, env mismatches, and integration failures before your users do.",
+  "ai-deployment-fixes": "AI-built websites break during deployment? Fix the 15 most common issues: SSR mismatches, missing env vars, broken routes, and more.",
+  "claude-code-sandbox": "Sandbox Claude Code safely without breaking Git, MCP, or your dev workflow. Step-by-step setup with Docker and permission controls.",
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const { post } = await serverTrpc.blog.bySlug.query({ slug });
-    const title = post.meta_title?.trim() || post.title;
-    const description = post.meta_description?.trim() || post.excerpt?.trim() || undefined;
+    const title = titleOverrides[slug] || post.meta_title?.trim() || post.title;
+    const description = metaDescriptionOverrides[slug] || post.meta_description?.trim() || post.excerpt?.trim() || undefined;
     const canonical = post.canonical_url?.trim() || `${siteUrl()}/articles/${post.slug}`;
   const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
     const image = optimizedSocialImage(uploadedImage) || `${siteUrl()}/api/og?title=${encodeURIComponent(title)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
@@ -68,7 +83,7 @@ export default async function ArticlePage({ params }: Props) {
 
   const pageUrl = `${siteUrl()}/articles/${post.slug}`;
   const canonical = post.canonical_url?.trim() || pageUrl;
-  const articleTitle = post.meta_title?.trim() || post.title;
+  const articleTitle = titleOverrides[slug] || post.meta_title?.trim() || post.title;
   const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
   const image = uploadedImage || `${siteUrl()}/api/og?title=${encodeURIComponent(articleTitle)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
   const jsonLd = {
@@ -77,8 +92,8 @@ export default async function ArticlePage({ params }: Props) {
       {
         "@type": "NewsArticle",
         "@id": `${pageUrl}#article`,
-        headline: post.meta_title?.trim() || post.title,
-        description: post.meta_description?.trim() || post.excerpt?.trim() || undefined,
+        headline: titleOverrides[slug] || post.meta_title?.trim() || post.title,
+        description: metaDescriptionOverrides[slug] || post.meta_description?.trim() || post.excerpt?.trim() || undefined,
         url: canonical,
         image: image ? [image] : undefined,
         datePublished: post.published_at || undefined,
@@ -104,6 +119,34 @@ export default async function ArticlePage({ params }: Props) {
       },
     ],
   };
+
+  // Extract FAQ questions from article H2s for FAQPage schema
+  const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
+  const faqItems: { question: string; answer: string }[] = [];
+  let match;
+  while ((match = h2Regex.exec(post.rendered_html)) !== null) {
+    const question = match[1].replace(/<[^>]*>/g, "").trim();
+    if (/\?/.test(question) || /^(how|what|why|when|where|which|can|do|does|is|are|should|will)/i.test(question)) {
+      // Extract the paragraph after this H2 as the answer
+      const afterH2 = post.rendered_html.slice(match.index + match[0].length);
+      const nextH2 = afterH2.search(/<h2/i);
+      const answerBlock = nextH2 > 0 ? afterH2.slice(0, nextH2) : afterH2.slice(0, 500);
+      const answer = answerBlock.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 300);
+      if (answer.length > 20) faqItems.push({ question, answer });
+    }
+  }
+
+  if (faqItems.length >= 3) {
+    (jsonLd["@graph"] as any[]).push({
+      "@type": "FAQPage",
+      "@id": `${pageUrl}#faq`,
+      mainEntity: faqItems.slice(0, 8).map(item => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
+    });
+  }
 
   return (
     <>
