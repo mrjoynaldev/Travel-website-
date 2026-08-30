@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
+import { Inter, DM_Mono } from "next/font/google";
 import { PublicShell, type PublicPageInfo, type PublicationInfo } from "@/components/public/PublicShell";
 import { GaTag } from "../components/GaTag";
 import { Toaster } from "@/components/ui/sonner";
 import { serverTrpc } from "@web/lib/trpc-server";
 import "./globals.css";
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-dm-sans",
+  variable: "--font-inter",
   weight: ["400", "500", "600", "700"],
 });
 
@@ -18,13 +18,6 @@ const dmMono = DM_Mono({
   display: "swap",
   variable: "--font-dm-mono",
   weight: ["400", "500"],
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-playfair",
-  weight: ["500", "600", "700"],
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
@@ -81,7 +74,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" className={`${dmSans.variable} ${dmMono.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${inter.variable} ${dmMono.variable}`}>
       <head>
         <script
           type="application/ld+json"
