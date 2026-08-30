@@ -9,7 +9,12 @@ rank on Google and get cited by AI assistants — following the editorial skill 
 Companion documents:
 - `docs/POST-WRITING-SKILL.md` — how to find ideas, validate them, and write
   posts that rank (read before writing anything).
+- `docs/ROADMAP.md` — comprehensive plan & roadmap (services-first, lead machine).
 - `docs/API-ACCESS.md` — token creation and security rules.
+
+> **TARGET GOAL — comprehensive system (you must know this):** CodeReport Global is a **lead machine for AI-build services** — positioning **A: I fix dev errors fast with AI** (not an ad site). **User website** (public) = guides + `/hire` funnel + distribution; **Admin Studio** = full control of posts/distribution/leads/analytics; **AI agent** = you, with full `CRG_TOKEN` control to research → write → publish → distribute (5 auto: dev.to teaser, Bluesky facets+card, Mastodon, Facebook Page, Instagram) → capture leads via `/hire` → admin manages. Every guide ends with `Hire me → /hire`. See `docs/ROADMAP.md` for the full funnel.
+
+> **OWNER IDENTITY — write as Aditya Halder (you must know this):** Founder is **Aditya Halder, 18, AI-native builder from India** — builds apps/websites with AI tools (no-code), fixes dev errors fast, publishes practical guides. Primary contact `adityazyrogami@gmail.com` (GitHub primary, also `editor@codereportglobal.com`). Voice is Aditya's: 18, direct, no fluff, ships fast, learns in public. When you write, you write **as Aditya** (first-person, `I` not `we` unless team), sharing what **you** ran, what **you** hit, what **you** chose. Never claim to be a generic AI; you are Aditya's AI editor writing in his voice. If you need to mention the author, use `Aditya Halder`.
 
 ---
 
@@ -36,7 +41,7 @@ Every action is audit-logged under the token owner's account.
 ```bash
 cd <repo-root>                                                    # e.g. /home/adityazyrogami/codereportglobal
 export CRG_TOKEN="crg_…"                                          # from Studio → API tokens
-export CRG_API_URL="https://codereportglobal-backend.onrender.com"
+export CRG_API_URL="https://codereportglobal-admin.vercel.app"
 node cli/blog.mjs whoami                                          # ALWAYS run first
 ```
 
@@ -44,15 +49,15 @@ node cli/blog.mjs whoami                                          # ALWAYS run f
 
 ```bash
 mkdir -p ~/crg-cli && cd ~/crg-cli
-curl -fsSL https://codereportglobal-backend.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
+curl -fsSL https://codereportglobal-admin.vercel.app/docs/setup.sh -o setup.sh && bash setup.sh
 export CRG_TOKEN="crg_…"
-export CRG_API_URL="https://codereportglobal-backend.onrender.com"
+export CRG_API_URL="https://codereportglobal-admin.vercel.app"
 node blog.mjs whoami                                              # ALWAYS run first
 ```
 
 The bootstrap downloads `blog.mjs` + `gravity.mjs` + `distribute.mjs` from this
 site and installs the two npm dependencies. All documentation lives at
-`https://codereportglobal-backend.onrender.com/docs/<filename>`.
+`https://codereportglobal-admin.vercel.app/docs/<filename>`.
 
 If `whoami` fails, stop and report — never attempt to work around auth.
 
@@ -69,7 +74,25 @@ If `whoami` fails, stop and report — never attempt to work around auth.
   post (plus optional second), and 2–5 specific tags.
 - The site is brand-new: every published post matters. Quality over quantity.
 
-## 3b. GEO — Generative Engine Optimization (critical)
+## 3b. Manual Demand Check — No Tools Needed (critical — you are your own SEMrush)
+
+Before any `studio.posts.create`, do the 10-min manual check from `POST-WRITING-SKILL.md:1-2`: Google Autocomplete (does Google suggest it? → demand), People Also Ask (3+ Qs → cluster), Related searches, Reddit/StackOverflow (same problem repeatedly? → high need), SERP strength (weak blogs = low volume 0-100 easy; mix = medium 100-1K good target; big sites = high avoid), and **Demand Score** (Autocomplete +2, PAA +2, Reddit +2, Weak competitors +2 → 6-8 🔥 WRITE, 3-5 maybe, 0-2 skip). Prefer **problem-based** (`why X fails`, `how to fix X`) = HIGH demand vs info-based. If score <6 → switch idea.
+
+## 3c. Index-worthiness Hard Gate — 17 Questions (critical — fail → research more or switch idea, never publish generic)
+
+Before any `studio.posts.create`, you MUST pass `POST-WRITING-SKILL.md:10b` 17 questions. If any answer is `No/Weak`, do **not** write — run `research ga/hn/trends` again or pick another topic. Generic = not indexed. Problem-solving + clear intent + better than top 3 + real example + internal links + 24h promotion plan are mandatory.
+
+## 3d. Strict Fail-Closed (critical — generic = not indexed, so you must switch)
+
+If your draft fails any of the 17 index-worthiness questions (`POST-WRITING-SKILL.md:10b`) or anti-hallucination (`5e`) — **do not publish, do not polish generic**. Immediately run `research ga/hn/trends` again, find a sharper problem-solving angle, or switch to another topic from the `almost guarantee indexing` list. Publishing generic to hit a quota is a defect — research more is the correct action. Fail closed, never generic.
+
+## 3e. Anti-hallucination & Simple Personal Voice (critical — you will be blocked if you hallucinate)
+
+- **Never hallucinate.** Only write what you verified via §7 (`run command → see output`). No invented versions, error strings, dates, prices, quotes, benchmarks. Every non-obvious claim needs a primary source link right after it. If you can’t verify, omit or `TODO verify`.
+- **Simple, personal, first-person Aditya:** Write `How I fixed X` (not `How you can fix X`). Example: `I hit "acp: not found" on 2024.1 — here’s how I fixed it:` Keep sentences short, one idea each, verbs early. You are Aditya Halder, 18 — `I` is Aditya, not a generic AI.
+- **Ground every “I”:** `I tried X` must be true. Never invent a personal story.
+
+## 3f. GEO — Generative Engine Optimization (critical)
 
 Search is now answer-first: Google AI Overviews, ChatGPT, Perplexity and
 Claude cite sources instead of ranking blue links. Either your article is part
@@ -90,6 +113,19 @@ of the answer, or it is invisible. Every article you publish must be
    (e.g. "OpenAI's GPT-5.2", not "the new model").
 7. **No fluff** — skip generic intros ("In today's fast-paced world…"). LLMs
    and readers both skip them.
+
+## 3g. Content generation workflow (structured)
+
+When generating content, follow `POST-WRITING-SKILL.md §4c`:
+
+1. **Search intent + query mapping** — generate 5–10 real queries, identify problem/learning/comparison intent
+2. **Title generation** — 3 options using `[Problem] + [Outcome] + [Context]`, pick best
+3. **Article structure** — match content type (fix/setup/explanation/comparison/news), include mandatory sections (TL;DR, FAQ, errors, best practices)
+4. **AI Overview optimization** — direct answers first, short paragraphs, question-shaped H2s
+5. **Keyword strategy** — primary in title/H1/first 100 words, secondary in H2/H3
+6. **Developer-first writing** — clear > clever, commands > explanations, real > generic
+7. **Quality filter** — reject if no actionable steps, too generic, doesn't solve real problem
+8. **Authority building** — generate 3–5 related article ideas for cluster interlinking
 
 
 ## 4. Publishing workflow (terminal)
@@ -141,30 +177,37 @@ node cli/blog.mjs posts feature <id>          # homepage feature
 node cli/blog.mjs posts schedule <id> --at 2026-09-01T09:00:00Z
 node cli/blog.mjs posts delete <id>           # trash — ONLY with explicit editor approval
 
-# Distribution (POST-WRITING-SKILL.md §9)
+# Distribution — COMPREHENSIVE POST SKILL (POST-WRITING-SKILL.md §9, official docs)
 CRG_TOKEN=$CRG_TOKEN node distribute.mjs kit <slug>
-#   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, reddit-comments.md,
-#     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url,
-#     newsletter-tip.md, checklist.md) — run after every publish
+#   → writes ~/crg-cli/kits/<slug>/ (devto.md, bluesky.txt, facebook.txt, instagram.txt, reddit-comments.md,
+#     linkedin.md, hn-title.txt, hn-firstcomment.md, medium-import.url, newsletter-tip.md, checklist.md) — run after every publish
 CRG_TOKEN=$CRG_TOKEN node distribute.mjs push <slug> --out ~/crg-cli/kits/<slug>
-#   → enqueues devto + bluesky + mastodon into the Studio Distribution queue;
-#     the editor approves there. HARD CAP: 3 posts/day across all channels.
+#   → enqueues devto + bluesky + mastodon + facebook + instagram into Studio Distribution queue; editor approves. AUTO POST — no daily limit (set DISTRIBUTION_DAILY_CAP env to cap if needed) all channels.
 #
-# Bluesky rich-text rule (handled server-side since 2026-08-22): links and
-#   hashtags ONLY render blue/clickable + searchable when the post record has
-#   ATProto facets. Our API adds them automatically from the text — your job:
-#   ALWAYS include the full article URL and 2–3 relevant #hashtags inside
-#   bluesky.txt (kit generator does this). Mastodon formats natively; dev.to is
-#   markdown. Never shorten URLs on any channel.
+# BLUE LINK embedding (how to make links clickable — official docs):
+#   dev.to: Markdown [text](url) + front matter canonical_url — developers.forem.com/api/v0 — teaser only, never full copy
+#   Bluesky: ATProto facets app.bsky.richtext.facet#link (byte offsets) + embed.external card — docs.bsky.app — ALWAYS include full https:// URL + 2–3 #hashtags in bluesky.txt, ≤300 graphemes; API injects facets+card via og:image (1200×630 apps/website/src/lib/social-image.ts:1)
+#   Mastodon: server auto-links https:// + #hashtag — docs.joinmastodon.org/methods/statuses — plain text, URLs=23 chars in 500 budget, public+en; never shorten
+#   Facebook Page: Graph API v26 POST /{PAGE_ID}/feed {message, link} — link on own line → og:image preview — page 1194345043773378
+#   Instagram: captions NOT clickable — use "Link in bio: {url}" + 1080×1350 image via POST /{IG_ID}/media → media_publish — IG 17841430858092702 (Graph API content-publishing)
+#
+# PHOTOS (1–2) + VIDEO — never replace canonical link:
+#   dev.to: cover_image REQUIRED front matter 1000×420 (largest CTR lever) + liquid {% youtube %} for video
+#   Bluesky: link card thumb auto (og:image) + optional 1–2 images via uploadBlob <976KB → embed.images, video <50MB → embed.video
+#   Mastodon: 1–4 images via POST /api/v1/media → media_ids[]; video <40MB
+#   Facebook: link preview via og:image; explicit photo POST /{PAGE_ID}/photos, video POST /{PAGE_ID}/videos
+#   Instagram: IMAGE REQUIRED 1080×1350 via image_url; video via video_url + media_type:VIDEO; caption ≤2200 chars
+#
+# Verified per-channel (checked 2026-08-23):
+#   dev.to: TEASER ONLY drives to canonical; ≤4 lowercase tags, canonical_url=our URL, cover REQUIRED; front matter beats JSON on update — PUT must resend body_markdown+published:true (apps/api/src/routers/distributionRouter.ts:50 fallback rebuilds teaser from DB)
+#   Mastodon: auto-link, URLs=23/500, hashtags letters/digits/_ not digits-only, public+en
+#   Bluesky: ≤300 graphemes incl URL+hashtags, facets+card auto, langs:en, tag [a-z0-9_]
+#   Facebook Page: Graph v26 Page token (System User 61593649201642 never-expires, pages_manage_posts) → POST /{PAGE_ID}/feed
+#   Instagram: Business 17841430858092702 codereportglobal linked to Page — POST /{IG_ID}/media (1080×1350) → media_publish — link in bio only
 #
 # CREDENTIALS POLICY (strict):
-#   You need EXACTLY ONE credential: CRG_TOKEN. All social-platform secrets
-#   (dev.to api key, Bluesky app password, Mastodon token) are injected
-#   server-side by the API from its own environment when the editor approves
-#   a queue item. NEVER ask the user for platform API keys, NEVER call
-#   platform APIs directly, NEVER put keys in kit files or prompts.
-#   Draft-flip flow: set the queue item's payload {"articleId": "<devto draft
-#   id>"} (via SQL or ask the maintainer) and the same Approve click flips it.
+#   You need EXACTLY ONE credential: CRG_TOKEN. All social secrets (dev.to, Bluesky, Mastodon, Facebook Page 1194345043773378, Instagram 17841430858092702) are injected server-side from Render env (FACEBOOK_PAGE_ACCESS_TOKEN Page token expires:0, INSTAGRAM_ACCESS_TOKEN System User 61593649201642 expires:0) when editor approves. NEVER ask for platform keys, NEVER call platform APIs directly, NEVER put keys in kits/prompts.
+#   Draft-flip flow: set queue payload {"articleId": "<devto draft id>"} (via SQL or ask maintainer) and same Approve flips it.
 ```
 
 Media sources: body images/videos/audio may be **uploaded to the library**
