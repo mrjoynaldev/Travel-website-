@@ -16,6 +16,8 @@ export type GravityBlock = {
   height?: number;
   rotation?: number;
   content?: string;
+  /** Legacy alias from agent/CLI docs: `code` is equivalent to `content` for code blocks */
+  code?: string;
   runs?: TextRun[];
   level?: "h2" | "h3" | "p" | "quote" | "list";
   url?: string;

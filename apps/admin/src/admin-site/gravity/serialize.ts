@@ -42,7 +42,7 @@ function renderRuns(block: GravityBlock) {
 }
 
 function codeBlockMarkup(block: GravityBlock) {
-  let code = (block.content || "").replace(/[\u200b\u200c\u200d\u{feff}]/gu, "");
+  let code = ((block as any).code ?? block.content ?? "").replace(/[\u200b\u200c\u200d\u{feff}]/gu, "");
   const lines = code.split("\n");
   while (lines.length && /^\s*[\w+-]*\s*copy\s*$/i.test(lines[0])) lines.shift();
   while (lines.length && /^\s*copy\s*$/i.test(lines[lines.length - 1])) lines.pop();

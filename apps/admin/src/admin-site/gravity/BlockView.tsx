@@ -86,9 +86,10 @@ export function BlockView({
   const [copied, setCopied] = useState(false);
   const textEditing = block.type === "text" && editingId === block.id;
 
+  const codeValue = (block as any).code ?? block.content ?? "";
   const copyCode = async () => {
     try {
-      await navigator.clipboard.writeText(block.content || "");
+      await navigator.clipboard.writeText(codeValue || "");
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -308,7 +309,7 @@ export function BlockView({
             </button>
           </div>
           <pre className="max-h-64 overflow-auto p-3 text-xs leading-relaxed text-emerald-100/90">
-            <code>{block.content || "// paste your code here"}</code>
+            <code>{codeValue || "// paste your code here"}</code>
           </pre>
         </div>
       )}
@@ -383,9 +384,9 @@ export function BlockView({
                 className="h-8 text-xs"
               />
               <textarea
-                value={block.content || ""}
+                value={codeValue || ""}
                 onChange={event =>
-                  updateBlock(block.id, { content: event.target.value })
+                  updateBlock(block.id, { content: event.target.value, code: undefined } as any)
                 }
                 rows={8}
                 placeholder="Paste your code here…"

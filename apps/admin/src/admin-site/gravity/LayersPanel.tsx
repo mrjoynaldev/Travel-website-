@@ -14,7 +14,7 @@ export function LayersPanel() {
   const grouped = sections.map(section => ({ section, blocks: blocks.filter(block => block.parentId === section.id) })).filter(group => group.blocks.length);
 
   const Icon = ({ block }: { block: (typeof blocks)[number] }) => block.type === "image" ? <ImageIcon className="h-3 w-3" /> : block.type === "video" ? <Video className="h-3 w-3" /> : block.type === "audio" ? <Music2 className="h-3 w-3" /> : block.type === "button" ? <SquareMousePointer className="h-3 w-3" /> : block.type === "code" ? <Braces className="h-3 w-3" /> : block.type === "custom" ? <Puzzle className="h-3 w-3" /> : <FileText className="h-3 w-3" />;
-  const label = (block: (typeof blocks)[number]) => (block.type === "text" ? (block.content || "Text").slice(0, 28) : block.type === "button" ? (block.content || "Button").slice(0, 28) : block.type === "code" ? (block.content || "Code").slice(0, 28) : block.type === "custom" ? "Custom HTML" : block.caption || block.url || (block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"));
+  const label = (block: (typeof blocks)[number]) => (block.type === "text" ? (block.content || "Text").slice(0, 28) : block.type === "button" ? (block.content || "Button").slice(0, 28) : block.type === "code" ? (((block as any).code ?? block.content) || "Code").slice(0, 28) : block.type === "custom" ? "Custom HTML" : block.caption || block.url || (block.type === "image" ? "Image" : block.type === "audio" ? "Audio" : "Video"));
 
   const Row = ({ block, depth }: { block: (typeof blocks)[number]; depth?: number }) => {
     const active = selected.includes(block.id);

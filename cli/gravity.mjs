@@ -49,7 +49,7 @@ function renderRuns(block) {
 }
 
 function codeBlockMarkup(block) {
-  let code = (block.content || "").replace(/\u200b|\u200c|\u200d|\ufeff/g, "");
+  let code = ((block.code ?? block.content) || "").replace(/\u200b|\u200c|\u200d|\ufeff/g, "");
   // Strip ChatGPT-style paste residue: a leading line like "yamlCopy" / "Copy".
   const lines = code.split("\n");
   while (lines.length && /^\s*[\w+-]*\s*copy\s*$/i.test(lines[0])) lines.shift();
