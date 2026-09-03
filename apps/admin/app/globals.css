@@ -157,6 +157,8 @@
   .editor-content .is-editor-empty:first-child::before { color: #9aa49f; content: attr(data-placeholder); float: left; height: 0; pointer-events: none; }
   @media (min-width: 640px) { .container { padding-inline: 1.5rem; } }
   @media (min-width: 1024px) { .container { max-width: 1240px; padding-inline: 2rem; } }
+  @media (min-width: 1280px) { .container { max-width: 1320px; } }
+  @media (min-width: 1536px) { .container { max-width: 1360px; } }
 }
 
 @media (prefers-reduced-motion: no-preference) { .enter-fade { animation: enter .35s cubic-bezier(.23,1,.32,1) both; } @keyframes enter { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } }

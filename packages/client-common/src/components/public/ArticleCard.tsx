@@ -46,14 +46,14 @@ export function ArticleCard({
     <article
       className={`group ${
         featured
-          ? "grid gap-6 md:grid-cols-[1.1fr_.9fr] md:items-center"
+          ? "grid gap-6 lg:gap-8 xl:gap-10 md:grid-cols-[1.1fr_.9fr] md:items-center lg:items-start"
           : "flex flex-col"
       }`}
     >
       <Link
         href={`/articles/${post.slug}`}
-        className={`relative block overflow-hidden bg-secondary ${
-          featured ? "aspect-[16/10] rounded-[1.25rem]" : "aspect-[16/11] rounded-xl"
+        className={`relative block overflow-hidden bg-secondary shadow-sm lg:group-hover:shadow-md transition-shadow ${
+          featured ? "aspect-[16/10] rounded-[1.25rem] lg:rounded-[1.5rem]" : "aspect-[16/11] rounded-xl lg:rounded-2xl"
         }`}
         aria-label={`Read ${post.title}`}
       >
@@ -76,21 +76,21 @@ export function ArticleCard({
         )}
       </Link>
 
-      <div className={featured ? "py-1" : "pt-5"}>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-label text-[10px] text-primary">
+      <div className={featured ? "py-1 lg:py-2" : "pt-5 lg:pt-6"}>
+        <div className="flex flex-wrap items-center gap-2 lg:gap-2.5">
+          <span className="font-label text-[10px] lg:text-[11px] text-primary">
             {post.categories?.[0]?.name || "Essay"}
           </span>
           <span className="h-1 w-1 rounded-full bg-[#c3c9c4]" />
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs lg:text-[13px] text-muted-foreground">
             {formatDate(post.published_at)}
           </span>
         </div>
 
         <h2
           className={`${
-            featured ? "mt-4 text-4xl sm:text-5xl" : "mt-3 text-2xl"
-          } font-display font-semibold leading-[1.07] tracking-tight transition-colors group-hover:text-primary`}
+            featured ? "mt-4 lg:mt-5 text-4xl sm:text-5xl lg:text-[2.6rem] xl:text-[2.85rem]" : "mt-3 lg:mt-4 text-2xl lg:text-[1.55rem]"
+          } font-display font-semibold leading-[1.07] lg:leading-[1.06] tracking-tight transition-colors group-hover:text-primary`}
         >
           <Link href={`/articles/${post.slug}`}>{post.title}</Link>
         </h2>
@@ -98,17 +98,17 @@ export function ArticleCard({
         {post.excerpt && (
           <p
             className={`${
-              featured ? "mt-4 text-base leading-7" : "mt-3 text-sm leading-6"
-            } max-w-xl text-muted-foreground`}
+              featured ? "mt-4 lg:mt-5 text-base lg:text-[17px] leading-7 lg:leading-8" : "mt-3 text-sm lg:text-[15px] leading-6 lg:leading-7"
+            } max-w-xl lg:max-w-[36rem] text-muted-foreground`}
           >
             {post.excerpt}
           </p>
         )}
 
-        <div className="mt-5 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="mt-5 lg:mt-6 flex items-center justify-between gap-3 text-xs lg:text-[13px] text-muted-foreground">
           <span>{post.author?.display_name || "CodeReport Global editorial"}</span>
           <span className="flex items-center gap-1.5">
-            <Clock3 className="h-3.5 w-3.5" />
+            <Clock3 className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
             {readTime(post.excerpt)} min read
           </span>
         </div>
@@ -116,7 +116,7 @@ export function ArticleCard({
         {featured && (
           <Link
             href={`/articles/${post.slug}`}
-            className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-primary"
+            className="mt-6 lg:mt-7 inline-flex items-center gap-2 text-sm lg:text-[15px] font-semibold text-primary hover:gap-3 transition-all"
           >
             Read the story <ArrowUpRight className="h-4 w-4" />
           </Link>
