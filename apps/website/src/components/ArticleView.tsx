@@ -35,7 +35,7 @@ type Comment = { id: string; parent_id: string | null; author_name: string; body
 
 const dateLabel = (date: string | null) => date ? new Date(date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" }) : "Editorial draft";
 
-export default function ArticleView({ post, related, comments: initialComments, slug }: { post: Post; related: ArticleCardPost[]; comments: Comment[]; slug: string }) {
+export default function ArticleView({ post, related, comments: initialComments, slug }: { post: Post; related?: ArticleCardPost[]; comments: Comment[]; slug: string }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [body, setBody] = useState("");
@@ -102,27 +102,10 @@ export default function ArticleView({ post, related, comments: initialComments, 
   }, [post.id]);
 
   const readingTime = useMemo(() => Math.max(3, Math.ceil((post.rendered_html.replace(/<[^>]*>/g, " ").split(/\s+/).length ?? 180) / 220)), [post.rendered_html]);
-  const bodyHtml = useMemo(() => {
-    let html = enhanceArticleHtml(post.rendered_html);
-    const hasAlsoRead = /Also read:/i.test(html);
-    const hasRelated = /Related guides/i.test(html);
-    // Inject keyword-rich internal links at 40% scroll position + end
-    if (!hasAlsoRead && related.length >= 2) {
-      const hub = { slug: "ai-code-production-checks", title: "AI Code Passes Tests but Fails in Production — A Checklist" };
-      const a = related[0]; const b = related[1];
-      const midLink = `<div class="gravity-text" style="margin:2em 0;padding:1.2em 1.5em;border-left:3px solid #e4a741;background:#f5f9f3;border-radius:0 .5rem .5rem 0"><strong>Related guides:</strong><br/><a href="/articles/${hub.slug}">AI Code Production Checklist</a> — the hub that ties this fix to production checks.<br/><a href="/articles/${a.slug}">${a.title}</a></div>`;
-      const endLink = `<div class="gravity-text" style="margin:2em 0;padding:1.2em 1.5em;border-left:3px solid #1f4d3b;background:#eef4ea;border-radius:0 .5rem .5rem 0"><strong>Also read:</strong><br/><a href="/articles/${a.slug}">${a.title}</a><br/><a href="/articles/${b.slug}">${b.title}</a> — next steps for this fix.</div>`;
-      const parts = html.split("</p>");
-      if (parts.length > 5) {
-        const mid = Math.floor(parts.length * 0.4);
-        parts.splice(mid, 0, midLink);
-        html = parts.join("</p>") + endLink;
-      } else {
-        html += midLink + endLink;
-      }
-    }
-    return html;
-  }, [post.rendered_html, related]);
+  // Related/Also-read fallback links are injected server-side
+  // (injectRelatedLinks in page.tsx) so crawlers and no-JS readers see real
+  // <a href> links in the SSR HTML. Client only enhances code blocks here.
+  const bodyHtml = useMemo(() => enhanceArticleHtml(post.rendered_html), [post.rendered_html]);
 
   const submitComment = async () => {
     if (!name.trim() || !email.trim() || !body.trim()) return;
@@ -157,6 +140,6 @@ export default function ArticleView({ post, related, comments: initialComments, 
       <div className="container max-w-3xl lg:max-w-[760px] pb-4 lg:pb-8">{post.featuredMedia && <figure className="mb-10 lg:mb-12"><img src={optimizedImageUrl(post.featuredMedia.url, 1200, 675) || post.featuredMedia.url} alt={post.featuredMedia.alt_text || post.title} className="aspect-[16/9] w-full rounded-2xl lg:rounded-[1.5rem] object-cover shadow-sm lg:shadow-md" width={1200} height={675} fetchPriority="high" />{post.featuredMedia.caption && <figcaption className="mt-2 lg:mt-3 text-xs lg:text-[13px] text-muted-foreground">{post.featuredMedia.caption}</figcaption>}</figure>}<div className="article-prose lg:pt-2" dangerouslySetInnerHTML={{ __html: bodyHtml }} /><div className="mt-12 lg:mt-16 flex flex-wrap gap-2 lg:gap-2.5 border-t border-border pt-7 lg:pt-8">{post.tags.map(tag => <span key={tag.id} className="rounded-full border border-border bg-white px-3 lg:px-3.5 py-1 lg:py-1.5 text-xs lg:text-[13px] text-muted-foreground hover:border-primary/30 hover:text-primary transition-colors">#{tag.name}</span>)}</div><section className="mt-10 lg:mt-12 rounded-2xl border border-[#d6e2d1] bg-[#f5f9f3] p-6 lg:p-7 xl:p-8 shadow-sm"><h3 className="font-display text-lg lg:text-[19px] font-semibold">Need this fixed for you?</h3><p className="mt-2 text-sm lg:text-[15px] leading-6 lg:leading-7 text-muted-foreground">I fix these in &lt;24h — bug, landing page, or automation. Real fix, no fluff.</p><div className="mt-4 lg:mt-5 flex flex-wrap gap-3"><Button asChild className="gap-2 lg:h-10"><Link href="/hire">Hire me — reply in 12h <Send className="h-4 w-4" /></Link></Button><Button variant="outline" asChild className="lg:h-10"><Link href="/hire">See services</Link></Button></div></section><section className="mt-14 lg:mt-16 rounded-2xl bg-white p-6 lg:p-7 shadow-sm lg:shadow-md border lg:border-border"><div className="flex gap-4 lg:gap-5"><Avatar className="h-12 w-12 lg:h-14 lg:w-14"><AvatarFallback className="bg-primary text-primary-foreground">{authorInitials}</AvatarFallback></Avatar><div>{post.author ? <Link href={`/authors/${post.author.id}`} className="text-sm lg:text-[15px] font-semibold hover:underline">Written by {post.author.display_name}</Link> : <p className="text-sm lg:text-[15px] font-semibold">Written by CodeReport Global editorial</p>}{post.author?.bio && <p className="mt-1 text-sm lg:text-[15px] leading-6 lg:leading-7 text-muted-foreground">{post.author.bio}</p>}</div></div></section></div>
     </article>
     <section className="border-t border-border bg-white"><div className="container max-w-3xl lg:max-w-[760px] py-14 lg:py-16 xl:py-20"><div className="flex items-center gap-2 lg:gap-3"><MessageCircle className="h-5 w-5 lg:h-6 lg:w-6 text-primary" /><h2 className="font-display text-2xl lg:text-[1.65rem] font-semibold">Reader conversation</h2></div><p className="mt-2 text-sm lg:text-[15px] leading-6 text-muted-foreground">Comments are reviewed before publication to keep the conversation useful.</p><form className="mt-7 lg:mt-8 grid gap-3 lg:gap-4 rounded-xl border border-border bg-[#f8faf6] p-5 lg:p-6" onSubmit={event => { event.preventDefault(); submitComment(); }}><div className="grid gap-3 sm:grid-cols-2"><Input required value={name} onChange={event => setName(event.target.value)} placeholder="Your name" className="lg:h-11" /><Input required type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="Email address" className="lg:h-11" /></div><Textarea required value={body} onChange={event => setBody(event.target.value)} placeholder="Join the conversation" rows={4} className="lg:text-[15px]" /><div><Button type="submit" disabled={submitting} className="gap-2 lg:h-11 lg:px-5">{submitting ? "Submitting…" : "Submit for review"} <Send className="h-4 w-4" /></Button></div><p className="text-xs lg:text-[13px] leading-5 lg:leading-6 text-muted-foreground">By submitting, you acknowledge the handling of your details under our <Link href="/privacy" className="font-medium text-primary underline underline-offset-2">Privacy policy</Link>.</p></form><div className="mt-8 lg:mt-10 space-y-5 lg:space-y-6">{comments.length ? comments.map(comment => <div key={comment.id} className="border-b border-border pb-5 lg:pb-6"><div className="flex items-center justify-between"><p className="text-sm lg:text-[15px] font-semibold">{comment.author_name}</p><time className="text-xs lg:text-[13px] text-muted-foreground">{new Date(comment.created_at).toLocaleDateString("en-US", { timeZone: "UTC" })}</time></div><p className="mt-2 text-sm lg:text-[15px] leading-6 lg:leading-7 text-muted-foreground">{comment.body}</p></div>) : <p className="py-5 text-sm lg:text-[15px] text-muted-foreground">No approved comments yet. You can be the first to join the conversation.</p>}</div></div></section>
-    {related.length > 0 && <section className="container max-w-6xl xl:max-w-[1320px] py-14 lg:py-16 xl:py-20"><p className="font-label text-xs lg:text-[11px] text-primary">Continue reading</p><h2 className="mt-2 font-display text-3xl lg:text-[2rem] xl:text-[2.2rem] font-semibold">More from the journal</h2><div className="mt-8 lg:mt-10 grid gap-7 lg:gap-8 xl:gap-9 md:grid-cols-3">{related.map(item => <ArticleCard key={item.id} post={item} />)}</div></section>}
+    {(related ?? []).length > 0 && <section className="container max-w-6xl xl:max-w-[1320px] py-14 lg:py-16 xl:py-20"><p className="font-label text-xs lg:text-[11px] text-primary">Continue reading</p><h2 className="mt-2 font-display text-3xl lg:text-[2rem] xl:text-[2.2rem] font-semibold">More from the journal</h2><div className="mt-8 lg:mt-10 grid gap-7 lg:gap-8 xl:gap-9 md:grid-cols-3">{(related ?? []).map(item => <ArticleCard key={item.id} post={item} />)}</div></section>}
   </>;
 }

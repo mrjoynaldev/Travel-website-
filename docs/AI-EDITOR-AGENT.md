@@ -180,6 +180,10 @@ node cli/blog.mjs research trends --geo US   # trending searches (switch --geo)
 node cli/blog.mjs research hn                # Hacker News front page
 node cli/blog.mjs research hn --query agents # topic search on HN
 node cli/blog.mjs research ga                # our live GA4 traffic + top pages
+# Then: pick ONE GSC-tested seed query, expand to 4-6 intent variants, and
+# run the SERP reverse-engineering table (POST-WRITING-SKILL.md:3d + :4 step 2)
+# before any draft. New spokes target /topics/puppeteer, /topics/typescript,
+# or /topics/ai-dev-tools and link UP to the hub + SIDEWAYS to 2 siblings.
 
 # 4. (Optional) upload a cover image or media asset
 node cli/blog.mjs media upload --file cover.jpg \

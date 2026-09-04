@@ -87,6 +87,34 @@ ask, and make sure one H2 answers each natural sub-question of that sentence.
   the person who searched "what is X" months earlier. Covering the full
   journey keeps them on our site for that entire arc.
 
+## 3d. Intent-cluster build (how new spokes are born — future posts only)
+
+Live hubs (created 2026-09-04, hidden from `/sitemap.xml` until they hold a
+published post): `/topics/puppeteer`, `/topics/typescript`,
+`/topics/ai-dev-tools`.
+
+1. **Seed from GSC, never from imagination.** Take one real query Google
+   already tested (`puppeteer npm`, `typescript 7 eslint`, `claude code
+   sandbox`) and expand it into 4–6 intent variants before writing anything:
+   - `puppeteer npm` → `puppeteer install npm error` / `puppeteer chromium
+     not downloading` / `puppeteer install size issue` / `puppeteer npm
+     postinstall skipped`
+   - One variant = one spoke ONLY if it is a distinct search intent (different
+     error, different fix). Variants of the same fix belong as H2s in ONE
+     article, never as separate URLs (splitting one intent = doorway-style
+     thin pages).
+2. **Hub-and-spoke link floor (mandatory per spoke):** every new spoke links
+   UP to its hub (`/topics/{slug}` with the hub name as anchor) and SIDEWAYS
+   to ≥2 sibling spokes with promise-naming anchors; the hub is the money
+   page — link it from every spoke's intro or first H2, not just the footer.
+3. **Author-written links first, automation second.** The site auto-injects
+   Related/Also-read blocks server-side (`injectRelatedLinks` in
+   `apps/website/src/lib/articleHtml.ts`) when a post ships without them —
+   that is the safety net, not the plan. Ship 2× in-body `Also read:` links
+   yourself; the injector only covers what you missed.
+4. **Sequence splits within days** so each cluster reads as complete; a hub
+   with one spoke is a promise, a hub with five is authority.
+
 ## 3b. Conversion architecture (traffic → readers → repeat viewers)
 
 A keyword without a conversion path is vanity traffic. Define each post's
@@ -117,9 +145,14 @@ pipeline job BEFORE writing:
 
 Answer these in one short paragraph each before drafting:
 
-1. **Who searches this and what do they want?** (intent sentence)
-2. **What is ranking in the top 5 right now?** Read them. List the topics they
-   cover — that is table stakes.
+1. **Who searches this and what do they want?** (intent sentence — one
+   line: `A dev seeing [exact error] who wants [exact outcome] in [context]`.)
+2. **SERP reverse-engineering (top 5, in a table before drafting):** for each
+   of the top-5 results record: (a) the exact promise of its title, (b) what
+   it covers — that is table stakes, (c) what it misses or gets wrong — that
+   is your gap, (d) what it repeats across all five — that is commodity, say
+   it shorter. If the table shows no gap, there is no angle — switch intent
+   variant (§3d), do not write.
 3. **What do all of them miss?** That gap IS your angle. No gap → find a
    different angle or skip the post.
 4. **How deep must it go?** Match/exceed the depth of top results; surface-level

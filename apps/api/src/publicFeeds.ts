@@ -26,24 +26,30 @@ async function latestPosts() {
   if (!site) return { site: null, posts: [] as any[], pages: [] as any[], categories: [] as any[], tags: [] as any[], authors: [] as any[] };
   const { data: posts, error: postError } = await db
     .from("posts")
-    .select("slug, title, excerpt, rendered_html, author_id, published_at, updated_at")
+    .select("id, slug, title, excerpt, rendered_html, author_id, published_at, updated_at")
     .eq("site_id", site.id)
     .eq("status", "published")
     .is("deleted_at", null)
     .order("published_at", { ascending: false })
     .limit(500);
   if (postError) throw postError;
-  const [pagesResult, categoriesResult, tagsResult, authorsResult, postCategoriesResult, profilesResult] = await Promise.all([
+  const publishedIds = (posts ?? []).map((post: any) => post.id);
+  const [pagesResult, categoriesResult, tagsResult, authorsResult, postCategoriesResult, postTagsResult, profilesResult] = await Promise.all([
     db.from("site_pages").select("slug, updated_at, published_at").eq("site_id", site.id).eq("status", "published").order("published_at", { ascending: false }).limit(100),
     db.from("categories").select("id, slug, name").eq("site_id", site.id),
-    db.from("tags").select("slug").eq("site_id", site.id),
+    db.from("tags").select("id, slug").eq("site_id", site.id),
     db.from("profiles").select("id, display_name").in("id", Array.from(new Set((posts ?? []).map((post: any) => post.author_id)))),
-    db.from("post_categories").select("post_id, categories(name)").eq("site_id", site.id),
+    publishedIds.length ? db.from("post_categories").select("post_id, category_id, categories(name)").in("post_id", publishedIds) : Promise.resolve({ data: [], error: null }),
+    publishedIds.length ? db.from("post_tags").select("tag_id").in("post_id", publishedIds) : Promise.resolve({ data: [], error: null }),
     Promise.resolve({ data: null, error: null }),
   ]);
-  if (pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error) {
-    throw pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error;
+  if (pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error || (postCategoriesResult as any).error || (postTagsResult as any).error) {
+    throw pagesResult.error || categoriesResult.error || tagsResult.error || authorsResult.error || (postCategoriesResult as any).error || (postTagsResult as any).error;
   }
+  // Sitemap hygiene: list only topics/tags that have at least one published
+  // post, so new empty cluster hubs never ship as thin sitemap URLs.
+  const usedCategoryIds = new Set(((postCategoriesResult as any).data ?? []).map((row: any) => row.category_id));
+  const usedTagIds = new Set(((postTagsResult as any).data ?? []).map((row: any) => row.tag_id));
   const postCategoryMap = new Map<string, string[]>();
   (postCategoriesResult.data ?? []).forEach((pc: any) => {
     const existing = postCategoryMap.get(pc.post_id) ?? [];
@@ -61,8 +67,8 @@ async function latestPosts() {
     site,
     posts: postsWithMeta,
     pages: pagesResult.data ?? [],
-    categories: categoriesResult.data ?? [],
-    tags: tagsResult.data ?? [],
+    categories: (categoriesResult.data ?? []).filter((category: any) => usedCategoryIds.has(category.id)),
+    tags: (tagsResult.data ?? []).filter((tag: any) => usedTagIds.has(tag.id)),
     authors: authorsResult.data ?? [],
   };
 }

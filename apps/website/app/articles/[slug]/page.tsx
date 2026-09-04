@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ArticleView from "@web/components/ArticleView";
+import { injectRelatedLinks } from "@web/lib/articleHtml";
 import { serverTrpc } from "@web/lib/trpc-server";
 import { optimizedSocialImage } from "@web/lib/social-image";
 
@@ -148,13 +149,20 @@ export default async function ArticlePage({ params }: Props) {
     });
   }
 
+  // SSR-visible internal links: inject the Related/Also-read fallback on the
+  // server so crawlers and no-JS readers get real <a href> links in the HTML.
+  const bodyHtml = injectRelatedLinks(
+    post.rendered_html,
+    (related ?? []).map((r: { slug: string; title: string }) => ({ slug: r.slug, title: r.title })),
+  );
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ArticleView post={post} related={related} comments={comments} slug={slug} />
+      <ArticleView post={{ ...post, rendered_html: bodyHtml }} related={related} comments={comments} slug={slug} />
     </>
   );
 }
