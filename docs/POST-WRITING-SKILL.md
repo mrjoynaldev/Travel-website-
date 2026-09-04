@@ -70,6 +70,13 @@ ask, and make sure one H2 answers each natural sub-question of that sentence.
 
 ## 3. Cluster strategy (never scatter)
 
+- **Niche: we are a dev error-fix solution engine, not a generic AI news
+  site.** GSC proves it: our queries are `typescript 7 eslint`, `claude code
+  sandbox`, `puppeteer npm`, `dangerouslyDisableSandbox` — developers with a
+  broken thing. Build three lanes only: (1) Errors (tool errors, install
+  failures, breaking changes), (2) Dev + AI failures (build passes but deploy
+  fails, LLM tool breaks CI), (3) Fix guides (step-by-step, command-based).
+  News is allowed only with a fix angle (`what changed for devs who do X`).
 - Money-equivalent pages here are the **topic hubs** (`/topics/{slug}`) — every
   article must strengthen one.
 - Build ONE funnel at a time: hub ← comparison/best-of posts ← educational
@@ -211,12 +218,33 @@ Generate 3–5 related article ideas in same topic cluster. Must interlink.
 
 ## 5. Structure blueprint
 
-- **Title**: ≤60 chars, keyword front-loaded, specific promise. News: what
-  happened + why it matters ("X ships Y — here's what changes for devs").
+- **Title (CTR format — mandatory)**: `[Exact error/problem] + Fix`, keyword
+  front-loaded, ≤60 chars, matching the real search phrasing — never
+  blog-style. The site is in Google's testing phase (positions 20–50):
+  impressions grow but CTR decides who wins the click. A title that does not
+  mirror the query loses to one that does, even ranked lower.
+  - ✅ `TypeScript 7 Breaks ESLint? Safe Fix Guide`
+  - ✅ `Puppeteer Chrome Not Downloading? npm Fix`
+  - ✅ `Fix Claude Code Sandbox Required-Unavailable Error`
+  - ❌ `Claude Code Sandbox Required Unavailable Fail Closed` (keyword salad, no promise)
+  - ❌ `pnpm12 puppeteer chrome missing` (fragment, no intent)
+  - ❌ `rust crate compromise check cargo ci safely` (reads like a tag list)
+  - News keeps the same shape: what happened + the fix (`Assistants API Sunset? Migrate Threads and Runs Safely`). Year `(2026)` only when it fits the 60-char budget.
+  - The SERP title is `meta_title` (+ ` · CodeReport Global` template) — set
+    `meta_title` to the CTR title on every post; never repeat the brand inside
+    it (the template adds it once).
 - **Slug**: 2–5 words, lowercase-hyphenated, keyword-rich, no filler.
-- **Intro (first 2 paragraphs)**: direct answer / the news / the payoff
-  immediately. No throat-clearing. This is the block AI overviews and
-  assistants quote.
+- **Intro (first 2 paragraphs — problem-first pattern)**: name the exact
+  error in the first two sentences, then the fix. Pattern: `If you're seeing
+  "[exact error string]" in [tool], here's the exact fix.` No throat-clearing
+  (`In recent AI developments…` is a defect). This is the block AI overviews
+  and assistants quote.
+- **Solution-engine structure (every article, in order)**: 1. Problem (the
+  exact error) → 2. Why it happens → 3. Quick fix (copy-paste code block
+  first, explanation after) → 4. Deep explanation → 5. Edge cases + a
+  `Common mistakes` section → 6. Related fixes (internal links). Minimum per
+  article: ≥2 code snippets, ≥3 internal links, short scannable sentences.
+  Target feel: StackOverflow + Dev.to + official docs combined.
 - **Body**: one `h2` per section mirroring sub-questions searchers have;
   `h3` for sub-points. Include: at least one runnable code block (developer
   topics), a list or table where scannable, media every 2–3 blocks.
@@ -318,8 +346,8 @@ You are **Aditya’s AI editor, not a generic LLM**. Hallucination is a **publis
 
 | Field | Rule |
 |---|---|
-| `--meta-title` | Only if title >60 chars; keep keyword, add brand |
-| `--meta-description` | 120–160 chars, unique to this page: what the reader GAINS + keyword + hook (Google rewrites titles/descriptions that are stuffed or boilerplate) |
+| `--meta-title` | ALWAYS set: the CTR title (`[Exact problem] + Fix`, keyword first, ≤60 chars, no brand — the template appends `· CodeReport Global` once) |
+| `--meta-description` | 120–160 chars, unique to this page: name the exact error in the FIRST words, then the fix + keyword + hook (Google rewrites titles/descriptions that are stuffed or boilerplate) |
 | `--excerpt` | 1–2 honest sentences (cards + meta fallback) |
 | `--category` | Exactly one primary hub (max two) |
 | `--tag` | 2–5 specific entity tags (company, product, language) |
@@ -545,6 +573,11 @@ Before `studio.posts.create`, you MUST answer all 17. If any answer is `No/Weak`
 **Part 5 — Signals:**
 16. Who will visit in first 24h? If no one → Google ignores. Plan Reddit/X/Dev.to promo BEFORE publishing.
 17. Where will I promote this? (Reddit, X, Dev.to) No plan = no signals.
+
+**CTR pre-flight (testing-phase gate — score inside Q5/Q6/Q10, any fail = rewrite before `submit`):**
+- C1. Would THIS title beat the current top-3 titles if a frustrated dev compared them side by side? Title = `[Exact problem] + Fix`, ≤60 chars, mirrors the literal query (`Breaks`, `Not Downloading`, `Required-Unavailable` — the words people type).
+- C2. Does the intro name the exact error string in the first 2 sentences AND give the fix direction immediately? (`If you're seeing "X" in Y, here's the exact fix.` — no throat-clearing.)
+- C3. Is the quick-fix code block reachable within the first screenful of the body (right after Problem → Why)? A fix buried below 1,000 words of context loses the click AND the back button.
 
 **Gold:** `If this article didn’t exist, would the internet lose something?` If NO → don’t publish. Switch idea. **Fail closed:** Generic content is a defect — research more or pick another topic from `research` that passes all 17.
 

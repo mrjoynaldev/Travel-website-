@@ -24,6 +24,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.i
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  applicationName: "CodeReport Global",
   title: { default: "CodeReport Global", template: "%s · CodeReport Global" },
   description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
   icons: {

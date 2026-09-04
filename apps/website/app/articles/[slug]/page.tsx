@@ -11,12 +11,12 @@ type Props = { params: Promise<{ slug: string }> };
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
 
 const titleOverrides: Record<string, string> = {
-  "ai-code-production-checks": "AI Code Passes Tests but Fails in Production — 15-Point Checklist (2026)",
-  "ai-deployment-fixes": "Why AI-Built Websites Break During Deployment: 15 Proven Fixes (2026)",
-  "claude-code-sandbox": "How to Sandbox Claude Code Without Breaking Git and MCP (2026)",
-  "n8n-mcp-production": "Deploy n8n MCP in Production: Proxy and Queue Setup Guide (2026)",
-  "deepseek-opencode-image-error": "DeepSeek Vision Image Input Error in OpenCode: Fix Guide (2026)",
-  "openai-hugging-face-agent-intrusion": "OpenAI–Hugging Face Agent Intrusion: 7 Sandbox Lessons (2026)",
+  "ai-code-production-checks": "AI Code Fails in Production? Fix Guide (2026)",
+  "ai-deployment-fixes": "AI Website Deployment Fails? 15 Fixes (2026)",
+  "claude-code-sandbox": "Sandbox Claude Code Without Breaking Git/MCP (2026)",
+  "n8n-mcp-production": "Deploy n8n MCP in Production: Proxy + Queue (2026)",
+  "deepseek-opencode-image-error": "DeepSeek Image Error in OpenCode? Fix (2026)",
+  "openai-hugging-face-agent-intrusion": "OpenAI–Hugging Face Intrusion: 7 Sandbox Fixes",
 };
 
 const metaDescriptionOverrides: Record<string, string> = {

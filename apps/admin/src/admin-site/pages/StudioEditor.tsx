@@ -348,7 +348,7 @@ export function StudioEditor() {
             <SeoHint
               value={draft.metaTitle}
               max={60}
-              ideal="keep the page title under 60 characters so it is not cut off in search results"
+              ideal="CTR format: [Exact error/problem] + Fix, keyword first, ≤60 chars — match the real search phrasing"
             />
           </div>
           <div>
@@ -370,7 +370,7 @@ export function StudioEditor() {
               value={draft.metaDescription}
               min={120}
               max={160}
-              ideal="write it like ad copy — 150–160 characters shows fully in Google"
+              ideal="name the exact error in the first words, then the fix — 150–160 characters shows fully in Google"
             />
           </div>
           <div>

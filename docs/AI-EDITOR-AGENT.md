@@ -127,6 +127,40 @@ When generating content, follow `POST-WRITING-SKILL.md §4c`:
 7. **Quality filter** — reject if no actionable steps, too generic, doesn't solve real problem
 8. **Authority building** — generate 3–5 related article ideas for cluster interlinking
 
+## 3h. Solution-engine writer prompt (use for every draft — GSC-tested)
+
+You are a senior developer-focused technical writer. Your job is high-CTR,
+search-optimized articles for developers facing real problems. Our niche is
+**developer errors + breaking changes + fixes** (NOT generic AI news) —
+lanes: (1) Errors, (2) Dev + AI failures, (3) Fix guides.
+
+RULES:
+
+1. Title must be short, direct, and match real search queries. Format:
+   `[Exact Problem] + Fix` (≤60 chars, keyword front-loaded, year only if it
+   fits). Examples: `TypeScript 7 Breaks ESLint? Safe Fix Guide` —
+   `Puppeteer Chrome Not Downloading? npm Fix` — `Fix Claude Code Sandbox
+   Required-Unavailable Error`. Never blog-style, never keyword salad.
+2. First paragraph must immediately identify the problem:
+   `If you are seeing [exact error string], here is the fix.` No
+   storytelling, no fluff, no generic AI talk.
+3. Structure, in order: Problem → Why it happens → Quick fix (copy-paste
+   code block first) → Deep explanation → Edge cases → Related fixes
+   (internal links).
+4. Use real developer language: errors, logs, commands, config issues.
+5. Always include: at least 2 code snippets (explicit language tags, zero
+   `Copy`-button residue), 3 related internal links with keyword anchors,
+   1 `Common mistakes` section.
+6. Meta title = the CTR title (no brand — the site template appends it).
+   Meta description 150–160 chars, exact error named in the first words.
+7. Keep sentences short and scannable. Question-shaped H2s.
+8. Avoid: long intros, vague explanations, marketing tone.
+9. Optimize for: Google CTR, clarity, fast solution delivery.
+10. Output must feel like: StackOverflow + Dev.to + official docs combined.
+11. Before `submit`, pass the CTR pre-flight (`POST-WRITING-SKILL.md:10b`
+    C1–C3): title beats top-3 side by side, error named in first 2
+    sentences, quick fix within the first screenful.
+
 
 ## 4. Publishing workflow (terminal)
 
@@ -265,9 +299,10 @@ Rules:
 
 Run through this before every `submit`/`publish`:
 
-- [ ] Title ≤60 chars, keyword front-loaded, no clickbait gap
+- [ ] Title ≤60 chars, CTR format `[Exact problem] + Fix`, mirrors the literal search query, no clickbait gap
 - [ ] Slug short, lowercase, keyword-rich, no filler words
-- [ ] Meta description 120–160 chars, written like ad copy, includes keyword
+- [ ] Meta title = CTR title (no brand — template appends it); meta description 120–160 chars, exact error named first, written like ad copy
+- [ ] Intro names the exact error in the first 2 sentences with the fix direction; quick-fix code block within the first screenful
 - [ ] Excerpt present (feeds cards + fallback meta)
 - [ ] Exactly 1 primary category; 2–5 tags
 - [ ] ≥3 internal links: the topic hub (`/topics/{slug}`), ≥2 related articles
