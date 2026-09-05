@@ -310,6 +310,7 @@ Run through this before every `submit`/`publish`:
 - [ ] Slug short, lowercase, keyword-rich, no filler words
 - [ ] Meta title = CTR title (no brand — template appends it); meta description 120–160 chars, exact error named first, written like ad copy
 - [ ] Intro names the exact error in the first 2 sentences with the fix direction; quick-fix code block within the first screenful
+- [ ] No bare text URLs (every URL is a clickable link); anchors mixed exact/partial/natural; new post linked FROM 1–2 highest-authority existing posts (power-page rule)
 - [ ] Excerpt present (feeds cards + fallback meta)
 - [ ] Exactly 1 primary category; 2–5 tags
 - [ ] ≥3 internal links: the topic hub (`/topics/{slug}`), ≥2 related articles

@@ -146,6 +146,18 @@ published post): `/topics/puppeteer`, `/topics/typescript`,
    yourself; the injector only covers what you missed.
 4. **Sequence splits within days** so each cluster reads as complete; a hub
    with one spoke is a promise, a hub with five is authority.
+5. **Power-page rule (authority flows downhill):** on every publish, add ONE
+   link FROM each of the 1–2 highest-authority existing posts (most inbound
+   body links — check with the link audit) TO the new post, using a partial-
+   match anchor. New posts earn their first authority on day one instead of
+   waiting to be discovered.
+6. **Anchor mix (natural = safe):** across a post aim roughly 30% partial
+   match (`puppeteer chromium download fix`), 20% exact keyword, 30% natural
+   phrases (`the sandbox setup I use`), 20% branded/generic (`CodeReport
+   Global guide`). Same anchor to the same URL twice = rewrite one.
+7. **No bare URLs, ever:** a pasted text URL is not a link — crawlers pass no
+   context through it and readers can't tap it. Every URL ships as a real
+   `<a>` (gravity `runs` link), never as visible URL text.
 
 ## 3b. Conversion architecture (traffic → readers → repeat viewers)
 
