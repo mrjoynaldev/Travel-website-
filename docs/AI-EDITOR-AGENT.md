@@ -189,8 +189,11 @@ node cli/blog.mjs research ga                # our live GA4 traffic + top pages
 node cli/blog.mjs media upload --file cover.jpg \
   --alt "Describe the image clearly" --caption "Short caption" --folder featured
 
-# 5. Write the article as a Gravity JSON file (contract in §5),
-#    then create the draft with ALL fields set:
+# 5. Fill the content brief first (POST-WRITING-SKILL.md:12 -> kit brief.md:
+#    keyword, intent line, CTR title, H2 plan, code proofs, hub + 2 sideways
+#    links, 3-5 sources, 24h promotion plan). No brief = no draft.
+#    Then write the article as a Gravity JSON file (contract in §5),
+#    and create the draft with ALL fields set:
 node cli/blog.mjs posts create \
   --title "The headline (keyword front-loaded)" \
   --slug "short-keyword-slug" \

@@ -97,6 +97,10 @@ Only after: `10k+ monthly` + `regular returning`. Then AdSense `Step 3–4`, not
 - `studio.rankings` `views/depth75/complete/copies` → `COLLECT/UPDATE/NEW` verdicts
 - Leads: `/hire` form submits + Reddit/X DMs → clients
 - Search Console: `HTTPS`, `Page indexing`, `Performance` → indexing before syndication `§9`
+- Targets: CTR 3–8% on tested queries (rewrite titles under that) · positions
+  20–30 → top 10 in 8–12 weeks for low-competition fix queries · 10–30
+  quality referring domains in 3 months (dev blogs, newsletters,
+  awesome-lists — §9b templates) · 10–30% MoM organic-session growth
 
 ## 9) Risks & Mitigations
 - Broad positioning → pick A, stay sharp 60 days.

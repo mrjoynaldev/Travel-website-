@@ -488,6 +488,31 @@ Early-stage discipline: publish 10–15 excellent pieces before investing in
 link outreach; the best links arrive when something is genuinely worth
 linking to.
 
+## 8b. Title/meta A/B ritual + update & prune playbook (monthly)
+
+**A/B test (one variable per URL, 14-day reads):**
+1. Pick pages with high impressions + low CTR (GSC Performance) — that is a
+   title/snippet problem, not a ranking problem.
+2. Write 2 challenger variants emphasizing different levers: (a) numbers
+   (`15 Fixes`, `7 Checks`), (b) direct benefit (`Without Losing History`),
+   (c) urgency/specificity (`Required-Unavailable`, exact version).
+3. Apply via `posts update <id> --meta-title "…" --meta-description "…"`
+   (revisions auto-saved; slugs NEVER change in a test).
+4. Wait 14 days, compare CTR in GSC, keep the winner, log the test in the
+   kit's `checklist.md`. Never test title + description + intro at once —
+   you won't know what moved.
+
+**Update & prune (monthly, with §8's decision tree):**
+- Impressions steady + position slipping → UPDATE with new substance (new
+  error variant, new version, fresh verification). Never date-bump without
+  substance (spam signal); `updated_at` + visible "Updated" label move
+  together, always.
+- Two of our posts splitting one intent → MERGE into the stronger URL
+  (fold the loser's unique value into the winner, then archive the loser;
+  update every internal link that pointed at it).
+- Thin/overlapping drafts that never passed §10b → do not publish to "fill
+  the calendar". A missing post beats a thin post.
+
 ## 9. Distribution & share kits (syndication engine)
 
 Publishing is half the job. Every published article gets a distribution pass
@@ -550,6 +575,30 @@ Smoke: `CRG_TOKEN=... bash cli/smoke.sh` tests every auto channel (public site, 
 Discipline: reply to every serious comment on our syndicated copies within
 24h — engagement outweighs the drop itself. Log every placement in the kit's
 `checklist.md` so the Weekly Ranking Review can attribute traffic and citations.
+
+## 9b. Outreach templates (dev niche only — no HARO, no generic blasts)
+
+Target: dev blogs, newsletters (TLDR AI, Console.dev, Ben's Bites),
+awesome-lists, and resource pages that already link to weaker fix guides.
+One genuine outreach per week beats ten templated blasts.
+
+**Guest post pitch (dev blog / newsletter):**
+> Subject: Fix-guide idea for [Site] — [exact error + Fix]
+>
+> Hi [Name], I liked your piece on [their article]. I run CodeReport Global —
+> practical fix guides for dev-tool errors. I'd love to contribute "[proposed
+> title]": it includes [what's new: real repro, version-pinned commands,
+> comparison table]. Happy to send the outline first. — Aditya
+
+**Broken-link / better-resource note (awesome-list, docs-adjacent page):**
+> Hi [Name], your [page] links to [old guide] for [error] — it predates
+> [version/change], so the fix no longer works. I published a verified
+> repro + fix here: [our URL]. Consider swapping it in if useful.
+
+**Community rule (Reddit / X / HN — value first, always):** answer the
+question fully in the comment itself; link only when it is the direct fix
+for what was asked; never the same community twice a week. A removed
+comment costs more than a missing link.
 
 ## 10. Official Google Search compliance (docs/SEO-GOOGLE.md is the full reference)
 
@@ -631,3 +680,31 @@ You carry exactly ONE credential: `CRG_TOKEN`. Social-platform secrets
 applied automatically when the editor approves a queue item. Never request,
 store, or use platform API keys directly; never place credentials inside kit
 files. Distribution = `kit` + `push` + human approval, nothing else.
+
+## 12. Content brief + calendar record (one per post, kept in the kit)
+
+Fill this BEFORE drafting — it becomes the kit's `brief.md` and the calendar
+row. No brief = no draft.
+
+```md
+# Brief: [working title]
+- Primary keyword: [exact query, e.g. puppeteer chromium not downloading]
+- Secondary queries: [2–4 intent variants from §3d]
+- Intent (one line): A dev seeing [exact error] who wants [outcome] in [context]
+- Niche lane: Errors / Dev+AI failures / Fix guides → hub: /topics/[slug]
+- CTR title (≤60): [Exact problem] + Fix
+- Meta description (150–160): [exact error first] + [fix + hook]
+- Slug: [2–5 words]
+- H2 plan: [question-shaped subheads, one per variant]
+- Code blocks: [languages + what each proves]
+- Internal links: UP [hub URL + anchor] / SIDEWAYS [2 sibling URLs + anchors]
+- Sources (3–5 primary URLs): [docs, changelog, repo, thread]
+- Media: [cover + screenshots of real output, alt text notes]
+- Promotion plan (24h): [Reddit thread / X post / dev.to teaser]
+- KPI baseline: [GSC position + impressions at publish]
+```
+
+Calendar columns (spreadsheet or kit index): ID · Date · Type
+(spoke / hub-update) · Title · Keyword · Intent · Slug · Hub ·
+Status (idea / brief / draft / review / published) · Internal links ·
+Sources · Performance (impressions / clicks / CTR / position, weekly).
