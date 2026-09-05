@@ -63,6 +63,38 @@ competition. Start long-tail; build up as authority grows.
 
 **Fast workflow (10 min):** 1. Type keyword in Google → 2. Check suggestions → 3. Check Reddit → 4. Check top results → 5. Ask: Can I beat them? Is this a real problem?
 
+## 1b. Independent internet research protocol (run it yourself, every time)
+
+You are the researcher — no SEMrush, no waiting for tools. For every
+candidate topic, sweep these sources YOURSELF (fetch pages, read threads,
+query the CLIs below) and write down REAL NUMBERS, not vibes. Our niche is
+dev error-fix: you are measuring how many developers hit this problem and
+how badly current answers serve them.
+
+| # | Source (how) | Volume signal to record |
+|---|---|---|
+| 1 | Google Autocomplete — type the keyword + suffixes (`…error`, `…not working`, `…fix`, `…vs`) | Count of problem-phrased suggestions (want ≥3) |
+| 2 | People Also Ask + Related searches on the keyword | Count of questions/variants (want ≥3 PAA) |
+| 3 | Reddit — search keyword + `r/webdev r/AskProgramming r/SideProject r/LocalLLaMA r/n8n` | Thread count, upvotes, recency, repeat complaints |
+| 4 | StackOverflow — search the error string | Question count, view counts, unanswered rate |
+| 5 | GitHub issues — the tool's repo, search the error | Open matching issues, reactions, maintainer replies (silence = gap) |
+| 6 | HN — `research hn --query <topic>` | Points, comment counts, recency |
+| 7 | Trends — `research trends --geo US` (+ IN) | Interest level, rising related queries |
+| 8 | YouTube + Dev.to — search the error | Existing videos/posts, views, quality (talking-head fluff = gap) |
+| 9 | Top-5 SERP — open all five | Strength rating per result (weak blog / docs / authority) + gap table (§4.2) |
+| 10 | Changelog + official docs — the exact version | Facts for the source map (§5e): versions, dates, error strings |
+
+**Demand Score v2 (measured, 0–8 — same gate thresholds: 6–8 🔥 WRITE, 3–5 ⚠️ maybe, 0–2 ❌ skip):**
+- Autocomplete +2 — 3+ problem-phrased suggestions across suffixes
+- PAA +2 — 3+ related questions/variants
+- Community +2 — ANY TWO of: 5+ Reddit threads (or 500+ combined upvotes) · 3+ SO questions with real views · 3+ GitHub issues (or 1 high-reaction thread) · HN hits with 50+ points
+- Weak SERP +2 — top-5 has ≥2 weak blogs/docs pages you can beat on depth, freshness, or runnable proof
+
+**Output:** a research note in the kit (`research.md`) with the numbers per
+source + the score + the verdict. It feeds the brief (§12) and the source
+map (§5e). No research note with numbers = no brief = no draft. A score
+built on guesses is a score of zero.
+
 Search behavior shift: users increasingly paste **full conversational
 questions** into Google and assistants ("I want to pick up a new hobby… can you
 recommend classes near me?"). Prefer targets phrased the way people actually

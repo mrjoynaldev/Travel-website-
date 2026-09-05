@@ -76,7 +76,7 @@ If `whoami` fails, stop and report — never attempt to work around auth.
 
 ## 3b. Manual Demand Check — No Tools Needed (critical — you are your own SEMrush)
 
-Before any `studio.posts.create`, do the 10-min manual check from `POST-WRITING-SKILL.md:1-2`: Google Autocomplete (does Google suggest it? → demand), People Also Ask (3+ Qs → cluster), Related searches, Reddit/StackOverflow (same problem repeatedly? → high need), SERP strength (weak blogs = low volume 0-100 easy; mix = medium 100-1K good target; big sites = high avoid), and **Demand Score** (Autocomplete +2, PAA +2, Reddit +2, Weak competitors +2 → 6-8 🔥 WRITE, 3-5 maybe, 0-2 skip). Prefer **problem-based** (`why X fails`, `how to fix X`) = HIGH demand vs info-based. If score <6 → switch idea.
+Before any `studio.posts.create`, run the independent internet research protocol (`POST-WRITING-SKILL.md:1b`) YOURSELF: sweep Autocomplete suffixes, PAA/Related, Reddit subs, StackOverflow, GitHub issues, `research hn`, `research trends`, YouTube/Dev.to, top-5 SERP, and the changelog — and write the research note (kit `research.md`) with REAL NUMBERS per source plus the measured Demand Score v2 (6-8 🔥 WRITE, 3-5 maybe, 0-2 skip). SERP strength shortcut: weak blogs = low volume 0-100 easy; mix = medium 100-1K good target; big sites = high avoid. Prefer **problem-based** (`why X fails`, `how to fix X`) = HIGH demand vs info-based. No research note with numbers = no brief = no draft. If score <6 → switch idea.
 
 ## 3c. Index-worthiness Hard Gate — 17 Questions (critical — fail → research more or switch idea, never publish generic)
 
