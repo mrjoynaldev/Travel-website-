@@ -179,6 +179,10 @@ Answer these in one short paragraph each before drafting:
 
 1. **Who searches this and what do they want?** (intent sentence — one
    line: `A dev seeing [exact error] who wants [exact outcome] in [context]`.)
+   Match the format to the intent type: informational → guide/explainer,
+   transactional/comparison (`vs`, `best`, `which`) → head-to-head or
+   decision post, navigational/tool-specific → focused fix on that tool.
+   Intent mismatch = no ranking, whatever the depth.
 2. **SERP reverse-engineering (top 5, in a table before drafting):** for each
    of the top-5 results record: (a) the exact promise of its title, (b) what
    it covers — that is table stakes, (c) what it misses or gets wrong — that
@@ -211,6 +215,11 @@ Before any draft exists, complete this sentence and show it to the editor:
 - **Information gain is the currency**: each post must contain at least one
   thing a reader cannot get from the top-3 combined (original test, assembled
   table, named-source synthesis, contrarian-but-defensible read).
+- **Non-commodity test**: if the draft's sections could be swapped with any
+  top-3 result without anyone noticing, it is commodity content — rewrite
+  from your own test/output/numbers, not from their words. AI may research,
+  structure, and draft, but never publish on AI output alone: every claim
+  still passes §7 verification, and the publish decision stays human.
 - News posts still need an angle: "what changed" is table stakes; the angle is
   "what this changes for developers who do X."
 - Re-check after drafting: if the draft does not deliver the promised angle,
@@ -467,6 +476,10 @@ Engines weight demonstrable Experience, Expertise, Authority, Trust:
   source link (docs, changelog, benchmark, filing).
 - **Original research we did** that AI cannot produce: ran the benchmark,
   read the whole changelog, surveyed devs, built the table.
+- **HOW it was verified (one line in-post where relevant):** state what was
+  actually run — `verified on [tool version] with [command], [date]`. WHO
+  (Aditya byline) + HOW (this verification line) + WHY (the reader's fix)
+  is the trust signal engines and readers both check.
 - Expert quotes from podcasts/talks/papers with links — sourced expertise is
   still expertise.
 
