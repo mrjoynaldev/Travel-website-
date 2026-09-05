@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, DM_Mono } from "next/font/google";
 import { PublicShell, type PublicPageInfo, type PublicationInfo } from "@/components/public/PublicShell";
+import { AdsManager } from "../components/AdsManager";
 import { GaTag } from "../components/GaTag";
 import { Toaster } from "@/components/ui/sonner";
 import { serverTrpc } from "@web/lib/trpc-server";
@@ -112,6 +113,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <GaTag />
+        <AdsManager />
         <PublicShell publication={publication} pages={pages}>{children}</PublicShell>
         <Toaster />
       </body>
