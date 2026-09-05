@@ -576,30 +576,6 @@ Discipline: reply to every serious comment on our syndicated copies within
 24h — engagement outweighs the drop itself. Log every placement in the kit's
 `checklist.md` so the Weekly Ranking Review can attribute traffic and citations.
 
-## 9b. Outreach templates (dev niche only — no HARO, no generic blasts)
-
-Target: dev blogs, newsletters (TLDR AI, Console.dev, Ben's Bites),
-awesome-lists, and resource pages that already link to weaker fix guides.
-One genuine outreach per week beats ten templated blasts.
-
-**Guest post pitch (dev blog / newsletter):**
-> Subject: Fix-guide idea for [Site] — [exact error + Fix]
->
-> Hi [Name], I liked your piece on [their article]. I run CodeReport Global —
-> practical fix guides for dev-tool errors. I'd love to contribute "[proposed
-> title]": it includes [what's new: real repro, version-pinned commands,
-> comparison table]. Happy to send the outline first. — Aditya
-
-**Broken-link / better-resource note (awesome-list, docs-adjacent page):**
-> Hi [Name], your [page] links to [old guide] for [error] — it predates
-> [version/change], so the fix no longer works. I published a verified
-> repro + fix here: [our URL]. Consider swapping it in if useful.
-
-**Community rule (Reddit / X / HN — value first, always):** answer the
-question fully in the comment itself; link only when it is the direct fix
-for what was asked; never the same community twice a week. A removed
-comment costs more than a missing link.
-
 ## 10. Official Google Search compliance (docs/SEO-GOOGLE.md is the full reference)
 
 Google's position: AI-written content is legal and ranked normally — "regardless
