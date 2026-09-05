@@ -56,12 +56,16 @@ competition. Start long-tail; build up as authority grows.
 2. Are current answers bad? (generic, outdated, no fix) → 🔥 gap
 3. Can you add something NEW? (real test, real failure, better explanation) If not → don’t write
 
-**Demand prediction formula (your own SEMrush brain — 10 min before writing):**
-- Autocomplete exists (+2) + People Also Ask (+2) + Reddit discussions (+2) + Weak competitors (+2) = **Demand Score**
-- 6–8 → 🔥 WRITE THIS | 3–5 → ⚠️ Maybe | 0–2 → ❌ Skip
+**Demand scoring:** use Demand Score v2 with measured thresholds (§1b) —
+same 0–8 scale and gate (6–8 🔥 WRITE | 3–5 ⚠️ maybe | 0–2 ❌ skip), but
+every +2 must come from recorded numbers, never gut feel.
 - **Problem-based = HIGH demand** (`why X fails`, `how to fix X`) vs **Info-based = LOW** (`what is X`) → Problem = clicks + indexing
 
 **Fast workflow (10 min):** 1. Type keyword in Google → 2. Check suggestions → 3. Check Reddit → 4. Check top results → 5. Ask: Can I beat them? Is this a real problem?
+
+This section is the quick triage. The full measured protocol (§1b, 12
+sources + Demand Score v2) is REQUIRED before every brief — triage finds
+candidates, §1b kills or clears them.
 
 ## 1b. Independent internet research protocol (run it yourself, every time)
 
@@ -250,11 +254,13 @@ Generate 5–10 real search queries. Identify:
 - Comparison intent ("X vs Y")
 
 **STEP 2: Title generation**
-Generate 3 title options using: `[Exact Problem or Topic] + [Outcome] + [Optional Context]`
-- "Claude Code Sandbox Not Working? Fix Errors Fast"
-- "How to Run AI Code in a Sandbox (Safe Setup Guide)"
-- "Why AI Code Fails in Production (And How to Fix It)"
-Pick the BEST one — keyword front-loaded, ≤60 chars, specific promise.
+Generate 3 title options using the CTR format: `[Exact Problem] + Fix`
+(keyword front-loaded, ≤60 chars, mirrors the literal query).
+- "Fix Claude Code Sandbox Required-Unavailable Error"
+- "Puppeteer Chrome Not Downloading? npm Fix"
+- "TypeScript 7 Breaks ESLint? Safe Fix Guide"
+Pick the BEST one — specific promise, no blog-style openers (`How to…`,
+`Why…`, `Understanding…`). Must also pass the CTR pre-flight (§10b C1–C3).
 
 **STEP 3: Article structure (dynamic but controlled)**
 
@@ -351,7 +357,7 @@ Generate 3–5 related article ideas in same topic cluster. Must interlink.
     as a reader would paste it — no `$` prompts unless showing output
     interleaving, no invented flags.
 - **Close**: verdict/what-to-watch + one button CTA (related article or hub).
-- **Internal linking (SEO structure — required):** Every article must contain **2× `Also read: [keyword anchor]( /articles/slug )`** inside the body (one mid-article, one near end) + link to hub `ai-code-production-checks` where relevant. Use keyword anchors (`why AI code fails in production`), never `click here`. The site auto-injects hub links if you miss them (`ArticleView.tsx`), but you must still write them.
+- **Internal linking (SEO structure — required):** Every article must contain **2× `Also read: [keyword anchor]( /articles/slug )`** inside the body (one mid-article, one near end) + link UP to its cluster hub (`/topics/puppeteer`, `/topics/typescript`, or `/topics/ai-dev-tools`). Use keyword anchors (`why AI code fails in production`), never `click here`. The site auto-injects Related/Also-read blocks server-side (`injectRelatedLinks` in `apps/website/src/lib/articleHtml.ts`) if you miss them, but you must still write them.
 
 ## 5a. Voice: write like Aditya Halder — a person who did the thing
 
@@ -600,8 +606,9 @@ Golden rules:
    `linkedin.md`, `hn-title.txt` + `hn-firstcomment.md`, `medium-import.url`,
    `newsletter-tip.md`, `checklist.md`); then
    `node distribute.mjs push <slug>` enqueues the auto channels into the
-   Studio Distribution queue, where the editor approves each post (hard cap:
-   3 posts/day across all channels).
+   Studio Distribution queue, where the editor approves each post (auto
+   channels: no daily limit unless DISTRIBUTION_DAILY_CAP is set
+   server-side; manual Reddit comments stay capped at 3/day per the tiers).
 
 **COMPREHENSIVE POST SKILL — every integrated platform, official docs, blue links + photos/video (AI must learn this table).**
 
@@ -690,7 +697,7 @@ Before `studio.posts.create`, you MUST answer all 17. If any answer is `No/Weak`
 
 **Part 3 — Structure & SEO:**
 10. Is my keyword everywhere naturally? (Title, H1, first para, URL)
-11. Did I connect this article to others? (2–3 internal links, 1 backlink) No orphan pages.
+11. Did I connect this article to others? (2–3 internal links incl. the hub + 1–2 outbound primary-source citations) No orphan pages.
 12. If Googlebot lands here, can it go deeper? (at least 2 outbound links to our posts)
 
 **Part 4 — After writing:**

@@ -222,6 +222,7 @@ Posts:
   posts delete <id>                                 Move to trash (soft delete)
   posts feature <id> [--off]                        Toggle homepage feature flag
   posts schedule <id> --at <iso-date>|--clear       Schedule / clear scheduled publishing
+  links audit                                     Body-link graph: in/out per post, zero-inbound, bare URLs, dead slugs
 
 IndexNow (instant Bing/Yandex indexing):
   indexnow --url <u> [--url <u2> …]                 Submit changed URLs immediately
@@ -315,7 +316,9 @@ async function main() {
           categoryIds: patch.categoryIds ?? current.categoryIds,
           tagIds: patch.tagIds ?? current.tagIds,
           contentJson: patch.contentJson ?? current.content_json,
-          renderedHtml: patch.renderedHtml ?? current.rendered_html,
+          // WAF-safe: merged bodies keep raw HTML with /*, /index.html etc.
+          // which edge firewalls reject — b64 transport decodes server-side.
+          renderedHtml: encodeForWaf(patch.renderedHtml ?? current.rendered_html),
         };
         return print(await client.studio.posts.update.mutate({ id, data: merged, revisionNote: argValue("--revision-note") || "CLI update" }));
       }
@@ -438,6 +441,51 @@ async function main() {
     }
 
     if (cmd === "export") return print(await client.studio.exportContent.query({ format: argValue("--format") || "json" }));
+
+    if (cmd === "links" && (!sub || sub === "audit")) {
+      const items = [];
+      for (let page = 1; page <= 60; page++) {
+        const result = await client.blog.list.query({ page });
+        items.push(...(result.items ?? []));
+        if (page >= (result.totalPages ?? 1)) break;
+      }
+      const slugs = new Set(items.map(p => p.slug));
+      const stripTags = s => String(s).replace(/<[^>]*>/g, "").trim();
+      const outCount = new Map(items.map(p => [p.slug, 0]));
+      const inbound = new Map(items.map(p => [p.slug, []]));
+      const bare = [];
+      const dead = [];
+      const generic = [];
+      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/codereportglobal\.indevs\.in)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
+      for (const post of items) {
+        const html = post.rendered_html || "";
+        for (const match of html.matchAll(anchorRe)) {
+          const dst = match[2];
+          const anchor = stripTags(match[3]).slice(0, 80);
+          if (dst === post.slug) continue;
+          if (!slugs.has(dst)) { dead.push(`${post.slug} -> ${dst}`); continue; }
+          outCount.set(post.slug, (outCount.get(post.slug) ?? 0) + 1);
+          inbound.get(dst).push(`${post.slug} ("${anchor.slice(0, 40)}")`);
+          if (/^(click here|read more|here|this guide|this article|learn more|link|read full guide)$/i.test(anchor)) {
+            generic.push(`${post.slug} -> ${dst}: '${anchor}'`);
+          }
+        }
+        const bareUrls = html.match(/(?<![">/])https?:\/\/codereportglobal\.indevs\.in\/articles\/[a-z0-9-]+/g) || [];
+        if (bareUrls.length) bare.push(`${post.slug}: ${bareUrls.length} bare URL(s)`);
+      }
+      console.log(`✓ Body-link graph across ${items.length} published post(s) (clickable <a href> only)`);
+      for (const post of [...items].sort((a, b) => a.slug.localeCompare(b.slug))) {
+        console.log(`  ${post.slug}  out=${outCount.get(post.slug) ?? 0} in=${(inbound.get(post.slug) ?? []).length}`);
+      }
+      const zeroIn = items.filter(p => !(inbound.get(p.slug) ?? []).length).map(p => p.slug);
+      const zeroOut = items.filter(p => !(outCount.get(p.slug) ?? 0)).map(p => p.slug);
+      console.log(`\nZero inbound (need power-page links): ${zeroIn.length ? zeroIn.join(", ") : "none"}`);
+      console.log(`Zero outbound (covered by SSR fallback if no Also-read): ${zeroOut.length ? zeroOut.join(", ") : "none"}`);
+      console.log(`Bare text URLs (not clickable): ${bare.length ? bare.join("; ") : "none"}`);
+      console.log(`Dead hrefs (404 slugs): ${dead.length ? dead.join("; ") : "none"}`);
+      console.log(`Generic anchors: ${generic.length ? generic.join("; ") : "none"}`);
+      return;
+    }
 
     console.log(HELP);
   } catch (error) {

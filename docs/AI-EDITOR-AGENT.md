@@ -74,7 +74,7 @@ If `whoami` fails, stop and report — never attempt to work around auth.
   post (plus optional second), and 2–5 specific tags.
 - The site is brand-new: every published post matters. Quality over quantity.
 
-## 3b. Manual Demand Check — No Tools Needed (critical — you are your own SEMrush)
+## 3b. Internet Research Protocol — No Paid Tools (critical — you are your own SEMrush)
 
 Before any `studio.posts.create`, run the independent internet research protocol (`POST-WRITING-SKILL.md:1b`) YOURSELF: sweep Autocomplete suffixes, PAA/Related, Reddit subs, StackOverflow, GitHub issues, `research hn`, `research trends`, YouTube/Dev.to, top-5 SERP, and the changelog — and write the research note (kit `research.md`) with REAL NUMBERS per source plus the measured Demand Score v2 (6-8 🔥 WRITE, 3-5 maybe, 0-2 skip). SERP strength shortcut: weak blogs = low volume 0-100 easy; mix = medium 100-1K good target; big sites = high avoid. Prefer **problem-based** (`why X fails`, `how to fix X`) = HIGH demand vs info-based. No research note with numbers = no brief = no draft. If score <6 → switch idea.
 
@@ -174,6 +174,8 @@ node cli/blog.mjs tags list
 
 # 3. Avoid duplicate slugs / find internal-link targets
 node cli/blog.mjs posts list --status published
+node cli/blog.mjs links audit   # body-link graph: per-post in/out, zero-inbound
+                                # (power-page targets), bare URLs, dead slugs, generic anchors
 
 # 3b. Content research — ground every pitch in real signals
 node cli/blog.mjs research trends --geo US   # trending searches (switch --geo)
@@ -195,12 +197,12 @@ node cli/blog.mjs media upload --file cover.jpg \
 #    Then write the article as a Gravity JSON file (contract in §5),
 #    and create the draft with ALL fields set:
 node cli/blog.mjs posts create \
-  --title "The headline (keyword front-loaded)" \
-  --slug "short-keyword-slug" \
+  --title "TypeScript 7 Breaks ESLint? Safe Fix Guide" \
+  --slug "typescript-7-eslint-fix" \
   --excerpt "One or two sentence summary shown on cards." \
-  --meta-title "SEO title ≤60 chars if different from title" \
-  --meta-description "150–160 char ad-copy description with the keyword." \
-  --category "AI News" --tag "OpenAI" --tag "llms" \
+  --meta-title "TypeScript 7 Breaks ESLint? Safe Fix Guide" \
+  --meta-description "150–160 char ad-copy description, exact error named first." \
+  --category "TypeScript" --tag "typescript" --tag "eslint" \
   --thumbnail <media-asset-id> \
   --og-image https://…/cover.jpg \
   --gravity-file ./article.gravity.json
@@ -213,7 +215,9 @@ node cli/blog.mjs posts publish <id>
 curl -s -o /dev/null -w "%{http_code}\n" https://codereportglobal.indevs.in/articles/<slug>
 
 # Maintenance
-node cli/blog.mjs posts update <id> --meta-description "Improved copy"   # any field
+node cli/blog.mjs posts update <id> --meta-description "Improved copy"   # any field;
+                                # large bodies auto-encode b64 to pass the WAF
+node cli/blog.mjs links audit   # re-run after link edits: zero inbound must be none
 node cli/blog.mjs posts feature <id>          # homepage feature
 node cli/blog.mjs posts schedule <id> --at 2026-09-01T09:00:00Z
 node cli/blog.mjs posts delete <id>           # trash — ONLY with explicit editor approval
