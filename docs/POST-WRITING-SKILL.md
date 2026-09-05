@@ -83,6 +83,8 @@ how badly current answers serve them.
 | 8 | YouTube + Dev.to — search the error | Existing videos/posts, views, quality (talking-head fluff = gap) |
 | 9 | Top-5 SERP — open all five | Strength rating per result (weak blog / docs / authority) + gap table (§4.2) |
 | 10 | Changelog + official docs — the exact version | Facts for the source map (§5e): versions, dates, error strings |
+| 11 | GitHub Trending — top repos/releases in our lanes | Velocity signal: stars + new releases + "how-to" hooks devs are building on |
+| 12 | Papers with Code / arXiv — new papers WITH reproducible code | Fast-win topics: "reproduce [paper] in 15 minutes" posts with runnable code + measured numbers |
 
 **Demand Score v2 (measured, 0–8 — same gate thresholds: 6–8 🔥 WRITE, 3–5 ⚠️ maybe, 0–2 ❌ skip):**
 - Autocomplete +2 — 3+ problem-phrased suggestions across suffixes
@@ -263,6 +265,7 @@ Pick the BEST one — keyword front-loaded, ≤60 chars, specific promise.
 | EXPLANATION | Simple, clear explanation of concept. |
 | COMPARISON | Table or bullet comparison. When to use what. |
 | NEWS + ANALYSIS | What happened → Why it matters → Impact on developers. |
+| REPRO | Reproduce a paper/model release in 15 minutes: environment, commands, measured numbers, tradeoffs. Code-first, opinion clearly labeled. |
 
 **Required sections in every article:**
 1. H1: Final title
@@ -316,6 +319,10 @@ Generate 3–5 related article ideas in same topic cluster. Must interlink.
   - ❌ `pnpm12 puppeteer chrome missing` (fragment, no intent)
   - ❌ `rust crate compromise check cargo ci safely` (reads like a tag list)
   - News keeps the same shape: what happened + the fix (`Assistants API Sunset? Migrate Threads and Runs Safely`). Year `(2026)` only when it fits the 60-char budget.
+  - Benchmark/repro patterns (same CTR math — exact subject + outcome):
+    `Benchmark: [Model A] vs [Model B] on [Task] — Results` ·
+    `Reproduce [Paper] in 15 Minutes (Code Included)` ·
+    `How I Cut [Metric] by [N]% With [Tool] (Code)`.
   - The SERP title is `meta_title` (+ ` · CodeReport Global` template) — set
     `meta_title` to the CTR title on every post; never repeat the brand inside
     it (the template adds it once).
@@ -517,6 +524,12 @@ every list. Implications:
 - Verify HTTP 200 on the article URL.
 - The post auto-enters `/sitemap.xml` and (for 48h) `/news-sitemap.xml`.
 - Log the target query cluster and the visible position baseline.
+- Promo lane (same day, ≤30 min): X thread with 3–5 highlights + link;
+  submit to HN only if novel/controversial/highly technical; push the demo
+  as a gist/repo linking back; reply to every serious comment within 24h.
+- Metrics lane (weekly, into the kit checklist): GSC impressions/clicks/CTR/
+  position per target query + GA sessions/time-on-page + HN/Reddit upvotes.
+  Impressions up + CTR flat = title job (§8b); position 5–15 = update job.
 
 **Day-3 check (`research ga` + GSC):**
 - Indexing confirmed? Impressions appearing? Zero impressions by day 7 =
