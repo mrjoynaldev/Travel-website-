@@ -129,7 +129,10 @@ ask, and make sure one H2 answers each natural sub-question of that sentence.
 
 Live hubs (created 2026-09-04, hidden from `/sitemap.xml` until they hold a
 published post): `/topics/puppeteer`, `/topics/typescript`,
-`/topics/ai-dev-tools`.
+`/topics/ai-dev-tools`. Each hub IS the pillar page (indexed, Start-here +
+numbered spokes + FAQ rendered server-side) — never create a second
+guide-style URL for the same intent; two URLs splitting one intent
+cannibalize each other instead of ranking.
 
 1. **Seed from GSC, never from imagination.** Take one real query Google
    already tested (`puppeteer npm`, `typescript 7 eslint`, `claude code

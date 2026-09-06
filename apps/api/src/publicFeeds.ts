@@ -142,17 +142,17 @@ export async function newsSitemapXml(): Promise<FeedResult> {
 
 export async function sitemapXml(): Promise<FeedResult> {
   try {
-    const { posts, pages, categories, tags, authors } = await latestPosts();
+    const { posts, pages, categories, authors } = await latestPosts();
     const base = origin();
     if (!base) return { body: "CANONICAL_ORIGIN or NEXT_PUBLIC_SITE_URL must be configured before sitemap generation.", contentType: "text/plain", status: 503 };
+    // Only index-worthy URLs: /tags/* and /archive carry noindex,follow, so
+    // they stay crawlable for users but out of the sitemap and the index.
     const urls = [
       `<url><loc>${xmlEscape(`${base}/`)}</loc></url>`,
       ...posts.map(post => `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><lastmod>${new Date(post.updated_at || post.published_at).toISOString()}</lastmod></url>`),
       ...pages.map(page => `<url><loc>${xmlEscape(`${base}/${page.slug}`)}</loc><lastmod>${new Date(page.updated_at || page.published_at).toISOString()}</lastmod></url>`),
       ...categories.map(category => `<url><loc>${xmlEscape(`${base}/topics/${category.slug}`)}</loc></url>`),
-      ...tags.map(tag => `<url><loc>${xmlEscape(`${base}/tags/${tag.slug}`)}</loc></url>`),
       ...authors.map(author => `<url><loc>${xmlEscape(`${base}/authors/${author.id}`)}</loc></url>`),
-      `<url><loc>${xmlEscape(`${base}/archive`)}</loc></url>`,
     ].join("");
     return { body: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, contentType: "application/xml", status: 200 };
   } catch (error) {

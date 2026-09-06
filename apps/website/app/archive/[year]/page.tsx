@@ -17,6 +17,8 @@ export async function generateMetadata({ params }: { params: Promise<{ year: str
   return {
     title,
     description,
+    // Thin date listing: keep crawlable for users, out of the index.
+    robots: { index: false, follow: true },
     alternates: { canonical: `/archive/${year}` },
     openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `${siteUrl()}/archive/${year}`, title, description, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title, images: [`${siteUrl()}/og-default.png`] },
