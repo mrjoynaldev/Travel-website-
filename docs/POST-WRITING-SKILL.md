@@ -121,6 +121,18 @@ ask, and make sure one H2 answers each natural sub-question of that sentence.
   how-to/explainer posts, all interlinked.
 - Finish a cluster before starting the next. Google trusts sites that cover a
   subject comprehensively (topical authority), not isolated one-offs.
+- **ACTIVE CLUSTER (2026-09, everything else paused): TypeScript 7 ecosystem.**
+  GSC proves this is our strongest signal (TS7 + ESLint queries carry our
+  impressions). Until this hub holds 6–8 connected spokes, NO new posts
+  outside it — no random articles, no second lane. Spoke slots (one intent
+  each, in learning order): 1. TS7 breaking-changes deep dive · 2. TS7
+  migration checklist (real-world) · 3. ESLint + TS7 compatibility matrix ·
+  4. Why tools don't support TS7 yet · 5. Common TS7 errors with real logs ·
+  6. TS7 vs TS6 benchmarks · 7. TS7 + Vite/Next.js issues · 8. TS7 rollback
+  playbook. Publish in this order so the hub reads beginner → advanced.
+- **Pace cap: 2–3 posts per week MAX.** Pushing many pages fast slows
+  crawling. Every post ships HIGHLY connected (hub + 2 siblings +
+  power-page inbound) or it doesn't ship that week.
 - Same reader, different stages: the person searching "how to prevent X" is
   the person who searched "what is X" months earlier. Covering the full
   journey keeps them on our site for that entire arc.
@@ -155,6 +167,13 @@ cannibalize each other instead of ranking.
    yourself; the injector only covers what you missed.
 4. **Sequence splits within days** so each cluster reads as complete; a hub
    with one spoke is a promise, a hub with five is authority.
+8. **Hub curation (authority page, not a list):** each spoke opens with a
+   "read this first" line pointing at its prerequisite sibling (beginner →
+   advanced chain); wherever two options compete (TS6 vs TS7, alias vs
+   pin), decide with a comparison TABLE, not prose; every spoke links with
+   context (`because the alias approach breaks here, see…`), never bare
+   list-drops. Goal: a reader landing anywhere in the hub can traverse the
+   whole topic without searching again.
 5. **Power-page rule (authority flows downhill):** on every publish, add ONE
    link FROM each of the 1–2 highest-authority existing posts (most inbound
    body links — check with the link audit) TO the new post, using a partial-
@@ -544,6 +563,9 @@ every list. Implications:
 - Indexing confirmed? Impressions appearing? Zero impressions by day 7 =
   suspect indexing or intent mismatch — re-inspect title/meta against the
   actual query phrasing.
+- **Strategic recrawl only:** in GSC request indexing for updated posts and
+  hub pages ONLY — never bulk-request all URLs. Mass requests signal
+  low-value automation; surgical requests signal maintained content.
 
 **Day-14 ranking ritual:**
 - GSC positions: stuck at **positions 5–15** = update candidate (refresh
