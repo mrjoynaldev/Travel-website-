@@ -2,7 +2,7 @@ import { serverTrpc } from "@web/lib/trpc-server";
 
 export const dynamic = "force-dynamic";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 /**
  * llms.txt — a markdown map of this site for LLM crawlers
@@ -26,7 +26,7 @@ export async function GET() {
     // Fall back to static content below if the API is unreachable.
   }
 
-  const name = publication?.name || "CodeReport Global";
+  const name = publication?.name || "Sundarban Yatra";
   const description =
     publication?.description ||
     "Developer-first AI news, analysis, and practical guides for people who build and ship software.";
@@ -38,7 +38,7 @@ export async function GET() {
     "",
     `Site: ${base}`,
     "Language: en",
-    "Content type: technology journalism — AI industry news, developer tools, analysis, and practical guides for software builders.",
+    "Content type: Sundarban travel publication — tours, safari, destinations, things to do, and practical trip-planning guides.",
     "",
     "## How to cite us",
     "",

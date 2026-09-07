@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * CodeReport Global — CLI (full account control)
+ * Sundarban Yatra — CLI (full account control)
  *
  * Manage the entire publication from the command line using an API access
  * token. Create a token in Studio → "API tokens" (scope: read + write), then:
  *
- *   CRG_TOKEN=crg_... node cli/blog.mjs whoami
+ *   SY_TOKEN=sy_... node cli/blog.mjs whoami
  *
  * Env vars:
- *   CRG_TOKEN     Required. API access token (shown once at creation).
- *   CRG_API_URL   Optional. Defaults to https://codereportglobal-admin.vercel.app
+ *   SY_TOKEN     Required. API access token (shown once at creation).
+ *   SY_API_URL   Optional. Defaults to https://sundarbanyatra.in
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { readFileSync } from "node:fs";
@@ -17,16 +17,16 @@ import { extname } from "node:path";
 import superjson from "superjson";
 import { gravityToHtml } from "./gravity.mjs";
 
-const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-admin.vercel.app").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.CRG_SITE_URL || "https://codereportglobal.indevs.in").replace(/\/+$/, "");
-const TOKEN = process.env.CRG_TOKEN || parseFlag("--token");
+const API_URL = (process.env.SY_API_URL || process.env.SY_API_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || process.env.SY_SITE_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || parseFlag("--token");
 
 const liveUrl = slug => `${PUBLIC_SITE}/articles/${slug}`;
 const note = message => console.error(message);
 
 const TOKENLESS_COMMANDS = new Set(["indexnow"]);
 if (!TOKEN && !process.argv.slice(2).some(a => TOKENLESS_COMMANDS.has(a))) {
-  console.error("Missing access token. Set CRG_TOKEN or pass --token=crg_...");
+  console.error("Missing access token. Set SY_TOKEN or pass --token=sy_...");
   console.error("Create one in Studio → API tokens.");
   process.exit(1);
 }
@@ -195,7 +195,7 @@ async function buildPostInput({ requireContent }) {
 /* ------------------------------------------------------------------ */
 
 const HELP = `
-CodeReport Global CLI — full publication control
+Sundarban Yatra CLI — full publication control
 
 Usage: node cli/blog.mjs <command> [options]
 
@@ -258,7 +258,7 @@ Audience & insights:
   export [--format json|markdown] Full content export
 
 Options:
-  --token=<crg_...>   Access token (alternative to CRG_TOKEN)
+  --token=<sy_...>   Access token (alternative to SY_TOKEN)
 `;
 
 function requireArg(args, index, usage) {
@@ -408,9 +408,9 @@ async function main() {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
-          host: "codereportglobal.indevs.in",
+          host: "sundarbanyatra.in",
           key: KEY,
-          keyLocation: `https://codereportglobal.indevs.in/${KEY}.txt`,
+          keyLocation: `https://sundarbanyatra.in/${KEY}.txt`,
           urlList: urls,
         }),
       });
@@ -456,7 +456,7 @@ async function main() {
       const bare = [];
       const dead = [];
       const generic = [];
-      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/codereportglobal\.indevs\.in)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
+      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/sundarbanyatra\.in)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
       for (const post of items) {
         const html = post.rendered_html || "";
         for (const match of html.matchAll(anchorRe)) {
@@ -470,7 +470,7 @@ async function main() {
             generic.push(`${post.slug} -> ${dst}: '${anchor}'`);
           }
         }
-        const bareUrls = html.match(/(?<![">/])https?:\/\/codereportglobal\.indevs\.in\/articles\/[a-z0-9-]+/g) || [];
+        const bareUrls = html.match(/(?<![">/])https?:\/\/sundarbanyatra\.in\/articles\/[a-z0-9-]+/g) || [];
         if (bareUrls.length) bare.push(`${post.slug}: ${bareUrls.length} bare URL(s)`);
       }
       console.log(`✓ Body-link graph across ${items.length} published post(s) (clickable <a href> only)`);

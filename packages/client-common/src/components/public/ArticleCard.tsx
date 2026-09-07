@@ -52,8 +52,8 @@ export function ArticleCard({
     >
       <Link
         href={`/articles/${post.slug}`}
-        className={`relative block overflow-hidden bg-secondary shadow-sm lg:group-hover:shadow-md transition-shadow ${
-          featured ? "aspect-[16/10] rounded-[1.25rem] lg:rounded-[1.5rem]" : "aspect-[16/11] rounded-xl lg:rounded-2xl"
+        className={`relative block overflow-hidden bg-secondary shadow-sm lg:group-hover:shadow-[0_20px_44px_-20px_rgba(15,69,50,.35)] transition-shadow ${
+          featured ? "aspect-[16/10] rounded-[24px] lg:rounded-[28px]" : "aspect-[16/11] rounded-[20px] lg:rounded-[22px]"
         }`}
         aria-label={`Read ${post.title}`}
       >
@@ -67,10 +67,10 @@ export function ArticleCard({
             height={600}
           />
         ) : (
-          <div className="paper-grid relative flex h-full items-end bg-gradient-to-br from-[#dce7d7] to-[#c5d6c0] p-6">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)]" />
-            <span className="relative font-display text-2xl leading-none text-[#2f5e49]/80 md:text-3xl">
-              {post.categories?.[0]?.name || "CodeReport"}
+          <div className="paper-grid relative flex h-full items-end bg-gradient-to-br from-[#ddebe3] to-[#bcd2bf] p-6">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.4),transparent_55%)]" />
+            <span className="relative font-display text-2xl leading-none text-[#0f4532]/80 md:text-3xl">
+              {post.categories?.[0]?.name || "Sundarban"}
             </span>
           </div>
         )}
@@ -106,7 +106,7 @@ export function ArticleCard({
         )}
 
         <div className="mt-5 lg:mt-6 flex items-center justify-between gap-3 text-xs lg:text-[13px] text-muted-foreground">
-          <span>{post.author?.display_name || "CodeReport Global editorial"}</span>
+          <span>{post.author?.display_name || "Sundarban Yatra editorial"}</span>
           <span className="flex items-center gap-1.5">
             <Clock3 className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
             {readTime(post.excerpt)} min read

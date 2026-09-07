@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# CodeReport Global end-to-end smoke test.
-# Usage: CRG_TOKEN=crg_... bash cli/smoke.sh [slug]
+# Sundarban Yatra end-to-end smoke test.
+# Usage: SY_TOKEN=sy_... bash cli/smoke.sh [slug]
 set -u
-SITE="https://codereportglobal.indevs.in"
-API="https://codereportglobal-backend.onrender.com"
-ADMIN="https://codereportglobal-admin.vercel.app"
-TOKEN="${CRG_TOKEN:-}"
+SITE="https://sundarbanyatra.in"
+API="https://sundarbanyatra.in"
+ADMIN="https://sundarbanyatra.in"
+TOKEN="${SY_TOKEN:-$SY_TOKEN}"
 SLUG="${1:-rust-glancer-vscode-setup}"
 PASS=0; FAIL=0
 
@@ -49,7 +49,7 @@ AUTH="Authorization: Bearer $TOKEN"
 QIN='?input=%7B%22json%22%3A%7B%7D%7D'
 
 echo "== Authenticated tRPC (Bearer CRG token) =="
-[ -n "$TOKEN" ] || { echo "FAIL  no CRG_TOKEN provided"; FAIL=$((FAIL+1)); }
+[ -n "$TOKEN" ] || { echo "FAIL  no SY_TOKEN provided"; FAIL=$((FAIL+1)); }
 DIST=$(curl -s --max-time 30 -H "$AUTH" "$TRPC/distribution.list$QIN")
 check "distribution.list auth"   0   "$(echo "$DIST" | python3 -c "
 import json,sys
@@ -79,10 +79,10 @@ check "og:image render 1200x630" 1   "$(atleast "$(body "$SITE/articles/$SLUG" |
 
 # Kit generation — comprehensive link + media skill per POST-WRITING-SKILL.md §9
 if [ -n "$TOKEN" ]; then
-  rm -rf /tmp/smoke-kit && CRG_TOKEN="$TOKEN" node cli/distribute.mjs kit "$SLUG" --out /tmp/smoke-kit >/dev/null 2>&1
+  rm -rf /tmp/smoke-kit && SY_TOKEN="$TOKEN" node cli/distribute.mjs kit "$SLUG" --out /tmp/smoke-kit >/dev/null 2>&1
   check "kit devto.md teaser"        1 "$(test -f /tmp/smoke-kit/devto.md && grep -q 'canonical_url:' /tmp/smoke-kit/devto.md && awk 'END{print (NR<80)?1:0}' /tmp/smoke-kit/devto.md)"
   check "kit devto cover 1000x420"   1 "$(grep -c 'cover_image:' /tmp/smoke-kit/devto.md 2>/dev/null | awk '{print ($1>=1)?1:0}')"
-  check "kit bluesky blue link"      1 "$(grep -c 'https://codereportglobal.indevs.in/articles/' /tmp/smoke-kit/bluesky.txt 2>/dev/null | awk '{print ($1>=1)?1:0}')"
+  check "kit bluesky blue link"      1 "$(grep -c 'https://sundarbanyatra.in/articles/' /tmp/smoke-kit/bluesky.txt 2>/dev/null | awk '{print ($1>=1)?1:0}')"
   check "kit bluesky ≤300 graphemes" 1 "$(python3 -c "import sys; t=open('/tmp/smoke-kit/bluesky.txt',encoding='utf-8').read() if __import__('os').path.exists('/tmp/smoke-kit/bluesky.txt') else sys.exit(1); import unicodedata; print(1 if len(unicodedata.normalize('NFC',t))<=300 else 0)" 2>/dev/null || echo 0)"
   check "kit facebook txt"           1 "$(test -f /tmp/smoke-kit/facebook.txt && grep -q 'https://' /tmp/smoke-kit/facebook.txt && echo 1 || echo 0)"
   check "kit instagram txt"          1 "$(test -f /tmp/smoke-kit/instagram.txt && grep -q 'https://' /tmp/smoke-kit/instagram.txt && echo 1 || echo 0)"

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const title = (searchParams.get("title") || "CodeReport Global").slice(0, 120);
+  const title = (searchParams.get("title") || "Sundarban Yatra").slice(0, 120);
   const kicker = (searchParams.get("kicker") || "").slice(0, 60);
 
   return new ImageResponse(
@@ -34,11 +34,11 @@ export async function GET(request: Request) {
               color: "#1b563f",
             }}
           >
-            C
+            S
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 30, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5 }}>CodeReport Global</div>
-            <div style={{ fontSize: 20, color: "#9fd4b8" }}>Developer-first AI news</div>
+            <div style={{ fontSize: 30, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5 }}>Sundarban Yatra</div>
+            <div style={{ fontSize: 20, color: "#9fd4b8" }}>Tours • Safari • Travel Guides</div>
           </div>
         </div>
 
@@ -74,7 +74,7 @@ export async function GET(request: Request) {
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 22, color: "#9fd4b8" }}>codereportglobal.indevs.in</div>
+          <div style={{ fontSize: 22, color: "#9fd4b8" }}>sundarbanyatra.in</div>
           <div style={{ display: "flex", gap: 10 }}>
             <div style={{ width: 56, height: 8, borderRadius: 999, background: "#9fd4b8" }} />
             <div style={{ width: 28, height: 8, borderRadius: 999, background: "#eafff2" }} />

@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 224 71.4% 4.1%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220 14.3% 4.1%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220 14.3% 4.1%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13.9% 89.8%;
+    --input: 220 13.9% 89.8%;
+    --ring: 224 71.4% 4.1%;
+    --radius: 0.5rem;
+    
+    /* Sundarban Yatra color tokens from design document */
+    --color-bg: #F7F6F1;
+    --color-surface: #FFFFFF;
+    --color-surface-soft: #EFF4EE;
+    --color-text: #17211B;
+    --color-text-muted: #66716A;
+    --color-primary: #185C43;
+    --color-primary-dark: #0F4532;
+    --color-primary-soft: #DDEBE3;
+    --color-accent: #D59B43;
+    --color-accent-soft: #F5E7CC;
+    --color-border: #E5E8E4;
+    --color-success: #24734C;
+    --color-danger: #B54747;
+  }
+
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+    --card: 224 71.4% 4.1%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71.4% 4.1%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 224 71.4% 4.1%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220 14.3% 4.1%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 220 14.3% 95.9%;
+    --accent-foreground: 220 14.3% 4.1%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13.9% 89.8%;
+    --input: 220 13.9% 89.8%;
+    --ring: 210 20% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .yatra-card {
+    @apply bg-white border border-border rounded-[20px] overflow-hidden shadow-sm;
+  }
+  
+  .yatra-chip {
+    @apply text-[11px] font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full;
+  }
+  
+  .yatra-chip-accent {
+    @apply bg-[#f5e7cc] text-[#d59b43];
+  }
+  
+  .yatra-hero-veil {
+    @apply bg-gradient-to-b from-black/30 via-transparent to-black/10;
+  }
+  
+  .yatra-section {
+    @apply px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16;
+  }
+  
+  .container {
+    @apply width max-w-[1240px] mx-auto;
+  }
+  
+  /* Logo classes */
+  .logo-light {
+    @apply fill-current text-primary;
+  }
+  
+  .logo-dark {
+    @apply fill-current text-white;
+  }
+  
+  /* Custom scrollbar */
+  .scrollbar-none::-webkit-scrollbar {
+    @apply hidden;
+  }
+  
+  .scrollbar-none {
+    @apply -ms-overflow-style: none  scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* SectionHeader specific styles */
+.font-label {
+  @apply text-[11px] font-medium uppercase tracking-wider;
+}
+
+.h1 {
+  @apply text-[clamp(2rem,4vw,3.5rem)] font-display leading-1.05;
+}
+
+.h2 {
+  @apply text-[clamp(1.75rem,3vw,2.6rem)] font-display leading-1.1;
+}
+
+.h3 {
+  @apply text-[1.35rem] font-display leading-1.25;
+}
+
+.body-lg {
+  @apply text-[1.125rem] leading-1.65;
+}
+
+.body {
+  @apply text-[1rem] leading-1.7;
+}
+
+.meta {
+  @apply text-[0.8125rem] leading-1.4;
+}
+
+.hero-title {
+  @apply text-[clamp(2.5rem,5vw,4.5rem)] font-display leading-0.98 tracking-[-0.04em] font-bold;
+}

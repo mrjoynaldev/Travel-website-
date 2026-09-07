@@ -8,7 +8,7 @@ export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title,
       description: page.meta_description?.trim() || undefined,
       alternates: { canonical: `/${page.slug}` },
-      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `${siteUrl()}/${page.slug}`, title, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+      openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: `${siteUrl()}/${page.slug}`, title, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
       twitter: { card: "summary_large_image", images: [`${siteUrl()}/og-default.png`], title },
     };
   } catch {
@@ -36,7 +36,7 @@ export default async function SitePage({ params }: Props) {
     notFound();
   }
   return <>
-    <section className="border-b border-border bg-[#edf3ee]"><div className="container max-w-4xl lg:max-w-5xl py-14 md:py-20 lg:py-24 xl:py-28"><p className="font-label text-xs lg:text-[11px] text-primary">Publication page</p><h1 className="mt-4 font-display text-4xl font-semibold tracking-tight md:text-6xl lg:text-[3.3rem] lg:leading-[0.95]">{page.title}</h1></div></section>
+    <section className="border-b border-border bg-[#edf3ee]"><div className="container max-w-4xl lg:max-w-5xl py-14 md:py-20 lg:py-24 xl:py-28"><p className="font-label text-xs lg:text-[11px] text-primary">Information page</p><h1 className="mt-4 font-display text-4xl font-semibold tracking-tight md:text-6xl lg:text-[3.3rem] lg:leading-[0.95]">{page.title}</h1></div></section>
     <section className="container max-w-4xl lg:max-w-[760px] py-12 md:py-16 lg:py-20"><article className="article-prose" dangerouslySetInnerHTML={{ __html: page.rendered_html }} /></section>
   </>;
 }

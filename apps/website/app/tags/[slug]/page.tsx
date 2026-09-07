@@ -9,7 +9,7 @@ type PostListItem = Awaited<ReturnType<typeof serverTrpc.blog.list.query>>["item
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = `#${tag.name}`;
     return {
       title,
-      description: `Published stories tagged ${tag.name} from CodeReport Global.`,
+      description: `Travel guides tagged ${tag.name} from Sundarban Yatra.`,
       // Thin listing: keep crawlable for users, out of the index.
       robots: { index: false, follow: true },
       alternates: { canonical: `/tags/${tag.slug}` },
-      openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `${siteUrl()}/tags/${tag.slug}`, title, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+      openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: `${siteUrl()}/tags/${tag.slug}`, title, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
       twitter: { card: "summary_large_image", images: [`${siteUrl()}/og-default.png`], title },
     };
   } catch {
@@ -46,5 +46,5 @@ export default async function TagPage({ params }: { params: Promise<{ slug: stri
   } catch {
     notFound();
   }
-  return <ListingPage eyebrow="Tag" title={tag ? `#${tag.name}` : "Tag"} description="Published stories connected by a specific idea, thread, or subject." items={items} />;
+  return <ListingPage eyebrow="Tag" title={tag ? `#${tag.name}` : "Tag"} description="Sundarban guides connected by a specific place, topic or idea." items={items} />;
 }

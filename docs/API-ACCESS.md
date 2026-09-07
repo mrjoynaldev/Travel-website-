@@ -1,10 +1,10 @@
-# CodeReport Global — API Access & CLI
+# Sundarban Yatra — API Access & CLI
 
 Programmatic access to manage your publication from the command line (or any
 script/CI job) using **scoped, revocable access tokens**.
 
 - **Where tokens live:** Studio → **API tokens** (`/studio/api-tokens`).
-- **How auth works:** the token is sent as `Authorization: Bearer crg_…` and
+- **How auth works:** the token is sent as `Authorization: Bearer sy_…` (older `crg_…` tokens keep working) and
   resolves to the owning contributor's profile, so it inherits exactly the
   same role-scoped permissions as that user.
 - **Token safety:** only the SHA-256 hash is stored. The full token is shown
@@ -19,8 +19,8 @@ script/CI job) using **scoped, revocable access tokens**.
 3. Choose a name (e.g. `CI publisher`) and a scope:
    - **Read & write** (`read`, `write`) — full management.
    - **Read only** (`read`) — can list/read but cannot create, edit, or delete.
-4. Click **Create token** and copy the `crg_…` value immediately. Store it in
-   a secret manager or environment variable (e.g. `CRG_TOKEN`).
+4. Click **Create token** and copy the `sy_…` value immediately. Store it in
+   a secret manager or environment variable (e.g. `SY_TOKEN`).
 
 Tokens can be **revoked** at any time from the same screen. Revocation takes
 effect immediately. Optional expiry is available at creation.
@@ -35,10 +35,10 @@ the same env vars (see POST-WRITING-SKILL.md §9 for the channel rules).
 
 ```bash
 # Required
-export CRG_TOKEN="crg_…"
+export SY_TOKEN="sy_…"
 
-# Optional (defaults to https://codereportglobal-admin.vercel.app)
-export CRG_API_URL="https://codereportglobal-admin.vercel.app"
+# Optional (defaults to https://sundarbanyatra.in)
+export SY_API_URL="https://sundarbanyatra.in"
 
 # Quick self-check
 node cli/blog.mjs whoami
@@ -49,11 +49,11 @@ node cli/blog.mjs whoami
 ```json
 {
   "actor": { "role": "admin", "organizationId": "…", "siteId": "…" },
-  "site":  { "name": "CodeReport Global", "slug": "…" }
+  "site":  { "name": "Sundarban Yatra", "slug": "…" }
 }
 ```
 
-> The token can also be passed inline: `node cli/blog.mjs --token=crg_… whoami`.
+> The token can also be passed inline: `node cli/blog.mjs --token=sy_… whoami`. (The CLI also honors the legacy `CRG_TOKEN` / `CRG_API_URL` / `CRG_SITE_URL` env names.)
 
 ---
 
@@ -112,20 +112,20 @@ HTML by the CLI (`cli/gravity.mjs`).
 ### Examples
 
 ```bash
-# Publish a complete article from a Gravity JSON file
+# Publish a complete guide from a Gravity JSON file
 node cli/blog.mjs posts create \
-  --title "V8 ships built-in JIT for WASM" \
-  --slug "v8-wasm-jit" \
-  --excerpt "What the new pipeline means for your bundles." \
-  --meta-description "V8's new WASM JIT cuts cold-start 40%. Benchmarks, migration notes, and what changes for your build." \
-  --category "AI News" --tag "v8" --tag "webassembly" \
+  --title "How to Reach Sundarban from Kolkata (2026)" \
+  --slug "how-to-reach-sundarban" \
+  --excerpt "Trains, road and boat: timings, costs and the smoothest route." \
+  --meta-description "Kolkata to Sundarban: Canning trains, Godkhali jetty, boat timings and costs for your trip." \
+  --category "How to Reach" --tag "sundarban" --tag "kolkata" \
   --thumbnail 9f3c…-… --og-image https://…/cover.jpg \
   --gravity-file ./article.gravity.json
 node cli/blog.mjs posts submit <id>
 node cli/blog.mjs posts publish <id>
 
 # Upload a cover with alt text, then attach it
-node cli/blog.mjs media upload --file cover.jpg --alt "Release timeline chart" --folder featured
+node cli/blog.mjs media upload --file cover.jpg --alt "Boat cruising a mangrove creek at sunrise" --folder featured
 node cli/blog.mjs posts update <id> --thumbnail <asset-id>
 
 # Audit everything that's still in review
@@ -139,8 +139,8 @@ node cli/blog.mjs posts list --status review
 Under the hood the CLI talks to the same tRPC API the Studio uses:
 
 ```
-POST {CRG_API_URL}/api/trpc/<procedure>?batch=1
-Authorization: Bearer crg_…
+POST {SY_API_URL}/api/trpc/<procedure>?batch=1
+Authorization: Bearer sy_…
 Content-Type: application/json
 ```
 
@@ -163,7 +163,7 @@ capabilities, subscribers, apiTokens, exportContent), `ai`, `agent`, `llm`.
 
 ## 5. Security notes
 
-- Treat `crg_…` tokens like passwords. Never commit them; rotate on suspicion.
+- Treat `sy_…` tokens like passwords. Never commit them; rotate on suspicion.
 - The service-role key is **not** required by the CLI — it uses your scoped
   token instead, so blast radius is limited to the owning user's role.
 - Revoke a token instantly from Studio → API tokens if it leaks.

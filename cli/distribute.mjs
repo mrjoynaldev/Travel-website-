@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * CodeReport Global — Distribution Kit generator (Phase 2 of the syndication engine).
+ * Sundarban Yatra — Distribution Kit generator (Phase 2 of the syndication engine).
  *
  * Generates ready-to-paste share kits for every published article so each piece
  * earns reach AND backlinks without duplicate-content risk. Canonical home is
- * ALWAYS codereportglobal.indevs.in (see POST-WRITING-SKILL.md §9).
+ * ALWAYS sundarbanyatra.in (see POST-WRITING-SKILL.md §9).
  *
- *   CRG_TOKEN=crg_... node distribute.mjs kit <slug>
- *   CRG_TOKEN=crg_... node distribute.mjs kit <slug> --out ~/somewhere
+ *   SY_TOKEN=sy_... node distribute.mjs kit <slug>
+ *   SY_TOKEN=sy_... node distribute.mjs kit <slug> --out ~/somewhere
  *
  * Env vars:
- *   CRG_TOKEN     Required. API access token (shown once at creation).
- *   CRG_API_URL   Optional. Defaults to https://codereportglobal-admin.vercel.app
- *   CRG_SITE_URL  Optional. Defaults to https://codereportglobal.indevs.in
- *   CRG_KITS_DIR  Optional. Defaults to ~/crg-cli/kits/<slug>/
+ *   SY_TOKEN     Required. API access token (shown once at creation).
+ *   SY_API_URL   Optional. Defaults to https://sundarbanyatra.in
+ *   SY_SITE_URL  Optional. Defaults to https://sundarbanyatra.in
+ *   SY_KITS_DIR  Optional. Defaults to ~/sy-cli/kits/<slug>/
  *
  * Channel tiers (POST-WRITING-SKILL.md §9):
  *   AUTO   dev.to · Bluesky · Mastodon · Hashnode-RSS   (posted by system, hard daily cap)
@@ -26,12 +26,12 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import superjson from "superjson";
 
-const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-admin.vercel.app").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.CRG_SITE_URL || "https://codereportglobal.indevs.in").replace(/\/+$/, "");
-const TOKEN = process.env.CRG_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
+const API_URL = (process.env.SY_API_URL || process.env.SY_API_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || process.env.SY_SITE_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
 
 if (!TOKEN) {
-  console.error("Missing access token. Set CRG_TOKEN or pass --token=crg_...");
+  console.error("Missing access token. Set SY_TOKEN or pass --token=sy_...");
   console.error("Create one in Studio → API tokens.");
   process.exit(1);
 }
@@ -194,7 +194,7 @@ canonical_url: ${url}${cover ? `\ncover_image: ${cover}` : ""}
 
 ${summary}
 
-> Originally published at **CodeReport Global** — read the full guide with code, screenshots and benchmarks at **${url}**.
+> Originally published at **Sundarban Yatra** — read the full guide with photos, costs and timings at **${url}**.
 
 ## Why this matters
 
@@ -221,7 +221,7 @@ ${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkth
 
   // Instagram: caption not clickable — drive to link in bio + image via cover
   const instaTags = tags.slice(0, 3).map(t => `#${t}`).join(" ");
-  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #codereportglobal\n`;
+  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #sundarbanyatra\n`;
 
   files["reddit-comments.md"] = `# Reddit kit — ${title}
 URL: ${url}
@@ -292,7 +292,7 @@ Information gain (why their readers care): [FILL IN — the one thing no other o
   files["checklist.md"] = `# Distribution checklist — ${title}
 Article: ${url}
 Published: ${post.published_at ? new Date(post.published_at).toISOString().slice(0, 10) : "unknown"}
-Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
+Golden rule: sundarbanyatra.in is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
 
 ## AUTO channels (system posts within hard daily cap)
 - [ ] dev.to — review devto.md (teaser), flip published:true, confirm canonical_url renders
@@ -369,8 +369,8 @@ function requireSlug(args) {
 function kitDirFor(args, slug) {
   const outFlagIndex = args.indexOf("--out");
   if (outFlagIndex >= 0 && args[outFlagIndex + 1]) return resolve(args[outFlagIndex + 1]);
-  if (process.env.CRG_KITS_DIR) return resolve(process.env.CRG_KITS_DIR, slug);
-  return join(homedir(), "crg-cli", "kits", slug);
+  if (process.env.SY_KITS_DIR || process.env.SY_KITS_DIR) return resolve(process.env.SY_KITS_DIR || process.env.SY_KITS_DIR, slug);
+  return join(homedir(), "sy-cli", "kits", slug);
 }
 
 async function pushKit(slug) {
@@ -421,7 +421,7 @@ async function main() {
   push <slug>   Enqueue devto + bluesky + mastodon payloads from an existing kit
                 into the Studio distribution queue (approve-then-post, cap 3/day).
 
-Env: CRG_TOKEN (required), CRG_API_URL, CRG_SITE_URL, CRG_KITS_DIR.`);
+Env: SY_TOKEN (required), SY_API_URL, SY_SITE_URL, SY_KITS_DIR.`);
     return;
   }
 

@@ -2,7 +2,9 @@ import { createHash, randomBytes } from "node:crypto";
 import { getSupabase } from "../supabase";
 import type { AuthUser } from "./context";
 
-export const API_TOKEN_PREFIX = "crg_";
+export const API_TOKEN_PREFIX = "sy_";
+// Tokens minted by the old blog platform ("crg_…") keep working.
+const LEGACY_TOKEN_PREFIX = "crg_";
 
 export type ApiTokenScopes = "read" | "write";
 
@@ -34,7 +36,7 @@ export function hashApiToken(token: string): string {
  * the same role-scoped authorization as a signed-in contributor.
  */
 export async function resolveApiToken(token: string): Promise<{ user: AuthUser; token: ApiTokenContext } | null> {
-  if (!token.startsWith(API_TOKEN_PREFIX)) return null;
+  if (!token.startsWith(API_TOKEN_PREFIX) && !token.startsWith(LEGACY_TOKEN_PREFIX)) return null;
   const hash = hashApiToken(token);
   const db = getSupabase();
   const { data: row, error } = await db

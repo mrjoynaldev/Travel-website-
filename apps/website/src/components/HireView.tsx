@@ -1,69 +1,120 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Check, Clock3, MessageCircle, Send, ShieldCheck, Zap } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { toast } from "sonner";
-import { trpcClient } from "@web/lib/trpc-client";
+import { LeadForm } from "@web/components/conversion/LeadForm";
+import { Faq } from "@web/components/conversion/Faq";
+import { TourCard } from "@web/components/travel/TourCard";
+import { SectionHeader } from "@web/components/travel/SectionHeader";
+import { businessConfig, buildWhatsAppUrl } from "@web/lib/business";
+import { TOURS, FAQS } from "@web/lib/travel-data";
+import { Check, Clock3, Globe2, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+function PlanTripInner() {
+  const params = useSearchParams();
+  const tourSlug = params.get("tour") || undefined;
+  const interest = params.get("interest") || undefined;
+  const prefill = [tourSlug, interest, params.get("destination"), params.get("from")]
+    .filter(Boolean)
+    .join(" • ");
+  const activeTour = TOURS.find((t) => t.slug === tourSlug);
+  const wa = buildWhatsAppUrl(
+    activeTour
+      ? `Hello Sundarban Yatra, I am interested in the ${activeTour.title}.\n\nTravel date:\nTravellers:\nStarting location:`
+      : "Hello Sundarban Yatra, I want to plan a Sundarban trip. Please share tour options."
+  );
+
+  return (
+    <>
+      <section className="border-b border-border bg-[#eff4ee]">
+        <div className="container py-14 md:py-20 lg:py-24">
+          <p className="font-label text-[11px] text-primary">Plan Your Trip • Talk to a human</p>
+          <h1 className="mt-3 h1 font-display max-w-3xl">One call sorts your whole Sundarban trip.</h1>
+          <p className="mt-4 max-w-xl body-lg text-muted-foreground">
+            Dates, safari slots, stay, route — fastest on call or WhatsApp. No payment, no spam, reply in working hours.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-6 text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" /> {businessConfig.hours}</span>
+            <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> No advance needed to enquire</span>
+          </div>
+
+          {/* Primary: Call + WhatsApp cards */}
+          <div className="mt-8 grid gap-4 md:grid-cols-2 max-w-3xl">
+            <a
+              href={`tel:${businessConfig.phone}`}
+              className="yatra-card group flex items-center gap-5 p-6 lg:p-7 !bg-primary !border-primary text-white"
+            >
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/15"><Phone className="h-6 w-6" /></span>
+              <span>
+                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Call us — fastest</span>
+                <span className="mt-1 block font-display text-2xl lg:text-[1.7rem] font-bold tracking-tight">{businessConfig.phoneDisplay}</span>
+                <span className="mt-1 block text-[13px] text-white/70">Tap to call • {businessConfig.hours}</span>
+              </span>
+            </a>
+            <a
+              href={wa}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="yatra-card group flex items-center gap-5 p-6 lg:p-7"
+            >
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#1fa855]/12 text-[#1fa855]"><MessageCircle className="h-6 w-6" /></span>
+              <span>
+                <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">WhatsApp us</span>
+                <span className="mt-1 block font-display text-2xl lg:text-[1.7rem] font-bold tracking-tight group-hover:text-primary transition-colors">Chat now →</span>
+                <span className="mt-1 block text-[13px] text-muted-foreground">Send dates + group size, we reply with options</span>
+              </span>
+            </a>
+          </div>
+          {prefill && <p className="mt-4 inline-block rounded-full bg-white border border-border px-4 py-1.5 text-[13px] text-muted-foreground">Looking at: <span className="font-semibold text-foreground">{prefill}</span> — mention it on call / WhatsApp.</p>}
+
+          {/* Secondary: form for international / email-first travellers */}
+          <div className="mt-10 max-w-3xl rounded-[24px] border border-dashed border-border bg-white/70 p-6 lg:p-8">
+            <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground"><Globe2 className="h-4 w-4" /> Outside India, or prefer email?</p>
+            <h2 className="mt-2 font-display text-xl font-semibold">Send an enquiry form instead</h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">We reply by email / WhatsApp in working hours (IST).</p>
+            <div className="mt-5">
+              <LeadForm tourSlug={tourSlug} tourTitle={activeTour?.title} ctaLabel={activeTour ? `Ask About This Tour` : "Send Enquiry"} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="container yatra-section">
+        <SectionHeader eyebrow="Tours" title="Which tour fits you?" desc="Pick a starting point — then call or WhatsApp us to lock dates. Every itinerary can be customised." />
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {TOURS.map((t) => <TourCard key={t.slug} tour={t} />)}
+        </div>
+      </section>
+
+      <section className="border-y border-border bg-white">
+        <div className="container yatra-section grid gap-10 lg:grid-cols-2">
+          <div>
+            <p className="font-label text-[11px] text-primary">What happens next</p>
+            <h2 className="mt-3 h2 font-display">Simple, human, no pressure</h2>
+            <ul className="mt-6 grid gap-3">
+              {["You call or WhatsApp with dates + group size.", "We suggest 1–2 fitting tours with clear inclusions.", "You confirm on call — pay only when sure."].map((s, i) => (
+                <li key={i} className="flex gap-3 rounded-2xl border border-border bg-background p-4">
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">{i + 1}</span>
+                  <span className="text-[14.5px] leading-6">{s}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground"><Check className="h-4 w-4 text-primary" /> Licensed boats • Forest permits handled • Honest safari briefing</div>
+          </div>
+          <div>
+            <h3 className="font-display text-xl font-semibold">Quick questions</h3>
+            <div className="mt-4"><Faq items={FAQS.slice(0, 4)} /></div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
 
 export default function HireView() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [need, setNeed] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const submit = async () => {
-    if (!name.trim() || !email.trim() || !need.trim()) {
-      toast.error("Please fill name, email and what you need.");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      await trpcClient.blog.submitLead.mutate({ name: name.trim(), email: email.trim(), need: need.trim(), source: "hire-page" });
-      toast.success("Sent — I’ll reply within 12h.");
-      setName(""); setEmail(""); setNeed("");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not send. Try WhatsApp/Email below.");
-    } finally { setSubmitting(false); }
-  };
-
-  return <>
-    <section className="paper-grid border-b border-border"><div className="container py-16 md:py-20 lg:py-24 xl:py-28">
-      <p className="font-label text-xs lg:text-[11px] text-primary">Hire — CodeReport Global</p>
-      <h1 className="mt-3 max-w-3xl lg:max-w-[42rem] font-display text-4xl font-semibold leading-[1.05] lg:leading-[0.98] tracking-tight sm:text-5xl lg:text-[3rem] xl:text-[3.3rem]">I fix dev errors fast with AI.</h1>
-      <p className="mt-4 max-w-2xl lg:max-w-[36rem] text-base lg:text-[17px] leading-7 lg:leading-8 text-muted-foreground">You build, AI helps me ship. If you’re stuck on a bug, need a landing page in 24h, or want an automation — I’ll fix/build it, no fluff.</p>
-      <div className="mt-6 lg:mt-8 flex flex-wrap gap-3">
-        <Button asChild className="gap-2 lg:h-11 lg:px-6 shadow-sm"><Link href="#contact">Get help in 24h <Send className="h-4 w-4" /></Link></Button>
-        <Button variant="outline" asChild className="lg:h-11 lg:px-6"><Link href="/archive">See guides</Link></Button>
-      </div>
-      <div className="mt-8 lg:mt-10 flex flex-wrap gap-6 lg:gap-8 text-sm lg:text-[14.5px] text-muted-foreground">
-        <span className="inline-flex items-center gap-2"><Zap className="h-4 w-4 text-primary" />Avg reply 12h</span>
-        <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" />No lock-in</span>
-        <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" />18, AI-native</span>
-      </div>
-    </div></section>
-
-    <section className="container py-12 md:py-16 lg:py-20 xl:py-24"><p className="font-label text-xs lg:text-[11px] text-primary">Services</p><h2 className="mt-2 font-display text-3xl lg:text-[2rem] font-semibold">What I do</h2>
-      <div className="mt-8 lg:mt-10 grid gap-6 lg:gap-7 xl:gap-8 md:grid-cols-3">
-        <div className="rounded-2xl lg:rounded-[1.25rem] border border-border bg-white p-6 lg:p-7 shadow-sm lg:hover:shadow-md lg:hover:-translate-y-1 transition-all"><h3 className="font-semibold lg:text-[17px]">Bug / Error Fix</h3><p className="mt-2 text-sm lg:text-[15px] leading-6 lg:leading-7 text-muted-foreground">JetBrains ACP, npm/better-sqlite3, VS Code, build failures. Repro + fix + 2-min guide.</p><p className="mt-4 text-sm lg:text-[15px] font-medium">$50–150 <span className="font-normal text-muted-foreground">· 24h</span></p><ul className="mt-4 space-y-1 text-sm lg:text-[14.5px] text-muted-foreground"><li className="flex gap-2"><Check className="h-4 w-4 text-primary" />Repro + fix</li><li className="flex gap-2"><Check className="h-4 w-4 text-primary" />Commands + output</li></ul></div>
-        <div className="rounded-2xl lg:rounded-[1.25rem] border border-border bg-white p-6 lg:p-7 shadow-sm lg:hover:shadow-md lg:hover:-translate-y-1 transition-all"><h3 className="font-semibold lg:text-[17px]">AI Landing / Portfolio</h3><p className="mt-2 text-sm lg:text-[15px] leading-6 lg:leading-7 text-muted-foreground">One-page site in 24h, AI-built, copy + design included.</p><p className="mt-4 text-sm lg:text-[15px] font-medium">$150–300 <span className="font-normal text-muted-foreground">· 24h</span></p><ul className="mt-4 space-y-1 text-sm lg:text-[14.5px] text-muted-foreground"><li className="flex gap-2"><Check className="h-4 w-4 text-primary" />Copy + design</li><li className="flex gap-2"><Check className="h-4 w-4 text-primary" />Deploy included</li></ul></div>
-        <div className="rounded-2xl lg:rounded-[1.25rem] border border-border bg-white p-6 lg:p-7 shadow-sm lg:hover:shadow-md lg:hover:-translate-y-1 transition-all"><h3 className="font-semibold lg:text-[17px]">Automation</h3><p className="mt-2 text-sm lg:text-[15px] leading-6 lg:leading-7 text-muted-foreground">Scrape, bot, n8n — repetitive work → one click.</p><p className="mt-4 text-sm lg:text-[15px] font-medium">$100–200 <span className="font-normal text-muted-foreground">· 2–3 days</span></p><ul className="mt-4 space-y-1 text-sm lg:text-[14.5px] text-muted-foreground"><li className="flex gap-2"><Check className="h-4 w-4 text-primary" />One-click run</li><li className="flex gap-2"><Check className="h-4 w-4 text-primary" />Docs included</li></ul></div>
-      </div>
-    </section>
-
-    <section className="container py-12 md:py-16 lg:py-20"><div className="rounded-2xl border border-[#d6e2d1] bg-[#f5f9f3] p-6 md:p-8 lg:p-8 xl:p-9"><p className="font-label text-xs lg:text-[11px] text-primary">Portfolio</p><h3 className="mt-2 font-display text-2xl lg:text-[1.6rem] font-semibold">3 AI-built demos</h3><p className="mt-2 text-sm lg:text-[15px] text-muted-foreground">Real builds — not mockups. Click to see live.</p><div className="mt-6 lg:mt-8 grid gap-4 lg:gap-5 md:grid-cols-3"><a href="/" className="rounded-xl lg:rounded-[1.1rem] border border-border bg-white p-4 lg:p-5 hover:shadow-sm lg:hover:shadow-md hover:border-primary/15 transition-all"><p className="text-sm lg:text-[15px] font-medium">Fix Guide: npm12 better-sqlite3</p><p className="mt-1 text-xs lg:text-[13px] text-muted-foreground">Guide + distribution system live</p></a><a href="/hire" className="rounded-xl lg:rounded-[1.1rem] border border-border bg-white p-4 lg:p-5 hover:shadow-sm lg:hover:shadow-md hover:border-primary/15 transition-all"><p className="text-sm lg:text-[15px] font-medium">Landing: AI Portfolio</p><p className="mt-1 text-xs lg:text-[13px] text-muted-foreground">Demo — 24h build</p></a><a href="https://github.com/adittaya/codereportglobal" target="_blank" className="rounded-xl lg:rounded-[1.1rem] border border-border bg-white p-4 lg:p-5 hover:shadow-sm lg:hover:shadow-md hover:border-primary/15 transition-all"><p className="text-sm lg:text-[15px] font-medium">Automation: Content → 5 channels</p><p className="mt-1 text-xs lg:text-[13px] text-muted-foreground">Distribution engine</p></a></div></div></section>
-
-    <section id="contact" className="container py-12 md:py-16 lg:py-20 xl:py-24"><p className="font-label text-xs lg:text-[11px] text-primary">Contact</p><h2 className="mt-2 font-display text-3xl lg:text-[2rem] font-semibold">Tell me what you need</h2><p className="mt-2 max-w-xl lg:max-w-[38rem] text-sm lg:text-[15px] leading-6 text-muted-foreground">Reply within 12h. Or reach directly: <a href="mailto:adityazyrogami@gmail.com" className="text-primary underline underline-offset-4">adityazyrogami@gmail.com</a> (primary) · <a href="mailto:editor@codereportglobal.com" className="text-primary underline underline-offset-4">editor@codereportglobal.com</a> · WhatsApp on request.</p>
-      <form onSubmit={e => { e.preventDefault(); submit(); }} className="mt-8 grid gap-3 lg:gap-4 rounded-2xl lg:rounded-[1.25rem] border border-border bg-white p-6 lg:p-7 xl:p-8 md:max-w-2xl lg:max-w-[48rem] shadow-sm">
-        <div className="grid gap-3 lg:gap-4 sm:grid-cols-2"><Input required value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="lg:h-11" /><Input required type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className="lg:h-11" /></div>
-        <Textarea required value={need} onChange={e => setNeed(e.target.value)} placeholder="What do you need? e.g. Fix npm 12 better-sqlite3 error, or build a landing page for my SaaS" rows={4} className="lg:text-[15px]" />
-        <div className="flex items-center gap-3"><Button type="submit" disabled={submitting} className="gap-2 lg:h-11 lg:px-5">{submitting ? "Sending…" : "Send"} <Send className="h-4 w-4" /></Button><span className="text-xs lg:text-[13px] text-muted-foreground">By sending, you agree to our <Link href="/privacy" className="text-primary underline">Privacy</Link>.</span></div>
-      </form>
-      <p className="mt-4 lg:mt-6 text-sm lg:text-[15px] text-muted-foreground">Direct: <a href="mailto:adityazyrogami@gmail.com" className="text-primary underline underline-offset-4">adityazyrogami@gmail.com</a> (primary) · <a href="mailto:editor@codereportglobal.com" className="text-primary underline underline-offset-4">editor@codereportglobal.com</a> · WhatsApp on request.</p>
-      <div className="mt-8 lg:mt-10 flex gap-6 text-sm lg:text-[15px]"><a href="https://www.reddit.com/" target="_blank" className="inline-flex items-center gap-2 text-primary hover:underline"><MessageCircle className="h-4 w-4" />Reddit DM</a><a href="https://x.com/" target="_blank" className="inline-flex items-center gap-2 text-primary hover:underline"><MessageCircle className="h-4 w-4" />X DM</a></div>
-    </section>
-  </>;
+  return (
+    <Suspense fallback={<div className="container py-24 text-center text-sm text-muted-foreground">Loading trip planner…</div>}>
+      <PlanTripInner />
+    </Suspense>
+  );
 }

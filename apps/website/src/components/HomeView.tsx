@@ -4,10 +4,18 @@ import { ArticleCard, type ArticleCardPost } from "@/components/public/ArticleCa
 import { SearchField } from "@/components/public/PublicShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Mail, MoveRight } from "lucide-react";
+import { TripPlannerCard } from "@web/components/conversion/TripPlannerCard";
+import { LeadForm } from "@web/components/conversion/LeadForm";
+import { Faq } from "@web/components/conversion/Faq";
+import { SectionHeader } from "@web/components/travel/SectionHeader";
+import { TourCard } from "@web/components/travel/TourCard";
+import { DestinationCard, ActivityCard } from "@web/components/travel/Cards";
+import { buildWhatsAppUrl, businessConfig, defaultWhatsAppMessage } from "@web/lib/business";
+import { TOURS, DESTINATIONS, ACTIVITIES, FAQS, PLANNING_GUIDES, HERO_IMAGE, SAFARI_IMAGE } from "@web/lib/travel-data";
+import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Compass, HeartHandshake, Loader2, Mail, MapPin, MessageCircle, Phone, Route, Ship } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useTransition, useState } from "react";
+import { useEffect, useRef, useTransition, useState } from "react";
 import { toast } from "sonner";
 import { trpcClient } from "@web/lib/trpc-client";
 
@@ -41,14 +49,12 @@ function buildQuery(params: Record<string, string | number | undefined>) {
   return qs ? `/?${qs}` : "/";
 }
 
-function ConfiguredSections({ sections }: { sections: HomepageSection[] }) {
-  return <div className="space-y-14 lg:space-y-16">
-    {sections.map(section => <section key={section.id} className="border-t border-border pt-10 lg:pt-12 first:border-t-0 first:pt-0">
-      <div className="mb-7 lg:mb-9 flex flex-wrap items-end justify-between gap-4"><div><p className="font-label text-xs lg:text-[11px] text-primary">{section.section_type === "custom" ? "Editorial note" : "From the journal"}</p><h2 className="mt-2 font-display text-3xl font-semibold tracking-tight md:text-4xl lg:text-[2.2rem]">{section.title}</h2>{section.subtitle && <p className="mt-2 max-w-2xl text-sm lg:text-[15.5px] leading-6 lg:leading-7 text-muted-foreground">{section.subtitle}</p>}</div>{section.posts.length > 0 && <span className="text-sm text-muted-foreground hidden sm:inline">{section.posts.length} stories</span>}</div>
-      {section.section_type === "custom" ? <div className="article-prose rounded-2xl border border-[#d6e2d1] bg-[#f5f9f3] p-6 lg:p-7" dangerouslySetInnerHTML={{ __html: section.rendered_html || "" }} /> : section.posts.length ? <div className="grid gap-x-7 lg:gap-x-8 xl:gap-x-9 gap-y-12 lg:gap-y-14 md:grid-cols-3">{section.posts.map((post, index) => <ArticleCard key={post.id} post={post} featured={index === 0 && section.posts.length === 1} />)}</div> : <p className="rounded-xl border border-dashed border-border px-6 py-10 text-center text-sm text-muted-foreground">No published stories in this section yet.</p>}
-    </section>)}
-  </div>;
-}
+const TRUST = [
+  { icon: Compass, title: "Trusted Local Guidance", desc: "Helpful destination knowledge and practical trip-planning support from people who know the delta." },
+  { icon: Route, title: "Thoughtful Itineraries", desc: "Trips designed around realistic travel times, tides and forest entry rules — never rushed." },
+  { icon: HeartHandshake, title: "Clear Communication", desc: "Easy access on WhatsApp, phone and enquiry forms. Real replies, no bots pushing sales." },
+  { icon: MapPin, title: "Planning Support", desc: "Guidance for route, timing, stay and tour selection — even if you book nothing with us." },
+];
 
 export default function HomeView({ categories, sections, posts, search, category, page }: HomeViewProps) {
   const router = useRouter();
@@ -57,6 +63,7 @@ export default function HomeView({ categories, sections, posts, search, category
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>(category);
+  const [showEnquiry, setShowEnquiry] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => () => clearTimeout(searchTimer.current), []);
@@ -79,15 +86,13 @@ export default function HomeView({ categories, sections, posts, search, category
     navigate({ category: topic, page: 1 });
   };
 
-  const retry = () => { startTransition(() => router.refresh()); };
-
   const subscribe = async () => {
     if (!email) return;
     setSubmitting(true);
     try {
       await trpcClient.blog.subscribe.mutate({ email });
       setEmail("");
-      toast.success("You are subscribed. Welcome to CodeReport Global.");
+      toast.success("Subscribed — Sundarban trip notes will reach you.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Subscription could not be saved.");
     } finally {
@@ -95,20 +100,267 @@ export default function HomeView({ categories, sections, posts, search, category
     }
   };
 
-  const heading = search ? `Results for “${search}”` : category ? categories.find(item => item.slug === category)?.name || "Selected stories" : "Latest stories";
-  const showConfiguredSections = !search && !category && sections.length > 0;
+  const waGeneral = buildWhatsAppUrl(defaultWhatsAppMessage);
+  const isFiltering = Boolean(search || category);
   const isLoading = isPending;
 
-  return <>
-    <section className="paper-grid border-b border-border"><div className="container grid gap-10 lg:gap-12 xl:gap-16 py-16 md:py-24 lg:py-28 xl:py-32 md:grid-cols-[1.1fr_.9fr]"><div className="enter-fade"><p className="font-label text-xs lg:text-[11px] text-primary">Fix dev errors fast with AI — 18, AI-native</p><h1 className="mt-5 max-w-3xl font-display text-5xl font-semibold leading-[.98] lg:leading-[0.96] tracking-tight text-foreground sm:text-6xl lg:text-7xl">I fix <em className="font-normal text-primary">dev errors</em><br />in minutes.</h1><p className="mt-6 max-w-lg lg:max-w-[32rem] text-base lg:text-[16.5px] leading-7 lg:leading-8 text-muted-foreground">CodeReport Global: practical fix guides + AI builds. Stuck on a bug, need a landing page in 24h, or want an automation? I’ll ship it — no fluff. <Link href="/hire" className="font-medium text-primary underline underline-offset-4 decoration-primary/20 hover:decoration-primary">Hire me →</Link></p><div className="mt-8 lg:mt-10 flex flex-wrap gap-3"><Button asChild className="shadow-sm lg:h-11 lg:px-6"><Link href="/hire">Get help in 24h</Link></Button><Button variant="outline" asChild className="lg:h-11 lg:px-6"><Link href="/archive">Browse guides</Link></Button></div><div className="mt-6 lg:mt-8 max-w-md lg:max-w-[26rem]"><SearchField value={searchInput} onChange={onSearchChange} /></div></div><div className="flex flex-col justify-end rounded-2xl border border-[#cbd8c5] bg-[#e4ece0]/80 p-7 lg:p-8 xl:p-9 shadow-[0_18px_40px_-32px_rgba(31,77,59,.55)] lg:shadow-[0_24px_48px_-28px_rgba(31,77,59,0.5)]"><p className="font-label text-[10px] lg:text-[11px] text-primary">The editorial note</p><p className="mt-5 lg:mt-6 font-display text-2xl lg:text-[1.65rem] xl:text-[1.75rem] leading-snug lg:leading-[1.35] text-[#263c31]">We believe attention is a form of care. The best ideas have room to unfold — and then ship.</p><div className="mt-6 lg:mt-8 flex items-center gap-3 border-t border-[#c6d4c2] pt-4 lg:pt-5">
-      <img src="/logo.png" alt="CodeReport Global" className="h-9 w-9 rounded-full object-cover border border-[#c6d4c2]" />
-      <div>
-        <p className="text-sm font-semibold">The CodeReport Global team</p>
-        <p className="text-xs text-muted-foreground">Editors at large</p>
-      </div>
-    </div></div></div></section>
-    <section id="topics" className="border-b border-border bg-white"><div className="container py-7 lg:py-8"><div className="flex gap-2 lg:gap-2.5 overflow-x-auto lg:flex-wrap lg:overflow-visible pb-1 lg:pb-0 scrollbar-none"><Button size="sm" variant={!categoryFilter ? "default" : "outline"} onClick={() => setTopic()} className="shrink-0 rounded-full lg:h-9 lg:px-4 lg:text-[14px]">All stories</Button>{categories.map(item => <Button key={item.id} size="sm" variant={categoryFilter === item.slug ? "default" : "outline"} onClick={() => setTopic(item.slug)} className="shrink-0 rounded-full lg:h-9 lg:px-4 lg:text-[14px]">{item.name}</Button>)}</div></div></section>
-    <section className="container py-14 md:py-20 lg:py-24 xl:py-28">{showConfiguredSections ? <ConfiguredSections sections={sections} /> : <><div className="mb-10 lg:mb-12 flex items-end justify-between gap-4"><div><p className="font-label text-xs lg:text-[11px] text-primary">From the journal</p><h2 className="mt-2 font-display text-4xl lg:text-[2.4rem] font-semibold tracking-tight">{heading}</h2></div><p className="hidden text-sm lg:text-[14px] text-muted-foreground sm:block">{posts.total} published pieces</p></div>{isLoading ? <div className="grid min-h-64 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div> : posts.items.length ? <div className="space-y-14 lg:space-y-16"><ArticleCard post={posts.items[0]} featured /><div className="grid gap-x-7 lg:gap-x-8 xl:gap-x-9 gap-y-12 lg:gap-y-14 border-t border-border pt-12 lg:pt-14 md:grid-cols-3">{posts.items.slice(1).map(post => <ArticleCard key={post.id} post={post} />)}</div><div className="mt-12 lg:mt-16 rounded-xl border border-border bg-[#fbfcfa] p-6 lg:p-7"><p className="font-label text-xs lg:text-[11px] text-primary">All guides — for readers and search engines</p><ul className="mt-3 lg:mt-4 space-y-2 lg:space-y-2.5 pl-0 list-none">{posts.items.map(p => <li key={p.id} className="flex items-start gap-2 text-sm lg:text-[14.5px]"><span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" /><Link href={`/articles/${p.slug}`} className="font-medium text-primary hover:underline leading-6 lg:leading-7">{p.title}</Link>{p.excerpt && <span className="hidden text-muted-foreground lg:inline">— {p.excerpt.slice(0, 80)}…</span>}</li>)}</ul></div></div> : <div className="rounded-2xl border border-dashed border-border bg-white px-6 py-16 text-center"><p className="font-display text-2xl">There are no published stories here yet.</p><p className="mt-2 text-sm text-muted-foreground">Try a different search, explore another topic, or return soon.</p></div>}{posts.totalPages > 1 && <div className="mt-12 lg:mt-16 flex items-center justify-center gap-3"><Button variant="outline" className="lg:h-10 lg:px-5" disabled={page === 1} onClick={() => navigate({ page: page - 1 })}>Previous</Button><span className="text-sm text-muted-foreground">Page {page} of {posts.totalPages}</span><Button variant="outline" disabled={page === posts.totalPages} onClick={() => navigate({ page: page + 1 })}>Next</Button></div>}</>}</section>
-    <section id="newsletter" className="bg-[#dce7d7]"><div className="container grid gap-8 lg:gap-12 xl:gap-16 py-14 md:py-20 lg:py-24 xl:py-28 md:grid-cols-[1fr_.8fr] md:items-end"><div><p className="font-label text-xs lg:text-[11px] text-primary">Stay with the good stuff</p><h2 className="mt-3 max-w-xl lg:max-w-[28rem] font-display text-4xl lg:text-[2.5rem] xl:text-[2.65rem] font-semibold tracking-tight lg:leading-[1.05]">A quiet note when there's something worth reading.</h2></div><div><form onSubmit={event => { event.preventDefault(); subscribe(); }} className="flex flex-col gap-3 sm:flex-row lg:gap-4"><div className="relative flex-1"><Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input type="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" className="h-11 lg:h-12 bg-white pl-10 lg:pl-11 shadow-sm" /></div><Button type="submit" disabled={submitting} className="h-11 lg:h-12 lg:px-6 gap-2 shadow-sm">{submitting ? "Joining…" : "Subscribe"}<MoveRight className="h-4 w-4" /></Button></form><p className="mt-3 lg:mt-4 text-xs lg:text-[13px] leading-5 lg:leading-6 text-muted-foreground">By subscribing, you acknowledge the handling of your email as described in our <Link href="/privacy" className="font-medium text-primary underline underline-offset-2 hover:decoration-primary">Privacy policy</Link>.</p></div></div></section>
-  </>;
+  return (
+    <>
+      {/* HERO */}
+      <section className="relative overflow-hidden bg-[#0a1913] text-white">
+        <img src={HERO_IMAGE} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 yatra-hero-veil" />
+        <div className="relative container pb-24 pt-16 md:pb-32 md:pt-24 lg:pb-36 lg:pt-28">
+          <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm border border-white/20">
+            Sundarban Travel • Tours • Guides
+          </p>
+          <h1 className="mt-5 max-w-3xl hero-title font-display">
+            Plan Your Sundarban Journey with Confidence
+          </h1>
+          <p className="mt-5 max-w-xl text-[1.05rem] lg:text-lg leading-8 text-white/85">
+            Discover mangrove waterways, wildlife, villages and memorable boat journeys — with practical guides and thoughtfully planned Sundarban tours.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="#tours" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[15px] font-semibold text-[#0f4532] hover:bg-[#f5e7cc] transition-colors">
+              Explore Sundarban Tours <ArrowRight className="h-4 w-4" />
+            </a>
+            <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#1fa855] px-7 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors">
+              <MessageCircle className="h-4 w-4" /> WhatsApp Us
+            </a>
+          </div>
+          <p className="mt-6 text-[13px] tracking-wide text-white/70">Local guidance • Flexible itineraries • Easy enquiry</p>
+        </div>
+      </section>
+
+      {/* TRIP PLANNER — overlaps hero */}
+      <section className="container relative z-10 -mt-14 md:-mt-16">
+        <TripPlannerCard />
+      </section>
+
+      {/* POPULAR TOURS */}
+      <section id="tours" className="container yatra-section scroll-mt-24">
+        <SectionHeader
+          eyebrow="Popular tours"
+          title="Sundarban Tours Made for Your Trip"
+          desc="Choose a ready-made itinerary or tell us what kind of Sundarban experience you are looking for."
+          action={<a href="/hire" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all">Compare all tours <ArrowRight className="h-4 w-4" /></a>}
+        />
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+          {TOURS.map((t) => (
+            <TourCard key={t.slug} tour={t} />
+          ))}
+        </div>
+        <p className="mt-5 text-[13px] text-muted-foreground">Prices vary by season, group size and boat type — we share a clear written quote before you decide.</p>
+      </section>
+
+      {/* WHY CHOOSE US */}
+      <section className="border-y border-border bg-white">
+        <div className="container yatra-section">
+          <SectionHeader eyebrow="Why choose us" title="Why Travellers Choose Sundarban Yatra" align="center" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+            {TRUST.map((f) => (
+              <div key={f.title} className="rounded-[20px] border border-border bg-background p-6 lg:p-7">
+                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#ddebe3] text-primary"><f.icon className="h-5 w-5" /></span>
+                <h3 className="mt-4 font-display text-[1.1rem] font-semibold tracking-tight">{f.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* DESTINATIONS */}
+      <section id="destinations" className="container yatra-section scroll-mt-24">
+        <SectionHeader
+          eyebrow="Destinations"
+          title="Explore the Sundarbans"
+          desc="Six places that shape most journeys — from gateway jetties to quiet forest villages."
+        />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {DESTINATIONS.map((d) => (
+            <DestinationCard key={d.slug} d={d} />
+          ))}
+        </div>
+      </section>
+
+      {/* THINGS TO DO */}
+      <section id="things-to-do" className="border-y border-border bg-[#eff4ee] scroll-mt-24">
+        <div className="container yatra-section">
+          <SectionHeader
+            eyebrow="Experiences"
+            title="Things To Do in the Sundarbans"
+            desc="Beyond the tiger trail — slow boats, birds, villages and river light. Wildlife sightings depend on natural conditions, season and luck."
+          />
+          <div className="grid gap-3 md:grid-cols-2 lg:gap-4">
+            {ACTIVITIES.map((a) => (
+              <ActivityCard key={a.slug} a={a} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SAFARI FEATURE */}
+      <section id="safari" className="container yatra-section scroll-mt-24">
+        <div className="grid overflow-hidden rounded-[28px] border border-border bg-white lg:grid-cols-2">
+          <div className="relative min-h-[320px] lg:min-h-[480px]">
+            <img src={SAFARI_IMAGE} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            <span className="absolute left-5 top-5 yatra-chip bg-white/95">Safari • Licensed boats</span>
+          </div>
+          <div className="p-7 md:p-10 lg:p-12 flex flex-col justify-center">
+            <p className="font-label text-[11px] text-primary">Sundarban Safari</p>
+            <h2 className="mt-3 h2 font-display">Creeks, watchtowers and quiet patience</h2>
+            <p className="mt-4 leading-8 text-muted-foreground">
+              Safari here is a water journey — permitted creeks, forest guides, and watchtowers at Sajnekhali, Sudhanyakhali and Dobanki. Mornings are misty, afternoons golden, and every turn feels unscripted.
+            </p>
+            <ul className="mt-5 grid gap-2 text-[14.5px] text-foreground">
+              <li className="flex gap-2.5"><Binoculars className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Forest guide + permits handled</li>
+              <li className="flex gap-2.5"><Ship className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Small-group boats, shade + washroom</li>
+              <li className="flex gap-2.5"><BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Honest briefing — no guaranteed sightings</li>
+            </ul>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a href="/hire?interest=safari" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-semibold text-white hover:bg-[#0f4532] transition-colors">Explore Safari Tours</a>
+              <a href="#guides" className="inline-flex h-12 items-center rounded-full border border-border bg-white px-7 text-[15px] font-semibold hover:border-primary/40 hover:text-primary transition-colors">Read Safari Guide</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TRAVEL GUIDES — static planning cornerstones */}
+      <section id="guides" className="border-y border-border bg-white scroll-mt-24">
+        <div className="container yatra-section">
+          <SectionHeader
+            eyebrow="Travel guides"
+            title="Plan Your Sundarban Trip Better"
+            desc="Practical, honest answers — routes, costs, seasons and itineraries. Start with a cornerstone guide."
+            action={<a href="/archive" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">All guides <ArrowUpRight className="h-4 w-4" /></a>}
+          />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            {PLANNING_GUIDES.map((g) => (
+              <a key={g.title} href="/archive" className="yatra-card group block p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">Guide • {g.read} read</p>
+                <h3 className="mt-2.5 font-display text-[1.2rem] font-semibold tracking-tight group-hover:text-primary transition-colors">{g.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{g.desc}</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">Read Guide <ArrowRight className="h-4 w-4" /></span>
+              </a>
+            ))}
+          </div>
+
+          {/* Live editorial feed (existing CMS posts become guides) */}
+          <div className="mt-12">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="font-label text-[11px] text-primary">From the travel guide</p>
+                <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight">Latest from the Sundarban Travel Guide</h3>
+              </div>
+              <div className="w-full max-w-sm"><SearchField value={searchInput} onChange={onSearchChange} /></div>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <button onClick={() => setTopic()} className={`h-9 shrink-0 rounded-full border px-4 text-sm font-medium transition ${!categoryFilter ? "bg-primary text-white border-primary" : "bg-white border-border hover:border-primary/40"}`}>All</button>
+              {categories.map((c) => (
+                <button key={c.id} onClick={() => setTopic(c.slug)} className={`h-9 shrink-0 rounded-full border px-4 text-sm font-medium transition ${categoryFilter === c.slug ? "bg-primary text-white border-primary" : "bg-white border-border hover:border-primary/40"}`}>{c.name}</button>
+              ))}
+            </div>
+            {isLoading ? (
+              <div className="grid min-h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+            ) : posts.items.length ? (
+              <>
+                <div className="mt-6 grid gap-x-7 gap-y-10 md:grid-cols-3">
+                  {posts.items.slice(0, 6).map((p) => (
+                    <ArticleCard key={p.id} post={p} />
+                  ))}
+                </div>
+                {posts.totalPages > 1 && (
+                  <div className="mt-8 flex items-center justify-center gap-2">
+                    <Button variant="outline" disabled={page <= 1} onClick={() => navigate({ page: page - 1 })} className="rounded-full">Previous</Button>
+                    <span className="text-sm text-muted-foreground">Page {page} of {posts.totalPages}</span>
+                    <Button variant="outline" disabled={page >= posts.totalPages} onClick={() => navigate({ page: page + 1 })} className="rounded-full">Next</Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-6 rounded-2xl border border-dashed border-border bg-background px-6 py-12 text-center">
+                <p className="font-display text-xl">Guides are being written.</p>
+                <p className="mt-2 text-sm text-muted-foreground">Our editors are documenting routes, costs and seasons. Check the planning guides above meanwhile.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Admin-configured sections (preserved) */}
+          {!isFiltering && sections.length > 0 && (
+            <div className="mt-14 space-y-12 border-t border-border pt-12">
+              {sections.map((s) => (
+                <section key={s.id}>
+                  <p className="font-label text-[11px] text-primary">{s.section_type === "custom" ? "Editorial note" : "Curated"}</p>
+                  <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight">{s.title}</h3>
+                  {s.subtitle && <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{s.subtitle}</p>}
+                  {s.section_type === "custom" ? (
+                    <div className="article-prose mt-4 rounded-2xl border border-border bg-background p-6" dangerouslySetInnerHTML={{ __html: s.rendered_html || "" }} />
+                  ) : s.posts.length ? (
+                    <div className="mt-6 grid gap-x-7 gap-y-10 md:grid-cols-3">{s.posts.map((p) => <ArticleCard key={p.id} post={p} />)}</div>
+                  ) : null}
+                </section>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* FAQ — honest substitute for fabricated reviews */}
+      <section id="faq" className="container yatra-section scroll-mt-24">
+        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
+          <div>
+            <p className="font-label text-[11px] text-primary">Good to know</p>
+            <h2 className="mt-3 h2 font-display">Questions Travellers Ask Before They Go</h2>
+            <p className="mt-4 leading-7 text-muted-foreground">Straight answers on routes, days, inclusions and seasons. For anything specific, WhatsApp us — a human replies.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white"><MessageCircle className="h-4 w-4" /> Ask on WhatsApp</a>
+              <a href="/hire" className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-white px-6 text-sm font-semibold hover:border-primary/40 hover:text-primary">Get a Quote</a>
+            </div>
+          </div>
+          <Faq items={FAQS} />
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="container pb-16 lg:pb-24">
+        <div className="relative overflow-hidden rounded-[28px] bg-[#0f4532] px-7 py-12 md:p-14 lg:p-16 text-white">
+          <div className="absolute inset-0 opacity-[0.14]" style={{ backgroundImage: "radial-gradient(circle at 20% 20%, #fff 1px, transparent 1px), radial-gradient(circle at 80% 60%, #fff 1px, transparent 1px)", backgroundSize: "26px 26px" }} />
+          <div className="relative grid gap-10 lg:grid-cols-[1.1fr_.9fr] lg:items-center">
+            <div>
+              <p className="font-label text-[11px] text-[#d59b43]">Ready when you are</p>
+              <h2 className="mt-3 font-display text-3xl md:text-4xl lg:text-[2.8rem] font-bold tracking-tight leading-[1.05]">Ready to Plan Your Sundarban Trip?</h2>
+              <p className="mt-4 max-w-lg leading-8 text-white/80">One call sorts it all — dates, safari, stay. Tap below and talk to a human.</p>
+              <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                <a href={`tel:${businessConfig.phone}`} className="inline-flex min-h-14 flex-col items-center justify-center rounded-2xl bg-white px-6 py-3 text-[#0f4532] hover:bg-[#f5e7cc] transition-colors">
+                  <span className="flex items-center gap-2 text-[15px] font-bold"><Phone className="h-5 w-5" /> {businessConfig.phoneDisplay}</span>
+                  <span className="mt-0.5 block text-xs font-medium text-[#0f4532]/70">Tap to call • {businessConfig.hours}</span>
+                </a>
+                <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-5 w-5" /> WhatsApp Us</a>
+              </div>
+              <button onClick={() => setShowEnquiry((v) => !v)} aria-expanded={showEnquiry} className="mt-4 text-sm font-medium text-white/70 underline underline-offset-4 hover:text-white transition-colors">
+                {showEnquiry ? "Hide enquiry form ↑" : "Outside India? Send an enquiry form instead →"}
+              </button>
+              {showEnquiry && (
+                <div className="mt-4 rounded-[20px] bg-white p-6 text-foreground">
+                  <LeadForm ctaLabel="Send Enquiry" />
+                </div>
+              )}
+            </div>
+            <div className="rounded-[20px] bg-white p-6 lg:p-7 text-foreground">
+              <h3 className="font-display text-lg font-semibold">Get trip notes in your inbox</h3>
+              <p className="mt-1.5 text-sm text-muted-foreground">Season alerts, new guides, honest cost updates. No spam.</p>
+              <form onSubmit={(e) => { e.preventDefault(); subscribe(); }} className="mt-4 flex flex-col gap-2.5 sm:flex-row">
+                <div className="relative flex-1">
+                  <Mail className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="h-12 rounded-full bg-background pl-10" />
+                </div>
+                <Button type="submit" disabled={submitting} className="h-12 rounded-full px-6 font-semibold">{submitting ? "Joining…" : "Subscribe"}</Button>
+              </form>
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">By subscribing, you acknowledge our <Link href="/privacy" className="font-medium text-primary underline underline-offset-2">Privacy policy</Link>.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
 }

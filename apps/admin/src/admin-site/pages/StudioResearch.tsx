@@ -192,14 +192,14 @@ function TrafficSection() {
 }
 
 function TrendsSection() {
-  const [geo, setGeo] = useState("US");
+  const [geo, setGeo] = useState("IN");
   const trends = trpc.studio.research.trends.useQuery({ geo });
 
   return (
     <SectionCard
       icon={Flame}
       title="Google Trends — trending searches"
-      description="What the world is searching right now. Filter for angles that touch developer topics."
+      description="What the world is searching right now. Filter for angles that touch Sundarban tours, safari and trip planning."
       action={
         <Select value={geo} onValueChange={setGeo}>
           <SelectTrigger className="w-[170px]"><SelectValue /></SelectTrigger>
@@ -309,7 +309,7 @@ export default function StudioResearch() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
             Live traffic from Google Analytics plus real-time search and
-            developer signals to fuel your next story ideas.
+            travel signals to fuel your next Sundarban guide ideas.
           </p>
         </header>
         <div className="space-y-6">
@@ -318,7 +318,7 @@ export default function StudioResearch() {
           <HnSection />
           <div className="flex items-center gap-2 rounded-xl border border-dashed border-border p-4 text-xs text-muted-foreground">
             <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
-            Tip: ask your AI agent to run <code className="mx-1">node cli/blog.mjs research trends</code> and propose story angles from this same data.
+            Tip: ask your AI agent to run <code className="mx-1">node cli/blog.mjs research trends</code> and propose Sundarban guide angles from this same data.
           </div>
         </div>
       </div>

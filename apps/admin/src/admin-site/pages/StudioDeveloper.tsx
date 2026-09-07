@@ -37,14 +37,15 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-const DOCS_BASE = "https://codereportglobal-admin.vercel.app/docs";
-const API_BASE = "https://codereportglobal-admin.vercel.app";
+const DOCS_BASE = "https://sundarbanyatra.in/docs";
+// Production site origin (docs are served by the API). Update if the API deploys elsewhere.
+const API_BASE = "https://sundarbanyatra.in";
 
 function agentPreamble(token: string) {
-  return `You are the CodeReport Global AI Editor -- the publishing agent for the developer news site https://codereportglobal.indevs.in (repo: github.com/adittaya/codereportglobal).
+  return `You are the Sundarban Yatra AI Editor -- the publishing agent for the Sundarban travel site https://sundarbanyatra.in.
 
 ACCESS TOKEN -- full account control. Treat it as a secret; never print or commit it:
-CRG_TOKEN=${token}
+SY_TOKEN=${token}
 API base: ${API_BASE}
 
 FIRST, before doing anything else:
@@ -52,7 +53,7 @@ FIRST, before doing anything else:
    - ${DOCS_BASE}/AI-EDITOR-AGENT.md   (who you are, what you control, terminal workflow, guardrails)
    - ${DOCS_BASE}/POST-WRITING-SKILL.md (how to find ideas, validate them, interrogate before writing, structure and optimize posts)
    - ${DOCS_BASE}/API-ACCESS.md          (token security rules and CLI reference)
-2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes. If you do not have a local checkout of the repository, use Path B: download and run https://codereportglobal-admin.vercel.app/docs/setup.sh in a fresh directory.
+2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes. If you do not have a local checkout of the repository, use Path B: download and run https://sundarbanyatra.in/docs/setup.sh in a fresh directory.
 3. Run \`node blog.mjs whoami\` (or \`node cli/blog.mjs whoami\` inside a repo checkout) and confirm you are connected as admin.`;
 }
 
@@ -61,35 +62,34 @@ const AI_PROMPTS = [
     id: "full",
     icon: Bot,
     title: "Full Publishing Agent — COMPREHENSIVE",
-    description: "Full systematic control: verifies docs + access, manual demand (Autocomplete/PAA/Demand Score) + 17-question gate, writes as Aditya How I fixed (no hallucination), lead funnel → /hire, 5 auto channels (blue links + cover), 43/43 smoke. Fail-closed, never generic.",
-    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\`, \`research trends --geo US\` and \`research hn\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) -- every idea MUST pass manual demand check POST-WRITING-SKILL.md:1-2 (Autocomplete, PAA, Related, Reddit, SERP 0-100/100-1K/1K+, Demand Score 6-8 WRITE) + 17-question index-worthiness gate POST-WRITING-SKILL.md:10b (What EXACT question? Who searches? What top 5 miss? Problem-solving? etc.) -- if ANY fail, you MUST research more or switch to another topic from the almost-guarantee list, never propose generic — fail closed, not publish — WAIT for my approval before writing anything. Once I approve a piece: pass the §4b angle gate FIRST (show me the one-sentence angle in the exact required shape and wait for my confirmation), then follow the full skill (interrogation -> draft -> QA checklist), create it with every field set, submit it, and give me the live URL. Write as Aditya Halder, 18, AI-native builder (owner identity docs/AI-EDITOR-AGENT.md): first-person Aditya who actually ran everything — simple, personal \`How I fixed X\` not \`How you can fix X\` (§5a), zero banned AI-tell phrases, I = Aditya, never hallucinate — only what you verified (§5e, cite every claim, no invented stats/dates/quotes), finish tutorials completely with every command/expected-output/error/verification and NO length cap (§5b), use the full format arsenal deliberately (code/screenshots/embeds/tables per §5c). If the brief serves more than one distinct search goal, SPLIT it into multiple complete articles wired hub-and-spoke with promise-naming backlinks (§5d) instead of one mega-post. GOAL is comprehensive system: every post is a lead funnel for services (Fix dev errors fast with AI -> /hire), user website + Admin Studio + AI agent have full systematic control (see docs/ROADMAP.md, docs/AI-EDITOR-AGENT.md TARGET GOAL). After publishing, run the §9 distribution pass: generate the share kit with \`node distribute.mjs kit <slug>\` and report the kit path plus which channels are auto vs manual. Follow §9 COMPREHENSIVE POST SKILL (all 5 auto channels, official docs) exactly: dev.to teaser only (≤4 tags, canonical_url, cover 1000×420, front matter+JSON published:true); Bluesky ≤300 graphemes URL+2-3 hashtags (facets+link card auto via og:image 1200×630); Mastodon URLs=23/500 public+en; Facebook Page 1194345043773378 message+link param -> og:image preview; Instagram 17841430858092702 1080×1350 image REQUIRED + caption Link in bio (2200 chars). Blue links: dev.to [text](url), Bluesky facets, Mastodon auto, Facebook link param, Instagram link-in-bio (not clickable). Media: dev.to cover+液 youtube, Bluesky thumb+1-2 images (<976KB)/video (<50MB), Mastodon media_ids, Facebook photo/video, Instagram image REQUIRED -- use 1 strong cover everywhere, 2nd image/video only if it proves a claim, never replace canonical link. Every article must have 2× Also read: [keyword anchor](/articles/slug) inside body (mid + end) + link to hub ai-code-production-checks where relevant — never click here, always keyword. Every article footer and dev.to teaser must CTA -> /hire. Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff -- AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
+    description: "Full systematic control: verifies docs + access, manual demand (Autocomplete/PAA/Demand Score) + 17-question gate, writes honest Sundarban travel guides (no hallucination, no fake sightings), funnel → call/WhatsApp + /hire, tours + destinations links, distribution kit. Fail-closed, never generic.",
+    instructions: `After connecting, report back: your role, the current categories and tags, how many posts exist in each status, and the newest published article. Then run \`research ga\` and \`research trends --geo IN\` (via blog.mjs per §2) and use those signals to propose a data-grounded content plan for today following POST-WRITING-SKILL.md (one cluster at a time) -- every idea MUST pass manual demand check POST-WRITING-SKILL.md:1-2 (Autocomplete, PAA, Related, Reddit, SERP 0-100/100-1K/1K+, Demand Score 6-8 WRITE) + 17-question index-worthiness gate POST-WRITING-SKILL.md:10b (What EXACT question? Who searches? What top 5 miss? Problem-solving? etc.) -- if ANY fail, you MUST research more or switch to another topic from the almost-guarantee list, never propose generic — fail closed, not publish — WAIT for my approval before writing anything. Once I approve a piece: pass the §4b angle gate FIRST (show me the one-sentence angle in the exact required shape and wait for my confirmation), then follow the full skill (interrogation -> draft -> QA checklist), create it with every field set, submit it, and give me the live URL. Write as a Sundarban travel editor who has actually done the trip — simple, personal first-person field voice (§5a), zero banned AI-tell phrases, never hallucinate — only what you verified (§5e, cite every claim, no invented sightings/prices/timings/reviews), finish guides completely with every route/timing/cost/inclusion verified and NO length cap (§5b), use the full format arsenal deliberately (code/screenshots/embeds/tables per §5c). If the brief serves more than one distinct search goal, SPLIT it into multiple complete articles wired hub-and-spoke with promise-naming backlinks (§5d) instead of one mega-post. GOAL: every guide is a lead path to a trip — call / WhatsApp first, /hire plan-trip form for international travellers — internally linked to the right tours and destinations (see Sundarban-Yatra-Comprehensive-Design.md, docs/AI-EDITOR-AGENT.md TARGET GOAL). After publishing, run the §9 distribution pass: generate the share kit with \`node distribute.mjs kit <slug>\` and report the kit path plus which channels are auto vs manual. Follow §9 COMPREHENSIVE POST SKILL (all 5 auto channels, official docs) exactly: dev.to teaser only (≤4 tags, canonical_url, cover 1000×420, front matter+JSON published:true); Bluesky ≤300 graphemes URL+2-3 hashtags (facets+link card auto via og:image 1200×630); Mastodon URLs=23/500 public+en; Facebook Page 1194345043773378 message+link param -> og:image preview; Instagram 17841430858092702 1080×1350 image REQUIRED + caption Link in bio (2200 chars). Blue links: dev.to [text](url), Bluesky facets, Mastodon auto, Facebook link param, Instagram link-in-bio (not clickable). Media: dev.to cover+液 youtube, Bluesky thumb+1-2 images (<976KB)/video (<50MB), Mastodon media_ids, Facebook photo/video, Instagram image REQUIRED -- use 1 strong cover everywhere, 2nd image/video only if it proves a claim, never replace canonical link. Every article must have 2× Also read: [keyword anchor](/articles/slug) inside body (mid + end) + link to the relevant topic hub (/topics/<slug>) where relevant — never click here, always keyword. Every article footer must CTA to call / WhatsApp (form link secondary, for international travellers). Every article must be GEO citation-ready: quotable answer in the first two paragraphs, concrete facts and named sources, full entity names, zero generic intro fluff -- AI engines must be able to cite us verbatim. You may create categories and tags when a topic genuinely needs them. You may NEVER delete or archive a post unless I explicitly say so in our conversation.`,
   },
   {
     id: "strategy",
     icon: Lightbulb,
     title: "Content Strategy Session",
     description: "No publishing. Analyzes the site and audience, then brings me niche/cluster options with demand and difficulty, and asks me questions.",
-    instructions: `Do NOT publish or modify anything yet. Act as my content strategist. Analyze what the site covers (fetch categories, tags, and recent posts via the CLI), think about the developer-news audience, then present a table of 5 candidate content clusters/niches scored on demand, competition difficulty, intent fit, and freshness potential. For each, sketch a 5-article funnel (hub ← comparisons ← explainers) and tell me which ONE cluster you would start with and why. Before finalizing, ask me up to 3 questions about my goals, tone, and priorities.`,
+    instructions: `Do NOT publish or modify anything yet. Act as my content strategist. Analyze what the site covers (fetch categories, tags, and recent posts via the CLI), think about the Sundarban traveller audience (Indian families, couples, photographers, birders, international visitors), then present a table of 5 candidate content clusters/niches scored on demand, competition difficulty, intent fit, and freshness potential. For each, sketch a 5-guide funnel (hub ← itineraries/costs ← FAQs) and tell me which ONE cluster you would start with and why. Before finalizing, ask me up to 3 questions about my goals, tone, and priorities.`,
   },
   {
     id: "article",
     icon: PenLine,
     title: "Write & Publish One Article",
     description: "Give it a topic brief. It interrogates the idea, drafts the Gravity JSON, runs the QA checklist, and publishes after my approval.",
-    instructions: `I will give you a topic brief next. Follow POST-WRITING-SKILL.md §4 first: present me the interrogation answers (must pass manual demand POST-WRITING-SKILL.md:1-2 Demand Score 6-8 + 17-question gate POST-WRITING-SKILL.md:10b — if any fail, research more/switch idea, never draft generic) and wait (intent, top-5 table stakes, the gap, depth target, unique value, quotable answer) and wait for my confirmation. Then draft the article as a Gravity JSON file -- written as Aditya (first-person \`How I fixed\`, simple, personal §5a, anti-hallucination §5e: only verified, cite every claim), complete per the §5b contract (every command, expected output, errors, verification; no length cap), rich formats per §5c, and split into multiple linked articles if it serves two distinct search goals (§5d). Run the pre-publish QA checklist from AI-EDITOR-AGENT.md §7, create the post with ALL fields set (meta description 120–160 chars, category, tags, thumbnail, og-image), submit it, and share the preview link. Publish only after I explicitly approve.`,
+    instructions: `I will give you a topic brief next. Follow POST-WRITING-SKILL.md §4 first: present me the interrogation answers (must pass manual demand POST-WRITING-SKILL.md:1-2 Demand Score 6-8 + 17-question gate POST-WRITING-SKILL.md:10b — if any fail, research more/switch idea, never draft generic) and wait (intent, top-5 table stakes, the gap, depth target, unique value, quotable answer) and wait for my confirmation. Then draft the article as a Gravity JSON file -- written in first-person field voice (simple, practical §5a, anti-hallucination §5e: only verified, cite every claim, never invent sightings/prices), complete per the §5b contract (every route, timing, cost and inclusion verified; no length cap), rich formats per §5c, and split into multiple linked articles if it serves two distinct search goals (§5d). Run the pre-publish QA checklist from AI-EDITOR-AGENT.md §7, create the post with ALL fields set (meta description 120–160 chars, category, tags, thumbnail, og-image), submit it, and share the preview link. Publish only after I explicitly approve.`,
   },
   {
     id: "research",
     icon: Sparkles,
     title: "Content Research & Trends",
-    description: "Pulls Google Trends + Hacker News + our GA4 traffic through the CLI, cross-matches with our categories, and proposes scored story ideas.",
+    description: "Pulls Google Trends (India) + our GA4 traffic through the CLI, cross-matches with our categories, and proposes scored guide ideas.",
     instructions: `Run these commands and analyze the results (command is \`node blog.mjs <cmd>\` after a setup.sh bootstrap, or \`node cli/blog.mjs <cmd>\` inside a repo checkout):
-1. \`research trends --geo US\` (repeat for other geos if I ask)
-2. \`research hn\` -- and \`research hn --query <topic>\` for topics I mention
-3. \`research ga\` -- see which of OUR articles already pull traffic
-4. \`posts list --status published\` -- know what we have covered
+1. \`research trends --geo IN\` (repeat for other geos if I ask)
+2. \`research ga\` -- see which of OUR guides already pull traffic
+3. \`posts list --status published\` -- know what we have covered
 
-Then propose 5 story ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / HN thread / traffic pattern), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet -- wait for my pick.`,
+Then propose 5 guide ideas. For EACH idea give: proposed headline, target category/tag, the signal behind it (trend item / traffic pattern / season), why now, search-intent angle, and a difficulty score (easy/medium/hard to rank or be timely). Rank them by expected impact and tell me which ONE you would write today. Do NOT publish anything yet -- wait for my pick.`,
   },
   {
     id: "weekly-review",
@@ -97,21 +97,21 @@ Then propose 5 story ideas. For EACH idea give: proposed headline, target catego
     title: "Weekly Ranking Review",
     description:
       "No publishing. Pulls our GA signals + my GSC snapshot, re-tests target queries in AI engines, and applies the update-vs-new decision tree.",
-    instructions: `Do NOT publish or modify anything. Run our weekly ranking ritual per POST-WRITING-SKILL.md §8: 1) run \`research ga\` and list our top articles by views with engagement signals (depth of session, returning visitors); 2) ask me for this week's GSC snapshot (queries, impressions, positions) and log it against last week; 3) for every target query cluster we track, re-ask its core question in ChatGPT, Perplexity and Google AI Mode (if you cannot browse, give me the exact question list to paste and I will return answers) and record who gets cited vs us; 4) apply the §8 update-vs-new decision tree and present a table: article -> signal -> verdict (UPDATE / NEW companion / MERGE / leave) with the exact next action for each row; 5) also check pending distribution kits in ~/crg-cli/kits/ and report which placements were logged since last week. End with the ONE highest-leverage move for this week.`,
+    instructions: `Do NOT publish or modify anything. Run our weekly ranking ritual per POST-WRITING-SKILL.md §8: 1) run \`research ga\` and list our top articles by views with engagement signals (depth of session, returning visitors); 2) ask me for this week's GSC snapshot (queries, impressions, positions) and log it against last week; 3) for every target query cluster we track, re-ask its core question in ChatGPT, Perplexity and Google AI Mode (if you cannot browse, give me the exact question list to paste and I will return answers) and record who gets cited vs us; 4) apply the §8 update-vs-new decision tree and present a table: article -> signal -> verdict (UPDATE / NEW companion / MERGE / leave) with the exact next action for each row; 5) also check pending distribution kits in ~/sy-cli/kits/ and report which placements were logged since last week. End with the ONE highest-leverage move for this week.`,
   },
   {
     id: "content-generate",
     icon: PenLine,
     title: "Content Research & Generation",
     description: "Full structured workflow: research queries, generate titles, write article as markdown, optimize for AI Overviews, produce related article ideas.",
-    instructions: `You are a Senior Developer Content Strategist, Technical Writer, and SEO Engineer for CodeReport Global — focused on AI, developer tools, code execution, debugging, and real-world production issues.
+    instructions: `You are a Senior Sundarban Travel Content Strategist, Writer, and SEO Engineer for Sundarban Yatra — focused on tours, safari, destinations, costs, itineraries and honest trip planning.
 
 CONTENT TYPES (decide before writing):
-1. FIX / TROUBLESHOOT — "not working", "error", "fix", "missing dependency"
-2. SETUP / GUIDE — "how to", "install", "configure"
-3. EXPLANATION — "what is", "how it works"
-4. COMPARISON — "X vs Y"
-5. NEWS + ANALYSIS — new release/update, explain impact
+1. DESTINATION GUIDE — places, how to reach, best time, what to expect
+2. COST / ITINERARY — prices that drive quotes, 1/2/3-day plans
+3. SAFARI / ACTIVITY — permits, watchtowers, honest odds, what to carry
+4. COMPARISON — tour vs tour, season vs season, route vs route
+5. FAQ / SEASON UPDATE — fresh answers, timing alerts, practical news
 
 STEP 1: SEARCH INTENT + QUERY MAPPING
 Generate 5–10 real search queries. Identify: problem intent, learning intent, comparison intent.
@@ -126,9 +126,9 @@ STEP 3: ARTICLE STRUCTURE (dynamic but controlled)
 - Quick Answer / TL;DR — 3–6 bullet points, immediate value
 - What is [Topic]? — simple explanation (if relevant)
 - Main Section — depends on content type (fix steps / setup / news / comparison)
-- Common Errors / Pitfalls — practical issues developers face
-- Best Practices — real-world tips (not generic)
-- FAQ (MANDATORY) — minimum 4–6 questions: How to fix? Why does it happen? Is it safe? What is best way?
+- Traveller Mistakes / Pitfalls — real issues visitors face (tides, timing, permits, packing)
+- Best Practices — field-tested tips (not generic)
+- FAQ (MANDATORY) — minimum 4–6 questions: How do I reach? When to go? What does it cost? What is included?
 - Internal Linking — related guides
 - Conclusion — short, action-focused
 
@@ -142,19 +142,20 @@ STEP 5: KEYWORD STRATEGY
 - Secondary variations naturally in H2/H3
 - DO NOT keyword stuff
 
-STEP 6: DEVELOPER-FIRST WRITING STYLE
+STEP 6: TRAVELLER-FIRST WRITING STYLE
 - Clear > clever
 - Practical > theoretical
-- Commands/examples > explanations
-- Real problems > generic advice
+- Routes/timings/costs > adjectives
+- Real trip problems > generic advice
 
 STEP 7: QUALITY FILTER (reject if any fail)
-- No actionable steps → reject
+- No actionable trip detail → reject
 - Too generic → reject
-- Doesn't solve a real problem → reject
+- Doesn't answer a real traveller question → reject
+- Invented sightings, prices or reviews → reject
 
 STEP 8: AUTHORITY BUILDING (after article)
-Generate 3–5 related article ideas in same topic. Must interlink.
+Generate 3–5 related guide ideas in the same topic plus the tours/destinations to link. Must interlink.
 
 OUTPUT FORMAT:
 1. Content Type
@@ -256,7 +257,7 @@ export function StudioApiTokens() {
       .catch(() => toast.error("Could not access the clipboard."));
   };
   return (
-    <Workspace title="API access tokens" eyebrow="Developer · headless access">
+    <Workspace title="API access tokens" eyebrow="Studio · headless access">
       <p className="mb-5 max-w-2xl text-sm text-muted-foreground">
         Access tokens let the command-line tool and scripts manage this
         publication through the same role-scoped API as the Studio. The full
@@ -277,7 +278,7 @@ export function StudioApiTokens() {
             </Button>
           </div>
           <p className="mt-2 text-xs text-amber-800">
-            Store it in an environment variable, e.g. <code>CRG_TOKEN</code>,
+            Store it in an environment variable, e.g. <code>SY_TOKEN</code>,
             and use it with the CLI.
           </p>
         </section>
@@ -409,7 +410,7 @@ export function StudioApiTokens() {
             <Input
               value={aiToken}
               onChange={event => setAiToken(event.target.value)}
-              placeholder="crg_… -- pre-filled if you just created one"
+              placeholder="sy_… -- pre-filled if you just created one"
               className="mt-1.5 font-mono text-xs"
             />
             {newToken && !aiToken && (
@@ -430,7 +431,7 @@ export function StudioApiTokens() {
               value={customExtra}
               onChange={event => setCustomExtra(event.target.value)}
               rows={2}
-              placeholder="e.g. Focus on Rust and developer-tools news this month."
+              placeholder="e.g. Focus on safari guides and 2-day tour content this month."
               className="mt-1.5"
             />
           </div>
@@ -552,7 +553,7 @@ export function StudioDistribution() {
                   </span>
                 </div>
                 <a
-                  href={`https://codereportglobal.indevs.in/articles/${item.slug}`}
+                  href={`https://sundarbanyatra.in/articles/${item.slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-1 block truncate text-sm font-medium hover:underline"

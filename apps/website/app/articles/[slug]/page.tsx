@@ -9,21 +9,21 @@ export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 const titleOverrides: Record<string, string> = {
-  "ai-code-production-checks": "AI Code Fails in Production? Fix Guide (2026)",
-  "ai-deployment-fixes": "AI Website Deployment Fails? 15 Fixes (2026)",
-  "claude-code-sandbox": "Sandbox Claude Code Without Breaking Git/MCP (2026)",
-  "n8n-mcp-production": "Deploy n8n MCP in Production: Proxy + Queue (2026)",
-  "deepseek-opencode-image-error": "DeepSeek Image Error in OpenCode? Fix (2026)",
-  "openai-hugging-face-agent-intrusion": "OpenAI–Hugging Face Intrusion: 7 Sandbox Fixes",
+  "how-to-reach-sundarban": "How to Reach Sundarban from Kolkata (2026)",
+  "best-time-to-visit-sundarban": "Best Time to Visit Sundarban — Month by Month (2026)",
+  "sundarban-tour-cost": "Sundarban Tour Cost — What Drives the Price (2026)",
+  "sundarban-safari-guide": "Sundarban Safari Guide — Permits, Towers & Honest Odds",
+  "places-to-visit-in-sundarban": "Places to Visit in Sundarban — 6 Stops That Matter",
+  "sundarban-itinerary": "Sundarban Itinerary — 1, 2 & 3 Day Plans That Work",
 };
 
 const metaDescriptionOverrides: Record<string, string> = {
-  "ai-code-production-checks": "AI code passes tests but breaks in production? Use this 15-point checklist to catch edge cases, env mismatches, and integration failures before your users do.",
-  "ai-deployment-fixes": "AI-built websites break during deployment? Fix the 15 most common issues: SSR mismatches, missing env vars, broken routes, and more.",
-  "claude-code-sandbox": "Sandbox Claude Code safely without breaking Git, MCP, or your dev workflow. Step-by-step setup with Docker and permission controls.",
+  "how-to-reach-sundarban": "Kolkata to the Sundarbans: trains to Canning, road to Godkhali jetty, then boat. Timings, costs and the smoothest route for your trip.",
+  "best-time-to-visit-sundarban": "October to March suits most travellers; monsoon is lush but restricted. Month-by-month weather, crowds and safari odds.",
+  "sundarban-tour-cost": "Boat, stay, permits, season, group size — what actually drives a Sundarban quote and how to compare operators honestly.",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: "article",
         url: canonical,
-        siteName: "CodeReport Global",
+        siteName: "Sundarban Yatra",
         locale: "en_US",
         images: [{ url: image }],
         publishedTime: post.published_at || undefined,

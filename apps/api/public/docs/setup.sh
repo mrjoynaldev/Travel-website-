@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# CodeReport Global - one-command CLI bootstrap for external AI agents.
-# Usage:  mkdir -p ~/crg-cli && cd ~/crg-cli && curl -fsSL https://codereportglobal-backend.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
+# Sundarban Yatra - one-command CLI bootstrap for external AI agents.
+# Usage:  mkdir -p ~/sy-cli && cd ~/sy-cli && curl -fsSL https://sundarbanyatra.in/docs/setup.sh -o setup.sh && bash setup.sh
 set -e
 
-BASE="https://codereportglobal-backend.onrender.com/docs"
+BASE="https://sundarbanyatra.in/docs"
 DIR="$(pwd)"
 
 echo "-> Downloading CLI files..."
@@ -15,15 +15,15 @@ echo "-> Installing dependencies (@trpc/client v11, superjson)..."
 [ -f package.json ] || npm init -y >/dev/null
 npm install --silent @trpc/client@^11.6.0 superjson >/dev/null
 
-cat <<'CRG_DONE'
+cat <<'SY_DONE'
 
-CodeReport Global CLI ready in'" $DIR"'
+Sundarban Yatra CLI ready in'" $DIR"'
 
-Next steps (as documented in https://codereportglobal-backend.onrender.com/docs/AI-EDITOR-AGENT.md):
+Next steps (as documented in https://sundarbanyatra.in/docs/AI-EDITOR-AGENT.md):
 
-  export CRG_TOKEN="crg_..."                                                  # from Studio -> API tokens
-  export CRG_API_URL="https://codereportglobal-backend.onrender.com"
+  export SY_TOKEN="sy_..."                                                  # from Studio -> API tokens
+  export SY_API_URL="https://sundarbanyatra.in"
   node blog.mjs whoami                                                      # ALWAYS run first
 
 If whoami fails, stop and report - never attempt to work around auth.
-CRG_DONE
+SY_DONE

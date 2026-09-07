@@ -5,22 +5,22 @@ import { serverTrpc } from "@web/lib/trpc-server";
 
 export const revalidate = 300;
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 type PostListItem = Awaited<ReturnType<typeof serverTrpc.blog.list.query>>["items"][number];
 
 export async function generateMetadata({ params }: { params: Promise<{ year: string }> }): Promise<Metadata> {
   const year = Number((await params).year);
   if (!Number.isInteger(year) || year < 2000 || year > 2100) return {};
-  const title = `Publication archive — ${year}`;
-  const description = `Published CodeReport Global stories from ${year}.`;
+  const title = `Guide archive — ${year}`;
+  const description = `Sundarban Yatra travel guides from ${year}.`;
   return {
     title,
     description,
     // Thin date listing: keep crawlable for users, out of the index.
     robots: { index: false, follow: true },
     alternates: { canonical: `/archive/${year}` },
-    openGraph: { type: "website", siteName: "CodeReport Global", locale: "en_US", url: `${siteUrl()}/archive/${year}`, title, description, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+    openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: `${siteUrl()}/archive/${year}`, title, description, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title, images: [`${siteUrl()}/og-default.png`] },
   };
 }
@@ -35,5 +35,5 @@ export default async function YearArchivePage({ params }: { params: Promise<{ ye
   } catch {
     notFound();
   }
-  return <ListingPage eyebrow="Publication archive" title={String(year)} description="Published CodeReport Global stories from this year." items={items} />;
+  return <ListingPage eyebrow="Guide archive" title={String(year)} description="Sundarban travel guides published this year." items={items} />;
 }

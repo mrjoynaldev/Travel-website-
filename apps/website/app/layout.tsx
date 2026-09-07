@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, DM_Mono } from "next/font/google";
 import { PublicShell, type PublicPageInfo, type PublicationInfo } from "@/components/public/PublicShell";
-import { AdsManager } from "../components/AdsManager";
 import { GaTag } from "../components/GaTag";
 import { Toaster } from "@/components/ui/sonner";
 import { serverTrpc } from "@web/lib/trpc-server";
@@ -21,13 +20,13 @@ const dmMono = DM_Mono({
   weight: ["400", "500"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  applicationName: "CodeReport Global",
-  title: { default: "CodeReport Global", template: "%s · CodeReport Global" },
-  description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
+  applicationName: "Sundarban Yatra",
+  title: { default: "Sundarban Yatra — Plan Your Sundarban Journey with Confidence", template: "%s · Sundarban Yatra" },
+  description: "Discover mangrove waterways, wildlife, villages and boat journeys with practical Sundarban travel guides and thoughtfully planned tours.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "48x48" },
@@ -38,15 +37,15 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "CodeReport Global",
+    siteName: "Sundarban Yatra",
     locale: "en_US",
     url: SITE_URL,
-    images: [{ url: `${SITE_URL}/og-default.png`, width: 1200, height: 630, alt: "CodeReport Global" }],
+    images: [{ url: `${SITE_URL}/og-default.png`, width: 1200, height: 630, alt: "Sundarban Yatra — Sundarban tours, destinations and travel guides" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CodeReport Global",
-    description: "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
+    title: "Sundarban Yatra",
+    description: "Discover mangrove waterways, wildlife, villages and boat journeys with practical Sundarban travel guides and thoughtfully planned tours.",
     images: [`${SITE_URL}/og-default.png`],
   },
   robots: {
@@ -59,7 +58,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = { themeColor: "#1b563f" };
+export const viewport: Viewport = { themeColor: "#0f4532" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   let publication: PublicationInfo | null = null;
@@ -87,18 +86,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 {
                   "@type": "Organization",
                   "@id": `${SITE_URL}/#organization`,
-                  name: publication?.name || "CodeReport Global",
+                  name: publication?.name || "Sundarban Yatra",
                   url: SITE_URL,
                   logo: `${SITE_URL}/logo.png`,
-                  description: publication?.description || "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
+                  description: publication?.description || "Your trusted guide to planning a Sundarban journey — tours, destinations, safari and practical travel guides.",
                 },
                 {
                   "@type": "WebSite",
                   "@id": `${SITE_URL}/#website`,
                   url: SITE_URL,
-                  name: publication?.name || "CodeReport Global",
-                  alternateName: ["Code Report Global", "CodeReport", "The Code Report"],
-                  description: publication?.description || "Developer-first AI news, analysis, and practical guides for people who build and ship software.",
+                  name: publication?.name || "Sundarban Yatra",
+                  alternateName: ["Sundarban Yatra", "Sundarban Tours", "Sundarban Travel Guide"],
+                  description: publication?.description || "Your trusted guide to planning a Sundarban journey — tours, destinations, safari and practical travel guides.",
                   publisher: { "@id": `${SITE_URL}/#organization` },
                   potentialAction: {
                     "@type": "SearchAction",
@@ -113,7 +112,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <GaTag />
-        <AdsManager />
         <PublicShell publication={publication} pages={pages}>{children}</PublicShell>
         <Toaster />
       </body>

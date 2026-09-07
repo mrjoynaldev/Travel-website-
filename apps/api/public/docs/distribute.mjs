@@ -1,19 +1,19 @@
 #!/usr/bin/env node
 /**
- * CodeReport Global — Distribution Kit generator (Phase 2 of the syndication engine).
+ * Sundarban Yatra — Distribution Kit generator (Phase 2 of the syndication engine).
  *
  * Generates ready-to-paste share kits for every published article so each piece
  * earns reach AND backlinks without duplicate-content risk. Canonical home is
- * ALWAYS codereportglobal.indevs.in (see POST-WRITING-SKILL.md §9).
+ * ALWAYS sundarbanyatra.in (see POST-WRITING-SKILL.md §9).
  *
- *   CRG_TOKEN=crg_... node distribute.mjs kit <slug>
- *   CRG_TOKEN=crg_... node distribute.mjs kit <slug> --out ~/somewhere
+ *   SY_TOKEN=sy_... node distribute.mjs kit <slug>
+ *   SY_TOKEN=sy_... node distribute.mjs kit <slug> --out ~/somewhere
  *
  * Env vars:
- *   CRG_TOKEN     Required. API access token (shown once at creation).
- *   CRG_API_URL   Optional. Defaults to https://codereportglobal-backend.onrender.com
- *   CRG_SITE_URL  Optional. Defaults to https://codereportglobal.indevs.in
- *   CRG_KITS_DIR  Optional. Defaults to ~/crg-cli/kits/<slug>/
+ *   SY_TOKEN     Required. API access token (shown once at creation).
+ *   SY_API_URL   Optional. Defaults to https://sundarbanyatra.in
+ *   SY_SITE_URL  Optional. Defaults to https://sundarbanyatra.in
+ *   SY_KITS_DIR  Optional. Defaults to ~/sy-cli/kits/<slug>/
  *
  * Channel tiers (POST-WRITING-SKILL.md §9):
  *   AUTO   dev.to · Bluesky · Mastodon · Hashnode-RSS   (posted by system, hard daily cap)
@@ -21,17 +21,17 @@
  *   MANUAL Hacker News · LinkedIn · X · Medium import · Quora · newsletter tips
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import superjson from "superjson";
 
-const API_URL = (process.env.CRG_API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.CRG_SITE_URL || "https://codereportglobal.indevs.in").replace(/\/+$/, "");
-const TOKEN = process.env.CRG_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
+const API_URL = (process.env.SY_API_URL || process.env.SY_API_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || process.env.SY_SITE_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
 
 if (!TOKEN) {
-  console.error("Missing access token. Set CRG_TOKEN or pass --token=crg_...");
+  console.error("Missing access token. Set SY_TOKEN or pass --token=sy_...");
   console.error("Create one in Studio → API tokens.");
   process.exit(1);
 }
@@ -130,6 +130,7 @@ function htmlToMarkdown(html) {
   work = work.replace(/<[^>]*>/g, " ");
   work = decodeEntities(work);
   work = work.replace(/@@CRGBLOCK(\d+)@@/g, (_, n) => `\n\n${codeBlocks[Number(n)] ?? ""}\n\n`);
+  work = work.replace(/^[ \t]*(?:[a-z+#-]+[ \t]+)?Copy[ \t]*$/gim, "");
   work = work.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
   return work;
 }
@@ -181,6 +182,8 @@ function buildKit(post) {
 
   const files = {};
 
+  // Teaser drives traffic to canonical — never dump full article on dev.to (see https://developers.forem.com/api/v0 + forem/forem#front-matter-beats-API).
+  const teaserPreview = truncateWords(textOf(markdown.replace(/[#*_`>\-\n]+/g, " ").replace(/\s+/g, " ").trim()), 320);
   files["devto.md"] = `---
 title: ${title}
 published: false
@@ -189,14 +192,36 @@ tags: ${tags.join(", ")}
 canonical_url: ${url}${cover ? `\ncover_image: ${cover}` : ""}
 ---
 
-${markdown}
+${summary}
+
+> Originally published at **Sundarban Yatra** — read the full guide with photos, costs and timings at **${url}**.
+
+## Why this matters
+
+${teaserPreview}…
+
+## What you'll get in the full article
+
+${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkthrough`}
+- Copy-paste commands + expected output + common errors
+- Verified on the exact versions mentioned — no fluff
+
+👉 **Read the full article:** ${url}
+
+*If this saved you time, a reaction on dev.to helps — discussion continues on the original post.*
 
 ---
-
-Originally published at [CodeReport Global](${url}). If you found this useful, reactions and comments here are appreciated — the discussion continues on the original post.
+*Canonical: ${url}*
 `;
 
   files["bluesky.txt"] = `${blueskyTitle}${blueskyTail}\n`;
+
+  // Facebook Page: link on its own line so Graph API creates link preview via og:image (1200×630)
+  files["facebook.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nRead the full guide: ${url}\n\n#AI #SoftwareDevelopment ${tags.slice(0, 2).map(t => `#${t}`).join(" ")}\n`;
+
+  // Instagram: caption not clickable — drive to link in bio + image via cover
+  const instaTags = tags.slice(0, 3).map(t => `#${t}`).join(" ");
+  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #sundarbanyatra\n`;
 
   files["reddit-comments.md"] = `# Reddit kit — ${title}
 URL: ${url}
@@ -267,13 +292,26 @@ Information gain (why their readers care): [FILL IN — the one thing no other o
   files["checklist.md"] = `# Distribution checklist — ${title}
 Article: ${url}
 Published: ${post.published_at ? new Date(post.published_at).toISOString().slice(0, 10) : "unknown"}
-Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
+Golden rule: sundarbanyatra.in is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
 
 ## AUTO channels (system posts within hard daily cap)
-- [ ] dev.to — review devto.md, flip published:true (or paste into DEV editor), confirm canonical_url renders
+- [ ] dev.to — review devto.md (teaser), flip published:true, confirm canonical_url renders
 - [ ] Bluesky — post bluesky.txt verbatim
 - [ ] Mastodon — reuse bluesky.txt content (drop hashtags beyond 2 if noisy)
+- [ ] Facebook Page — post facebook.txt (auto via Graph API, link preview via og:image)
+- [ ] Instagram — post instagram.txt + cover 1080×1350 (auto via Graph API, caption link in bio)
 - [ ] Hashnode — RSS import picks it up automatically once feed connected; verify canonical shows
+
+## Verified channel rules (official docs, 2026-08-22)
+| Channel | Format | Link rule | Media |
+|---|---|---|---|
+| dev.to | teaser markdown + front matter | canonical_url = our URL; ≤4 lowercase tags | cover_image REQUIRED (1000×420 render) |
+| Bluesky | plain text ≤300 graphemes incl. URL+hashtags | API injects facets automatically | link-preview card auto-built from og:image |
+| Mastodon | plain text ≤500 chars | URLs always count as 23 chars — never shorten | optional: 1 image via Studio media library first |
+| Facebook Page | message + link param | link on own line → og:image preview | link preview auto via og:image |
+| Instagram | caption + 1080×1350 image | link in bio (captions not clickable) | image REQUIRED 1080×1350 |
+| HN | title + first comment with bare URL | links must be https:// | no media |
+| LinkedIn/X | short prose + bare URL on its own line | native auto-linking | optional image boosts CTR |
 
 ## QUEUE channel
 - [ ] Reddit — pick ONE fresh thread (<24h) matching drafts in reddit-comments.md; approve in Studio queue (cap 3/day)
@@ -300,12 +338,7 @@ Golden rule: codereportglobal.indevs.in is canonical. Wait 7–10 days after pub
 }
 
 async function resolvePost(slug) {
-  let pool = [];
-  try {
-    pool = await client.studio.posts.list.query({ status: "published", search: slug });
-  } catch {
-    pool = await client.studio.posts.list.query({ status: "published" });
-  }
+  const pool = await client.studio.posts.list.query({ status: "published" });
   if (!Array.isArray(pool)) throw new Error("Unexpected response from posts.list.");
   const exact = pool.find(post => post.slug === slug);
   const loose = exact || pool.find(post => post.slug.includes(slug));
@@ -315,16 +348,64 @@ async function resolvePost(slug) {
     for (const post of pool) console.error(`   - ${post.slug}`);
     process.exit(1);
   }
-  return loose;
+  const full = await client.studio.posts.get.query({ id: loose.id });
+  return {
+    ...loose,
+    ...full,
+    tags: loose.tags ?? [],
+    featuredMedia: loose.featuredMedia ?? null,
+  };
 }
 
 function requireSlug(args) {
   const slug = args[0];
   if (!slug) {
-    console.error("Usage: node distribute.mjs kit <slug> [--out <dir>]");
+    console.error("Usage: node distribute.mjs <kit|push> <slug> [--out <dir>]");
     process.exit(1);
   }
   return slug;
+}
+
+function kitDirFor(args, slug) {
+  const outFlagIndex = args.indexOf("--out");
+  if (outFlagIndex >= 0 && args[outFlagIndex + 1]) return resolve(args[outFlagIndex + 1]);
+  if (process.env.SY_KITS_DIR || process.env.SY_KITS_DIR) return resolve(process.env.SY_KITS_DIR || process.env.SY_KITS_DIR, slug);
+  return join(homedir(), "sy-cli", "kits", slug);
+}
+
+async function pushKit(slug) {
+  const dir = kitDirFor(process.argv.slice(2), slug);
+  let devtoMd;
+  let blueskyTxt;
+  try {
+    devtoMd = readFileSync(join(dir, "devto.md"), "utf8");
+    blueskyTxt = readFileSync(join(dir, "bluesky.txt"), "utf8").trim();
+  } catch {
+    console.error(`✗ Kit not found in ${dir}. Run \`node distribute.mjs kit ${slug}\` first.`);
+    process.exit(1);
+  }
+  let facebookTxt = "";
+  let instagramTxt = "";
+  try { facebookTxt = readFileSync(join(dir, "facebook.txt"), "utf8").trim(); } catch {}
+  try { instagramTxt = readFileSync(join(dir, "instagram.txt"), "utf8").trim(); } catch {}
+  // Instagram needs cover image URL at 1080x1350 — parse from devto front matter
+  const coverMatch = devtoMd.match(/cover_image:\s*(.+)/);
+  const rawCover = coverMatch ? coverMatch[1].trim() : "";
+  const instaImageFinal = rawCover
+    ? rawCover.split("?")[0].replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + "?width=1080&height=1350&resize=cover&quality=75"
+    : "";
+  console.error("-> Enqueuing devto + bluesky + mastodon + facebook + instagram into the Studio distribution queue...");
+  const items = [
+    { channel: "devto", payload: { bodyMarkdown: devtoMd } },
+    { channel: "bluesky", payload: { text: blueskyTxt } },
+    { channel: "mastodon", payload: { text: blueskyTxt } },
+    ...(facebookTxt ? [{ channel: "facebook", payload: { text: facebookTxt } }] : []),
+    ...(instagramTxt ? [{ channel: "instagram", payload: { caption: instagramTxt, imageUrl: instaImageFinal || cover } }] : []),
+  ];
+  const rows = await client.distribution.enqueue.mutate({ slug, items });
+  console.error(`   queued ${rows.length} item(s):`);
+  for (const row of rows) console.error(`   - [${row.status}] ${row.channel}`);
+  console.log("\nQueued. Approve them in Studio → Distribution (auto post — no daily limit).");
 }
 
 async function main() {
@@ -332,31 +413,36 @@ async function main() {
   const command = args[0];
 
   if (!command || command === "help" || command === "--help") {
-    console.log(`Usage: node distribute.mjs kit <slug> [--out <dir>]
+    console.log(`Usage: node distribute.mjs <command> <slug> [--out <dir>]
 
-Generates a distribution kit (dev.to draft, Bluesky post, Reddit comment drafts,
-LinkedIn post, HN submission files, Medium import URL, newsletter pitch,
-placement checklist) for one published article.
+  kit <slug>    Generate a distribution kit (dev.to draft, Bluesky post, Reddit
+                comment drafts, LinkedIn post, HN submission files, Medium import
+                URL, newsletter pitch, placement checklist) for one published article.
+  push <slug>   Enqueue devto + bluesky + mastodon payloads from an existing kit
+                into the Studio distribution queue (approve-then-post, cap 3/day).
 
-Env: CRG_TOKEN (required), CRG_API_URL, CRG_SITE_URL, CRG_KITS_DIR.`);
+Env: SY_TOKEN (required), SY_API_URL, SY_SITE_URL, SY_KITS_DIR.`);
     return;
   }
 
-  if (command !== "kit") {
-    console.error(`Unknown command "${command}". Try: kit <slug>`);
+  if (command !== "kit" && command !== "push") {
+    console.error(`Unknown command "${command}". Try: kit <slug> | push <slug>`);
     process.exit(1);
   }
 
   const slug = requireSlug(args.slice(1));
-  const outFlagIndex = args.indexOf("--out");
-  const outDir = outFlagIndex >= 0 && args[outFlagIndex + 1]
-    ? resolve(args[outFlagIndex + 1])
-    : process.env.CRG_KITS_DIR
-      ? resolve(process.env.CRG_KITS_DIR, slug)
-      : join(homedir(), "crg-cli", "kits", slug);
+  const outDir = kitDirFor(args, slug);
 
   console.error(`-> Fetching published post "${slug}"...`);
   const post = await resolvePost(slug);
+  console.error(`-> Found: ${post.title}`);
+
+  if (command === "push") {
+    await pushKit(slug);
+    return;
+  }
+
+  console.error(`-> Generating kit in ${outDir} ...`);
   console.error(`-> Found: ${post.title}`);
   console.error(`-> Generating kit in ${outDir} ...`);
 
