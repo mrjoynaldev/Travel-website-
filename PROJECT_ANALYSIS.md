@@ -1,8 +1,8 @@
-# Sundarban Yatra - Complete Project Analysis
+# Sundarban Yatri - Complete Project Analysis
 
 ## Project Overview
 
-**Sundarban Yatra** is a specialized travel discovery, destination guide, and tour lead-generation platform focused exclusively on the Sundarbans (mangrove forests in Bangladesh/India). The platform combines a travel publication with practical tour planning and enquiry/lead-generation capabilities.
+**Sundarban Yatri** is a specialized travel discovery, destination guide, and tour lead-generation platform focused exclusively on the Sundarbans (mangrove forests in Bangladesh/India). The platform combines a travel publication with practical tour planning and enquiry/lead-generation capabilities.
 
 ---
 
@@ -33,7 +33,7 @@
 ## Application Breakdown
 
 ### 1. Website App (`apps/website`)
-**Purpose:** Public-facing frontend for Sundarban Yatra
+**Purpose:** Public-facing frontend for Sundarban Yatri
 
 **Key Technologies:**
 - Next.js 15 (App Router)
@@ -132,7 +132,7 @@
 ---
 
 ### 3. Admin App (`apps/admin`)
-**Purpose:** Content management system (CMS) for Sundarban Yatra
+**Purpose:** Content management system (CMS) for Sundarban Yatri
 
 **Key Technologies:**
 - Next.js 15
@@ -157,7 +157,7 @@
 
 ## Design System
 
-### Brand Colors (Sundarban Yatra)
+### Brand Colors (Sundarban Yatri)
 
 ```css
 :root {

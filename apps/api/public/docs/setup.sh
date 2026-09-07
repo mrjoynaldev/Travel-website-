@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sundarban Yatra - one-command CLI bootstrap for external AI agents.
+# Sundarban Yatri - one-command CLI bootstrap for external AI agents.
 # Usage:  mkdir -p ~/sy-cli && cd ~/sy-cli && curl -fsSL https://sundarbanyatra.in/docs/setup.sh -o setup.sh && bash setup.sh
 set -e
 
@@ -17,7 +17,7 @@ npm install --silent @trpc/client@^11.6.0 superjson >/dev/null
 
 cat <<'SY_DONE'
 
-Sundarban Yatra CLI ready in'" $DIR"'
+Sundarban Yatri CLI ready in'" $DIR"'
 
 Next steps (as documented in https://sundarbanyatra.in/docs/AI-EDITOR-AGENT.md):
 

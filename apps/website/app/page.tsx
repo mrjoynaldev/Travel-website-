@@ -7,10 +7,10 @@ export const revalidate = 300;
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
 
 export const metadata: Metadata = {
-  title: "Sundarban Yatra — Sundarban Tours, Safari, Destinations & Travel Guides",
+  title: "Sundarban Yatri — Sundarban Tours, Safari, Destinations & Travel Guides",
   description: "Plan your Sundarban journey with confidence — mangrove tours, safari, destinations, things to do and practical travel guides.",
   alternates: { canonical: "/" },
-  openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: siteUrl(), images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+  openGraph: { type: "website", siteName: "Sundarban Yatri", locale: "en_US", url: siteUrl(), images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
   twitter: { card: "summary_large_image", images: [`${siteUrl()}/og-default.png`] },
 };
 

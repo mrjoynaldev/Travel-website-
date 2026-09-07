@@ -25,7 +25,7 @@
     --ring: 224 71.4% 4.1%;
     --radius: 0.5rem;
     
-    /* Sundarban Yatra color tokens from design document */
+    /* Sundarban Yatri color tokens from design document */
     --color-bg: #F7F6F1;
     --color-surface: #FFFFFF;
     --color-surface-soft: #EFF4EE;
@@ -74,23 +74,23 @@
 }
 
 @layer utilities {
-  .yatra-card {
+  .yatri-card {
     @apply bg-white border border-border rounded-[20px] overflow-hidden shadow-sm;
   }
   
-  .yatra-chip {
+  .yatri-chip {
     @apply text-[11px] font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full;
   }
   
-  .yatra-chip-accent {
+  .yatri-chip-accent {
     @apply bg-[#f5e7cc] text-[#d59b43];
   }
   
-  .yatra-hero-veil {
+  .yatri-hero-veil {
     @apply bg-gradient-to-b from-black/30 via-transparent to-black/10;
   }
   
-  .yatra-section {
+  .yatri-section {
     @apply px-4 sm:px-6 lg:px-8 py-10 sm:py-12 lg:py-16;
   }
   

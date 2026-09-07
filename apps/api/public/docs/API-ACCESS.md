@@ -1,4 +1,4 @@
-# Sundarban Yatra — API Access & CLI
+# Sundarban Yatri — API Access & CLI
 
 Programmatic access to manage your publication from the command line (or any
 script/CI job) using **scoped, revocable access tokens**.
@@ -49,7 +49,7 @@ node cli/blog.mjs whoami
 ```json
 {
   "actor": { "role": "admin", "organizationId": "…", "siteId": "…" },
-  "site":  { "name": "Sundarban Yatra", "slug": "…" }
+  "site":  { "name": "Sundarban Yatri", "slug": "…" }
 }
 ```
 

@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         type: "article",
         url: canonical,
-        siteName: "Sundarban Yatra",
+        siteName: "Sundarban Yatri",
         locale: "en_US",
         images: [{ url: image }],
         publishedTime: post.published_at || undefined,

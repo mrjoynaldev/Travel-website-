@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sundarban Yatra — Distribution Kit generator (Phase 2 of the syndication engine).
+ * Sundarban Yatri — Distribution Kit generator (Phase 2 of the syndication engine).
  *
  * Generates ready-to-paste share kits for every published article so each piece
  * earns reach AND backlinks without duplicate-content risk. Canonical home is
@@ -194,7 +194,7 @@ canonical_url: ${url}${cover ? `\ncover_image: ${cover}` : ""}
 
 ${summary}
 
-> Originally published at **Sundarban Yatra** — read the full guide with photos, costs and timings at **${url}**.
+> Originally published at **Sundarban Yatri** — read the full guide with photos, costs and timings at **${url}**.
 
 ## Why this matters
 
@@ -221,7 +221,7 @@ ${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkth
 
   // Instagram: caption not clickable — drive to link in bio + image via cover
   const instaTags = tags.slice(0, 3).map(t => `#${t}`).join(" ");
-  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #sundarbanyatra\n`;
+  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #sundarbanyatri\n`;
 
   files["reddit-comments.md"] = `# Reddit kit — ${title}
 URL: ${url}

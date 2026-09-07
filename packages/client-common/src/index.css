@@ -41,7 +41,7 @@
 }
 
 :root {
-  /* Sundarban Yatra — nature-inspired premium editorial system */
+  /* Sundarban Yatri — nature-inspired premium editorial system */
   --background: #f7f6f1;
   --foreground: #17211b;
   --card: #ffffff;
@@ -92,7 +92,7 @@
   .flex { min-width: 0; min-height: 0; }
   .font-display { font-family: var(--font-inter), "Inter", "DM Sans", ui-sans-serif, system-ui, Arial, sans-serif; letter-spacing: -0.02em; }
   .font-label { font-family: var(--font-inter), "Inter", "DM Sans", ui-sans-serif, system-ui, sans-serif; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
-  /* Sundarban Yatra type scale */
+  /* Sundarban Yatri type scale */
   .hero-title { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 0.98; letter-spacing: -0.04em; font-weight: 700; }
   .h1 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.05; letter-spacing: -0.03em; font-weight: 700; }
   .h2 { font-size: clamp(1.75rem, 3vw, 2.6rem); line-height: 1.1; letter-spacing: -0.025em; font-weight: 700; }
@@ -102,12 +102,12 @@
   .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
   /* Travel surfaces */
-  .yatra-card { background: #fff; border: 1px solid #e5e8e4; border-radius: 20px; box-shadow: 0 1px 2px rgba(23,33,27,.04), 0 12px 32px -20px rgba(15,69,50,.18); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
-  .yatra-card:hover { transform: translateY(-4px); box-shadow: 0 2px 4px rgba(23,33,27,.05), 0 24px 48px -20px rgba(15,69,50,.28); border-color: #cbd8c5; }
-  .yatra-chip { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; background: #ddebe3; color: #0f4532; font-size: .75rem; font-weight: 600; letter-spacing: .04em; padding: .35rem .8rem; }
-  .yatra-chip-accent { background: #f5e7cc; color: #7a5410; }
-  .yatra-hero-veil { background: linear-gradient(180deg, rgba(10,25,19,.18) 0%, rgba(10,25,19,.28) 38%, rgba(10,25,19,.72) 100%); }
-  .yatra-section { padding-block: clamp(3.5rem, 7vw, 6rem); }
+  .yatri-card { background: #fff; border: 1px solid #e5e8e4; border-radius: 20px; box-shadow: 0 1px 2px rgba(23,33,27,.04), 0 12px 32px -20px rgba(15,69,50,.18); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .yatri-card:hover { transform: translateY(-4px); box-shadow: 0 2px 4px rgba(23,33,27,.05), 0 24px 48px -20px rgba(15,69,50,.28); border-color: #cbd8c5; }
+  .yatri-chip { display: inline-flex; align-items: center; gap: .4rem; border-radius: 999px; background: #ddebe3; color: #0f4532; font-size: .75rem; font-weight: 600; letter-spacing: .04em; padding: .35rem .8rem; }
+  .yatri-chip-accent { background: #f5e7cc; color: #7a5410; }
+  .yatri-hero-veil { background: linear-gradient(180deg, rgba(10,25,19,.18) 0%, rgba(10,25,19,.28) 38%, rgba(10,25,19,.72) 100%); }
+  .yatri-section { padding-block: clamp(3.5rem, 7vw, 6rem); }
   .paper-grid { background-image: linear-gradient(rgba(24,92,67,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(24,92,67,.05) 1px, transparent 1px); background-size: 28px 28px; }
   .article-prose { font-family: var(--font-inter), "Inter", "DM Sans", ui-sans-serif, system-ui, Arial, sans-serif; font-size: 1.06rem; line-height: 1.78; color: #26322c; overflow-wrap: break-word; }
   .article-prose h2, .article-prose h3 { margin-top: 2.2em; margin-bottom: .55em; font-family: var(--font-inter), "Inter", "DM Sans", ui-sans-serif, system-ui, Arial, sans-serif; font-weight: 700; line-height: 1.2; color: #17211b; }

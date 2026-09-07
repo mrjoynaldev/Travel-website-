@@ -106,7 +106,7 @@ export function ArticleCard({
         )}
 
         <div className="mt-5 lg:mt-6 flex items-center justify-between gap-3 text-xs lg:text-[13px] text-muted-foreground">
-          <span>{post.author?.display_name || "Sundarban Yatra editorial"}</span>
+          <span>{post.author?.display_name || "Sundarban Yatri editorial"}</span>
           <span className="flex items-center gap-1.5">
             <Clock3 className="h-3.5 w-3.5 lg:h-4 lg:w-4" />
             {readTime(post.excerpt)} min read

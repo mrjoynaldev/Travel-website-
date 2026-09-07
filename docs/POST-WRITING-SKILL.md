@@ -1,4 +1,4 @@
-# SKILL: Travel Guide Writing for Sundarban Yatra
+# SKILL: Travel Guide Writing for Sundarban Yatri
 
 > **GOAL — comprehensive system:** Every guide is a **lead path to a trip** (call / WhatsApp first, `/hire` plan-trip form secondary for international travellers), not an ad play. You serve the **user website** (public guides + hire CTA), via **Admin Studio** control, as the **AI agent** with full `SY_TOKEN` systematic control. See `docs/ROADMAP.md` and `docs/AI-EDITOR-AGENT.md: TARGET GOAL`.
 
@@ -166,7 +166,7 @@ cannibalize each other instead of ranking.
 6. **Anchor mix (natural = safe):** across a post aim roughly 30% partial
    match (`sundarban 2 day tour cost`), 20% exact keyword, 30% natural
 phrases (`the sunrise cruise we took`), 20% branded/generic (`Sundarban
-Yatra guide`). Same anchor to the same URL twice = rewrite one.
+Yatri guide`). Same anchor to the same URL twice = rewrite one.
 7. **No bare URLs, ever:** a pasted text URL is not a link — crawlers pass no
    context through it and readers can't tap it. Every URL ships as a real
    `<a>` (gravity `runs` link), never as visible URL text.
@@ -334,7 +334,7 @@ Generate 3–5 related guide ideas in the same topic plus the tours/destinations
     `Sundarban Itinerary — 1, 2 & 3 Day Plans` ·
     `Sundarban Safari Guide — Permits, Towers & Honest Odds` ·
     `How I Planned a 2-Day Sundarban Trip Under ₹X`.
-  - The SERP title is `meta_title` (+ ` · Sundarban Yatra` template) — set
+  - The SERP title is `meta_title` (+ ` · Sundarban Yatri` template) — set
     `meta_title` to the CTR title on every post; never repeat the brand inside
     it (the template adds it once).
 - **Slug**: 2–5 words, lowercase-hyphenated, keyword-rich, no filler.
@@ -366,7 +366,7 @@ Generate 3–5 related guide ideas in the same topic plus the tours/destinations
 
 Our narrator is a **Sundarban travel editor who has actually done these trips** — writing for a fellow traveller planning theirs. This is not generic travel prose; it is field voice. Generic-AI voice is a defect treated like a broken fact.
 
-- **Field identity:** `I/we` = the Sundarban Yatra editors, writing from real trips. Use first person for what was actually experienced (routes taken, timings kept, what surprised you), never present as a generic AI. Never invent a sighting, a price, or a personal anecdote.
+- **Field identity:** `I/we` = the Sundarban Yatri editors, writing from real trips. Use first person for what was actually experienced (routes taken, timings kept, what surprised you), never present as a generic AI. Never invent a sighting, a price, or a personal anecdote.
 - **Field notes over manual (simple):** Never write generic `One can visit X` — write from the trip. `Here is how you reach X` → `We left Godkhali at 8:10 and reached Sajnekhali by 9:30 — here is the full day:` Open with the concrete reality (timing, route, cost), not the topic. Every guide reads like a sharp field log: simple, one idea per sentence. Use `you` for the reader's next step — the CTA to call/WhatsApp.
 - **First person is earned**: which route you took and why, what surprised you on the water, what you would skip next time. We genuinely verify timings and costs before publishing (§7), so write from real checks — specifics (jetty names, departure times, what lunch actually was) are what make it human. Never invent fake experience details; ground every "I/we" claim in real verification.
 - **Opinions welcome when defensible**: "We don't recommend the monsoon day-trip
@@ -433,7 +433,7 @@ image fails QA; a photo of the actual jetty, boat or watchtower passes.
 
 ## 5e. Anti-hallucination contract (AI can’t hallucinate — enforced)
 
-You are the **Sundarban Yatra AI editor, not a generic LLM**. Hallucination is a **publish-blocking defect** (worse than a typo). Every sentence must pass:
+You are the **Sundarban Yatri AI editor, not a generic LLM**. Hallucination is a **publish-blocking defect** (worse than a typo). Every sentence must pass:
 
 - **Verified only:** Only write what you **checked, read, or measured**. Routes, timings, prices, inclusions, permit rules, dates — all from §7 verification. If you didn’t confirm the Godkhali departure time, don’t write `8:10`. If you didn’t check the operator quote, don’t quote a price. **No invented sightings, prices, timings, reviews, stats, or quotes.**
 - **Cite every non-obvious claim:** Link the primary source (official notice, operator page, timetable, forum thread with real experience) right after the sentence. No citation = no claim. Use `Blockquote` with link for verbatim quotes; never fabricate a quote or a review.
@@ -448,7 +448,7 @@ You are the **Sundarban Yatra AI editor, not a generic LLM**. Hallucination is a
 
 | Field | Rule |
 |---|---|
-| `--meta-title` | ALWAYS set: the CTR title (`[Topic] + [Outcome] + [Context]`, keyword first, ≤60 chars, no brand — the template appends `· Sundarban Yatra` once) |
+| `--meta-title` | ALWAYS set: the CTR title (`[Topic] + [Outcome] + [Context]`, keyword first, ≤60 chars, no brand — the template appends `· Sundarban Yatri` once) |
 | `--meta-description` | 120–160 chars, unique to this page: name the place/question in the FIRST words, then the answer + keyword + hook (Google rewrites titles/descriptions that are stuffed or boilerplate) |
 | `--excerpt` | 1–2 honest sentences (cards + meta fallback) |
 | `--category` | Exactly one primary hub (max two) |
@@ -456,7 +456,7 @@ You are the **Sundarban Yatra AI editor, not a generic LLM**. Hallucination is a
 | `--thumbnail` + `--og-image` | Always set; ≥1200px wide preferred (~16:9) for Google Discover; alt text mandatory on every image |
 
 Title rules (Google title-link doc): unique per page, descriptive, no keyword
-stuffing, brand appears once via the site template (`%s · Sundarban Yatra`) —
+stuffing, brand appears once via the site template (`%s · Sundarban Yatri`) —
 never repeat the brand inside the article title itself.
 
 Internal linking (best-effort-to-value tactic in SEO): ≥3 per post — the topic
@@ -643,7 +643,7 @@ AI rule: use 1 strong image (cover) everywhere it helps CTR; add 2nd image or 15
 - **Bluesky:** `https://docs.bsky.app/docs/advanced-guides/posts` — ≤300 graphemes incl. URL+hashtags; facets + link-preview card (`og:image` Supabase 1200×630) injected automatically. Hashtags `[a-z0-9_]` only. `langs:["en"]`.
 - **Mastodon:** `https://docs.joinmastodon.org/methods/statuses/` — plain text auto-links, URLs =23 chars in 500 budget — never shorten. Hashtags letters/digits/_ not digits-only. `visibility:public, language:en` via API.
 - **Facebook Page:** `https://developers.facebook.com/docs/graph-api/reference/page/feed` `v26.0` — `POST /{PAGE_ID}/feed {message, link}` with System User `61593649201642` Page token (never expires, `pages_manage_posts` + `pages_read_engagement`). Link must be `https://` on own line for preview. Page `1194345043773378`.
-- **Instagram:** `https://developers.facebook.com/docs/instagram-api/content-publishing` — Business `17841430858092702 Sundarban Yatra` linked to Page. `POST /{IG_ID}/media {image_url: 1080×1350, caption: link in bio}` → `media_publish`. Captions not clickable — always `Link in bio: {url}`.
+- **Instagram:** `https://developers.facebook.com/docs/instagram-api/content-publishing` — Business `17841430858092702 Sundarban Yatri` linked to Page. `POST /{IG_ID}/media {image_url: 1080×1350, caption: link in bio}` → `media_publish`. Captions not clickable — always `Link in bio: {url}`.
 
 Channel tiers:
 - **AUTO system (queue approve, auto post — no limit `MAX_DAILY_POSTS` `distributionRouter.ts:9` 00:00 UTC):** dev.to (teaser + canonical), Bluesky (facets+card), Mastodon (auto-link), Facebook Page (link preview), Instagram (image+caption)

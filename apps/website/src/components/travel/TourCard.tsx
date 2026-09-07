@@ -4,7 +4,7 @@ import type { Tour } from "@web/lib/travel-data";
 
 export function TourCard({ tour }: { tour: Tour }) {
   return (
-    <article className="yatra-card group overflow-hidden flex flex-col">
+    <article className="yatri-card group overflow-hidden flex flex-col">
       <Link href={`/tours/${tour.slug}`} aria-label={`View ${tour.title}`} className="block">
         <div className="relative aspect-[3/2] overflow-hidden">
           <img
@@ -14,7 +14,7 @@ export function TourCard({ tour }: { tour: Tour }) {
             className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-80" />
-          <span className="absolute left-4 top-4 yatra-chip bg-white/95 text-foreground shadow-sm">
+          <span className="absolute left-4 top-4 yatri-chip bg-white/95 text-foreground shadow-sm">
             {tour.featured ? "Most popular" : tour.group}
           </span>
           <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-sm">

@@ -20,8 +20,8 @@ export function TourDetail({ slug }: { slug: string }) {
         <div className="container py-10 md:py-14">
           <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Tours", href: "/tours" }, { label: tour.title }]} />
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="yatra-chip">{tour.featured ? "Most popular" : tour.group}</span>
-            <span className="yatra-chip yatra-chip-accent">{tour.duration}</span>
+            <span className="yatri-chip">{tour.featured ? "Most popular" : tour.group}</span>
+            <span className="yatri-chip yatri-chip-accent">{tour.duration}</span>
           </div>
           <h1 className="mt-4 h1 font-display max-w-3xl">{tour.title}</h1>
           <p className="mt-3 max-w-2xl body-lg text-muted-foreground">{tour.summary}</p>
@@ -146,7 +146,7 @@ export function TourDetail({ slug }: { slug: string }) {
 
       {/* Related tours */}
       <section className="border-t border-border bg-white">
-        <div className="container yatra-section">
+        <div className="container yatri-section">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-label text-[11px] text-primary">Keep looking</p>

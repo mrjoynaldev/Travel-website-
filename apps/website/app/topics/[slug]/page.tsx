@@ -47,7 +47,7 @@ const HUB_FAQS: Record<string, Array<{ q: string; a: string }>> = {
 };
 
 const GENERIC_FAQS = [
-  { q: "What will I find in this hub?", a: "Every published Sundarban Yatra guide on this topic — practical, honest answers written from real trip experience." },
+  { q: "What will I find in this hub?", a: "Every published Sundarban Yatri guide on this topic — practical, honest answers written from real trip experience." },
   { q: "How often is this hub updated?", a: "Every new guide in this topic appears here automatically, newest first." },
 ];
 
@@ -60,9 +60,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = category.name;
     return {
       title,
-      description: category.description || `Sundarban travel guides from Sundarban Yatra on ${category.name}.`,
+      description: category.description || `Sundarban travel guides from Sundarban Yatri on ${category.name}.`,
       alternates: { canonical: `/topics/${category.slug}` },
-      openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: `${siteUrl()}/topics/${category.slug}`, title, description: category.description || undefined, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+      openGraph: { type: "website", siteName: "Sundarban Yatri", locale: "en_US", url: `${siteUrl()}/topics/${category.slug}`, title, description: category.description || undefined, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
       twitter: { card: "summary_large_image", images: [`${siteUrl()}/og-default.png`], title },
     };
   } catch {

@@ -9,9 +9,8 @@ import { LeadForm } from "@web/components/conversion/LeadForm";
 import { Faq } from "@web/components/conversion/Faq";
 import { SectionHeader } from "@web/components/travel/SectionHeader";
 import { TourCard } from "@web/components/travel/TourCard";
-import { DestinationCard, ActivityCard } from "@web/components/travel/Cards";
 import { buildWhatsAppUrl, businessConfig, defaultWhatsAppMessage } from "@web/lib/business";
-import { TOURS, DESTINATIONS, ACTIVITIES, FAQS, PLANNING_GUIDES, HERO_IMAGE, SAFARI_IMAGE } from "@web/lib/travel-data";
+import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE } from "@web/lib/travel-data";
 import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Compass, HeartHandshake, Loader2, Mail, MapPin, MessageCircle, Phone, Route, Ship } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -109,7 +108,7 @@ export default function HomeView({ categories, sections, posts, search, category
       {/* HERO */}
       <section className="relative overflow-hidden bg-[#0a1913] text-white">
         <img src={HERO_IMAGE} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 yatra-hero-veil" />
+        <div className="absolute inset-0 yatri-hero-veil" />
         <div className="relative container pb-24 pt-16 md:pb-32 md:pt-24 lg:pb-36 lg:pt-28">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm border border-white/20">
             Sundarban Travel • Tours • Guides
@@ -138,12 +137,12 @@ export default function HomeView({ categories, sections, posts, search, category
       </section>
 
       {/* POPULAR TOURS */}
-      <section id="tours" className="container yatra-section scroll-mt-24">
+      <section id="tours" className="container yatri-section scroll-mt-24">
         <SectionHeader
           eyebrow="Popular tours"
           title="Sundarban Tours Made for Your Trip"
           desc="Choose a ready-made itinerary or tell us what kind of Sundarban experience you are looking for."
-          action={<a href="/hire" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all">Compare all tours <ArrowRight className="h-4 w-4" /></a>}
+          action={<a href="/tours" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all">Compare all tours <ArrowRight className="h-4 w-4" /></a>}
         />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
           {TOURS.map((t) => (
@@ -155,8 +154,8 @@ export default function HomeView({ categories, sections, posts, search, category
 
       {/* WHY CHOOSE US */}
       <section className="border-y border-border bg-white">
-        <div className="container yatra-section">
-          <SectionHeader eyebrow="Why choose us" title="Why Travellers Choose Sundarban Yatra" align="center" />
+        <div className="container yatri-section">
+          <SectionHeader eyebrow="Why choose us" title="Why Travellers Choose Sundarban Yatri" align="center" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
             {TRUST.map((f) => (
               <div key={f.title} className="rounded-[20px] border border-border bg-background p-6 lg:p-7">
@@ -169,42 +168,12 @@ export default function HomeView({ categories, sections, posts, search, category
         </div>
       </section>
 
-      {/* DESTINATIONS */}
-      <section id="destinations" className="container yatra-section scroll-mt-24">
-        <SectionHeader
-          eyebrow="Destinations"
-          title="Explore the Sundarbans"
-          desc="Six places that shape most journeys — from gateway jetties to quiet forest villages."
-        />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          {DESTINATIONS.map((d) => (
-            <DestinationCard key={d.slug} d={d} />
-          ))}
-        </div>
-      </section>
-
-      {/* THINGS TO DO */}
-      <section id="things-to-do" className="border-y border-border bg-[#eff4ee] scroll-mt-24">
-        <div className="container yatra-section">
-          <SectionHeader
-            eyebrow="Experiences"
-            title="Things To Do in the Sundarbans"
-            desc="Beyond the tiger trail — slow boats, birds, villages and river light. Wildlife sightings depend on natural conditions, season and luck."
-          />
-          <div className="grid gap-3 md:grid-cols-2 lg:gap-4">
-            {ACTIVITIES.map((a) => (
-              <ActivityCard key={a.slug} a={a} />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* SAFARI FEATURE */}
-      <section id="safari" className="container yatra-section scroll-mt-24">
+      <section id="safari" className="container yatri-section scroll-mt-24">
         <div className="grid overflow-hidden rounded-[28px] border border-border bg-white lg:grid-cols-2">
           <div className="relative min-h-[320px] lg:min-h-[480px]">
             <img src={SAFARI_IMAGE} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-            <span className="absolute left-5 top-5 yatra-chip bg-white/95">Safari • Licensed boats</span>
+            <span className="absolute left-5 top-5 yatri-chip bg-white/95">Safari • Licensed boats</span>
           </div>
           <div className="p-7 md:p-10 lg:p-12 flex flex-col justify-center">
             <p className="font-label text-[11px] text-primary">Sundarban Safari</p>
@@ -219,34 +188,23 @@ export default function HomeView({ categories, sections, posts, search, category
             </ul>
             <div className="mt-7 flex flex-wrap gap-3">
               <a href="/hire?interest=safari" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-semibold text-white hover:bg-[#0f4532] transition-colors">Explore Safari Tours</a>
-              <a href="#guides" className="inline-flex h-12 items-center rounded-full border border-border bg-white px-7 text-[15px] font-semibold hover:border-primary/40 hover:text-primary transition-colors">Read Safari Guide</a>
+              <a href="/archive" className="inline-flex h-12 items-center rounded-full border border-border bg-white px-7 text-[15px] font-semibold hover:border-primary/40 hover:text-primary transition-colors">Read Travel Guides</a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* TRAVEL GUIDES — static planning cornerstones */}
+      {/* TRAVEL GUIDES — live editorial feed */}
       <section id="guides" className="border-y border-border bg-white scroll-mt-24">
-        <div className="container yatra-section">
+        <div className="container yatri-section">
           <SectionHeader
             eyebrow="Travel guides"
             title="Plan Your Sundarban Trip Better"
-            desc="Practical, honest answers — routes, costs, seasons and itineraries. Start with a cornerstone guide."
+            desc="Practical answers from our editors — routes, costs, seasons and trip notes."
             action={<a href="/archive" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary">All guides <ArrowUpRight className="h-4 w-4" /></a>}
           />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-            {PLANNING_GUIDES.map((g) => (
-              <a key={g.title} href="/archive" className="yatra-card group block p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-primary">Guide • {g.read} read</p>
-                <h3 className="mt-2.5 font-display text-[1.2rem] font-semibold tracking-tight group-hover:text-primary transition-colors">{g.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{g.desc}</p>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary">Read Guide <ArrowRight className="h-4 w-4" /></span>
-              </a>
-            ))}
-          </div>
-
           {/* Live editorial feed (existing CMS posts become guides) */}
-          <div className="mt-12">
+          <div>
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-label text-[11px] text-primary">From the travel guide</p>
@@ -306,7 +264,7 @@ export default function HomeView({ categories, sections, posts, search, category
       </section>
 
       {/* FAQ — honest substitute for fabricated reviews */}
-      <section id="faq" className="container yatra-section scroll-mt-24">
+      <section id="faq" className="container yatri-section scroll-mt-24">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
           <div>
             <p className="font-label text-[11px] text-primary">Good to know</p>

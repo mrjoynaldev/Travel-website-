@@ -20,8 +20,8 @@ function PlanTripInner() {
   const activeTour = TOURS.find((t) => t.slug === tourSlug);
   const wa = buildWhatsAppUrl(
     activeTour
-      ? `Hello Sundarban Yatra, I am interested in the ${activeTour.title}.\n\nTravel date:\nTravellers:\nStarting location:`
-      : "Hello Sundarban Yatra, I want to plan a Sundarban trip. Please share tour options."
+      ? `Hello Sundarban Yatri, I am interested in the ${activeTour.title}.\n\nTravel date:\nTravellers:\nStarting location:`
+      : "Hello Sundarban Yatri, I want to plan a Sundarban trip. Please share tour options."
   );
 
   return (
@@ -42,7 +42,7 @@ function PlanTripInner() {
           <div className="mt-8 grid gap-4 md:grid-cols-2 max-w-3xl">
             <a
               href={`tel:${businessConfig.phone}`}
-              className="yatra-card group flex items-center gap-5 p-6 lg:p-7 !bg-primary !border-primary text-white"
+              className="yatri-card group flex items-center gap-5 p-6 lg:p-7 !bg-primary !border-primary text-white"
             >
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/15"><Phone className="h-6 w-6" /></span>
               <span>
@@ -55,7 +55,7 @@ function PlanTripInner() {
               href={wa}
               target="_blank"
               rel="noopener noreferrer"
-              className="yatra-card group flex items-center gap-5 p-6 lg:p-7"
+              className="yatri-card group flex items-center gap-5 p-6 lg:p-7"
             >
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#1fa855]/12 text-[#1fa855]"><MessageCircle className="h-6 w-6" /></span>
               <span>
@@ -79,7 +79,7 @@ function PlanTripInner() {
         </div>
       </section>
 
-      <section className="container yatra-section">
+      <section className="container yatri-section">
         <SectionHeader eyebrow="Tours" title="Which tour fits you?" desc="Pick a starting point — then call or WhatsApp us to lock dates. Every itinerary can be customised." />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {TOURS.map((t) => <TourCard key={t.slug} tour={t} />)}
@@ -87,7 +87,7 @@ function PlanTripInner() {
       </section>
 
       <section className="border-y border-border bg-white">
-        <div className="container yatra-section grid gap-10 lg:grid-cols-2">
+        <div className="container yatri-section grid gap-10 lg:grid-cols-2">
           <div>
             <p className="font-label text-[11px] text-primary">What happens next</p>
             <h2 className="mt-3 h2 font-display">Simple, human, no pressure</h2>

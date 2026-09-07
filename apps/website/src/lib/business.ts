@@ -1,10 +1,12 @@
 export const businessConfig = {
-  name: "Sundarban Yatra",
+  name: "Sundarban Yatri",
   tagline: "Explore. Experience. Understand the Sundarbans.",
-  phoneDisplay: "+91 98765 43210",
+  organiser: "Joynal Abedin Gazi",
+  location: "Sonakhali, Sundarban, West Bengal, India",
+  phoneDisplay: "+91 85138 19474",
   // E.164 without + for tel:, digits for wa.me
-  phone: "+919876543210",
-  whatsapp: "919876543210",
+  phone: "+918513819474",
+  whatsapp: "918513819474",
   email: "hello@sundarbanyatra.in",
   hours: "Mon–Sat, 9am–7pm IST",
 };
@@ -16,10 +18,10 @@ export function buildWhatsAppUrl(message: string, tourTitle?: string) {
 }
 
 export const defaultWhatsAppMessage =
-  "Hello Sundarban Yatra, I want to plan a Sundarban trip. Please share tour options.";
+  "Hello Sundarban Yatri, I want to plan a Sundarban trip. Please share tour options.";
 
 export const tourWhatsAppMessage = (tourTitle: string) =>
-  `Hello Sundarban Yatra, I am interested in the ${tourTitle}.\n\nTravel date:\nTravellers:\nStarting location:`;
+  `Hello Sundarban Yatri, I am interested in the ${tourTitle}.\n\nTravel date:\nTravellers:\nStarting location:`;
 
 export type TripDetails = {
   date?: string;
@@ -34,7 +36,7 @@ export type TripDetails = {
 // travellers can send their trip in one tap — no form needed.
 export function tripWhatsAppMessage(d: TripDetails) {
   const lines = [
-    "Hello Sundarban Yatra, I want to plan a Sundarban trip.",
+    "Hello Sundarban Yatri, I want to plan a Sundarban trip.",
     "",
     d.tour ? `Tour: ${d.tour}` : null,
     `Travel date: ${d.date || "-"}`,

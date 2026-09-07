@@ -13,14 +13,14 @@ export async function generateMetadata({ params }: { params: Promise<{ year: str
   const year = Number((await params).year);
   if (!Number.isInteger(year) || year < 2000 || year > 2100) return {};
   const title = `Guide archive — ${year}`;
-  const description = `Sundarban Yatra travel guides from ${year}.`;
+  const description = `Sundarban Yatri travel guides from ${year}.`;
   return {
     title,
     description,
     // Thin date listing: keep crawlable for users, out of the index.
     robots: { index: false, follow: true },
     alternates: { canonical: `/archive/${year}` },
-    openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: `${siteUrl()}/archive/${year}`, title, description, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+    openGraph: { type: "website", siteName: "Sundarban Yatri", locale: "en_US", url: `${siteUrl()}/archive/${year}`, title, description, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
     twitter: { card: "summary_large_image", title, images: [`${siteUrl()}/og-default.png`] },
   };
 }

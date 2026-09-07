@@ -4,7 +4,7 @@ import { MessageCircle, Phone } from "lucide-react";
 import { businessConfig, buildWhatsAppUrl, defaultWhatsAppMessage, trackEvent } from "@web/lib/business";
 
 export function StickyMobileCta({ tourTitle }: { tourTitle?: string }) {
-  const wa = buildWhatsAppUrl(tourTitle ? `Hello Sundarban Yatra, I am interested in ${tourTitle}.` : defaultWhatsAppMessage);
+  const wa = buildWhatsAppUrl(tourTitle ? `Hello Sundarban Yatri, I am interested in ${tourTitle}.` : defaultWhatsAppMessage);
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 backdrop-blur-md md:hidden pb-[env(safe-area-inset-bottom)]">
       <div className="grid grid-cols-3 gap-2 p-3">

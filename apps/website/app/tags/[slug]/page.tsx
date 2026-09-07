@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const title = `#${tag.name}`;
     return {
       title,
-      description: `Travel guides tagged ${tag.name} from Sundarban Yatra.`,
+      description: `Travel guides tagged ${tag.name} from Sundarban Yatri.`,
       // Thin listing: keep crawlable for users, out of the index.
       robots: { index: false, follow: true },
       alternates: { canonical: `/tags/${tag.slug}` },
-      openGraph: { type: "website", siteName: "Sundarban Yatra", locale: "en_US", url: `${siteUrl()}/tags/${tag.slug}`, title, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
+      openGraph: { type: "website", siteName: "Sundarban Yatri", locale: "en_US", url: `${siteUrl()}/tags/${tag.slug}`, title, images: [{ url: `${siteUrl()}/og-default.png`, width: 1200, height: 630 }] },
       twitter: { card: "summary_large_image", images: [`${siteUrl()}/og-default.png`], title },
     };
   } catch {

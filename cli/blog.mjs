@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sundarban Yatra — CLI (full account control)
+ * Sundarban Yatri — CLI (full account control)
  *
  * Manage the entire publication from the command line using an API access
  * token. Create a token in Studio → "API tokens" (scope: read + write), then:
@@ -195,7 +195,7 @@ async function buildPostInput({ requireContent }) {
 /* ------------------------------------------------------------------ */
 
 const HELP = `
-Sundarban Yatra CLI — full publication control
+Sundarban Yatri CLI — full publication control
 
 Usage: node cli/blog.mjs <command> [options]
 
@@ -456,7 +456,7 @@ async function main() {
       const bare = [];
       const dead = [];
       const generic = [];
-      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/sundarbanyatra\.in)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
+      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/sundarbanyatri\.in)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
       for (const post of items) {
         const html = post.rendered_html || "";
         for (const match of html.matchAll(anchorRe)) {
@@ -470,7 +470,7 @@ async function main() {
             generic.push(`${post.slug} -> ${dst}: '${anchor}'`);
           }
         }
-        const bareUrls = html.match(/(?<![">/])https?:\/\/sundarbanyatra\.in\/articles\/[a-z0-9-]+/g) || [];
+        const bareUrls = html.match(/(?<![">/])https?:\/\/sundarbanyatri\.in\/articles\/[a-z0-9-]+/g) || [];
         if (bareUrls.length) bare.push(`${post.slug}: ${bareUrls.length} bare URL(s)`);
       }
       console.log(`✓ Body-link graph across ${items.length} published post(s) (clickable <a href> only)`);

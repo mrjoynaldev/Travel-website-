@@ -1,6 +1,6 @@
-# Sundarban Yatra — Comprehensive Design MD + Implementation Guide
+# Sundarban Yatri — Comprehensive Design MD + Implementation Guide
 
-> **Purpose:** This document is the single design and implementation specification for transforming the existing travel website into **Sundarban Yatra**, a Sundarban-focused travel discovery, travel-guide and tour lead-generation platform.
+> **Purpose:** This document is the single design and implementation specification for transforming the existing travel website into **Sundarban Yatri**, a Sundarban-focused travel discovery, travel-guide and tour lead-generation platform.
 >
 > **Visual reference:** The supplied reference image should guide the overall visual language: large photography, premium editorial spacing, rounded cards, clean navigation, strong hero, trust sections, destination/package cards and prominent conversion CTAs. The content, information architecture and business model must remain specifically focused on the Sundarbans.
 
@@ -10,7 +10,7 @@
 
 ## Product
 
-**Sundarban Yatra**
+**Sundarban Yatri**
 
 ## Positioning
 
@@ -84,7 +84,7 @@ The uploaded visual reference has several useful characteristics that should be 
 - elegant footer
 - generous whitespace
 
-Sundarban Yatra should **not** copy its generic travel concepts such as:
+Sundarban Yatri should **not** copy its generic travel concepts such as:
 
 - Flights
 - Hotels
@@ -112,7 +112,7 @@ The final site must feel like a specialized Sundarban brand, not a re-skinned gl
 
 ## 3.1 Brand Name
 
-**Sundarban Yatra**
+**Sundarban Yatri**
 
 Suggested descriptors:
 
@@ -503,7 +503,7 @@ Local guidance  •  Flexible itineraries  •  Easy enquiry
 
 The supplied reference uses a booking/search widget.
 
-For Sundarban Yatra, replace it with a **Trip Planning / Enquiry Card**.
+For Sundarban Yatri, replace it with a **Trip Planning / Enquiry Card**.
 
 ## Fields
 
@@ -594,7 +594,7 @@ Use a section inspired by the reference trust block.
 
 Heading:
 
-> **Why Travellers Choose Sundarban Yatra**
+> **Why Travellers Choose Sundarban Yatri**
 
 Four features:
 
@@ -835,7 +835,7 @@ Prefer a call? +91 XXXXXXXXXX
 Desktop:
 
 ```text
-Sundarban Yatra
+Sundarban Yatri
 
 Explore
   Sundarban Tours
@@ -865,7 +865,7 @@ Contact
 Bottom:
 
 ```text
-© Sundarban Yatra
+© Sundarban Yatri
 Privacy Policy • Terms • Disclaimer
 ```
 
@@ -1323,7 +1323,7 @@ Preserve a useful contextual message in WhatsApp.
 Example:
 
 ```text
-Hello Sundarban Yatra,
+Hello Sundarban Yatri,
 I am interested in the Sundarban 2 Days / 1 Night Tour.
 
 Travel date:
@@ -1361,7 +1361,7 @@ Example:
 ```tsx
 <a
   href={buildWhatsAppUrl(
-    "Hello Sundarban Yatra, I am interested in the 2 Days / 1 Night Sundarban Tour."
+    "Hello Sundarban Yatri, I am interested in the 2 Days / 1 Night Sundarban Tour."
   )}
   target="_blank"
   rel="noopener noreferrer"
@@ -1853,7 +1853,7 @@ export function LeadForm({
 
         <a
           href={buildWhatsAppUrl(
-            `Hello Sundarban Yatra, I am interested in ${tourTitle ?? "a Sundarban tour"}.`
+            `Hello Sundarban Yatri, I am interested in ${tourTitle ?? "a Sundarban tour"}.`
           )}
           target="_blank"
           rel="noopener noreferrer"
@@ -3121,7 +3121,7 @@ export function TravelHero() {
 
             <a
               href={buildWhatsAppUrl(
-                "Hello Sundarban Yatra, I would like help planning a Sundarban trip."
+                "Hello Sundarban Yatri, I would like help planning a Sundarban trip."
               )}
               className="rounded-full border border-white/70 px-6 py-3 font-semibold"
               target="_blank"
@@ -3145,14 +3145,14 @@ Adapt to the framework used in the existing repository.
 
 ```ts
 export const metadata = {
-  title: "Sundarban Tours & Travel Guide | Sundarban Yatra",
+  title: "Sundarban Tours & Travel Guide | Sundarban Yatri",
   description:
     "Explore Sundarban tours, travel guides, safari information, destinations and practical trip-planning help.",
   alternates: {
     canonical: "https://example.com/",
   },
   openGraph: {
-    title: "Sundarban Yatra",
+    title: "Sundarban Yatri",
     description:
       "Plan your Sundarban journey with practical guides and thoughtfully planned tours.",
     images: [
@@ -3160,7 +3160,7 @@ export const metadata = {
         url: "/images/sundarban-og.jpg",
         width: 1200,
         height: 630,
-        alt: "Sundarban Yatra",
+        alt: "Sundarban Yatri",
       },
     ],
   },
@@ -3436,7 +3436,7 @@ Example:
 
 ```ts
 export const businessConfig = {
-  brandName: "Sundarban Yatra",
+  brandName: "Sundarban Yatri",
   phone: "+91XXXXXXXXXX",
   whatsapp: "91XXXXXXXXXX",
   email: "hello@example.com",
@@ -3458,7 +3458,7 @@ Do not scatter these values throughout the application.
 Example:
 
 ```env
-NEXT_PUBLIC_SITE_NAME=Sundarban Yatra
+NEXT_PUBLIC_SITE_NAME=Sundarban Yatri
 NEXT_PUBLIC_SITE_URL=https://example.com
 NEXT_PUBLIC_BUSINESS_PHONE=+91XXXXXXXXXX
 NEXT_PUBLIC_WHATSAPP_NUMBER=91XXXXXXXXXX
@@ -3545,7 +3545,7 @@ Implement:
 Use small, reviewable commits.
 
 ```text
-feat(brand): rebrand public site as Sundarban Yatra
+feat(brand): rebrand public site as Sundarban Yatri
 
 feat(travel): add destinations content model
 
@@ -3580,7 +3580,7 @@ The redesign is complete when:
 
 ## Brand
 
-- site is visibly branded as Sundarban Yatra
+- site is visibly branded as Sundarban Yatri
 - no unrelated global travel branding remains
 
 ## Homepage
@@ -3696,7 +3696,7 @@ ENQUIRE
 BOOK
 ```
 
-The visual experience should follow the supplied reference's premium editorial feel, while the information architecture, imagery, content and conversion system remain unmistakably **Sundarban Yatra**.
+The visual experience should follow the supplied reference's premium editorial feel, while the information architecture, imagery, content and conversion system remain unmistakably **Sundarban Yatri**.
 
 ---
 

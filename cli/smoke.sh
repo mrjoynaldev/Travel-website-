@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sundarban Yatra end-to-end smoke test.
+# Sundarban Yatri end-to-end smoke test.
 # Usage: SY_TOKEN=sy_... bash cli/smoke.sh [slug]
 set -u
 SITE="https://sundarbanyatra.in"

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const title = (searchParams.get("title") || "Sundarban Yatra").slice(0, 120);
+  const title = (searchParams.get("title") || "Sundarban Yatri").slice(0, 120);
   const kicker = (searchParams.get("kicker") || "").slice(0, 60);
 
   return new ImageResponse(
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
             S
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 30, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5 }}>Sundarban Yatra</div>
+            <div style={{ fontSize: 30, fontWeight: 700, color: "#ffffff", letterSpacing: -0.5 }}>Sundarban Yatri</div>
             <div style={{ fontSize: 20, color: "#9fd4b8" }}>Tours • Safari • Travel Guides</div>
           </div>
         </div>

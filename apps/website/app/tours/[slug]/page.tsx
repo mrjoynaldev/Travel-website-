@@ -14,12 +14,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const tour = getTour(slug);
   if (!tour) return { title: "Tour not found" };
   return {
-    title: `${tour.title} — Itinerary, Inclusions & Booking | Sundarban Yatra`,
+    title: `${tour.title} — Itinerary, Inclusions & Booking | Sundarban Yatri`,
     description: tour.summary,
     alternates: { canonical: `/tours/${slug}` },
     openGraph: {
       type: "website",
-      siteName: "Sundarban Yatra",
+      siteName: "Sundarban Yatri",
       url: `${siteUrl()}/tours/${slug}`,
       title: tour.title,
       description: tour.summary,

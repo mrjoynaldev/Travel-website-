@@ -32,7 +32,7 @@ export function TripPlannerCard() {
     <div className="rounded-[24px] border border-border bg-white/95 p-6 lg:p-8 shadow-[0_28px_60px_-28px_rgba(15,69,50,.35)] backdrop-blur">
       <div className="flex items-center justify-between gap-3">
         <h3 className="font-display text-xl lg:text-[1.4rem] font-semibold tracking-tight">Plan Your Trip</h3>
-        <span className="yatra-chip">Fastest on call</span>
+        <span className="yatri-chip">Fastest on call</span>
       </div>
       <p className="mt-1.5 text-sm text-muted-foreground">Fill the basics, then send it to us in one tap — we reply with the right tour.</p>
 

@@ -26,7 +26,7 @@ export async function GET() {
     // Fall back to static content below if the API is unreachable.
   }
 
-  const name = publication?.name || "Sundarban Yatra";
+  const name = publication?.name || "Sundarban Yatri";
   const description =
     publication?.description ||
     "Developer-first AI news, analysis, and practical guides for people who build and ship software.";
