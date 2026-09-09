@@ -23,7 +23,7 @@ const ALLOWED_MIME = [
   "audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm", "video/mp4", "video/webm",
 ] as const;
 
-export function MediaUploadButton({ accept, folder = "library", label = "Upload", className, id, onUploaded }: { accept: string; folder?: string; label?: string; className?: string; id?: string; onUploaded: (asset: UploadedAsset) => void }) {
+export function MediaUploadButton({ accept, folder = "library", label = "Upload", className, id, maxMB = 10, onUploaded }: { accept: string; folder?: string; label?: string; className?: string; id?: string; maxMB?: number; onUploaded: (asset: UploadedAsset) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<File | null>(null);
   const [altText, setAltText] = useState("");
@@ -33,7 +33,7 @@ export function MediaUploadButton({ accept, folder = "library", label = "Upload"
   const choose = (file?: File) => {
     if (!file) return;
     if (!ALLOWED_MIME.includes(file.type as (typeof ALLOWED_MIME)[number])) { toast.error("That file type is not accepted."); return; }
-    if (file.size > 10 * 1024 * 1024) { toast.error("Media must be 10 MB or smaller."); return; }
+    if (file.size > maxMB * 1024 * 1024) { toast.error(`Files must be ${maxMB} MB or smaller.`); return; }
     setAltText(""); setCaption("");
     setPending(file);
   };
@@ -67,7 +67,7 @@ export function MediaUploadButton({ accept, folder = "library", label = "Upload"
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">Ready to upload to the {folder} folder.</p>
+          <p className="text-sm text-muted-foreground">Ready to upload to the {folder} folder (max {maxMB} MB).</p>
         )}
         <DialogFooter>
           <Button type="button" variant="outline" disabled={upload.isPending} onClick={() => setPending(null)}>Cancel</Button>

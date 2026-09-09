@@ -285,7 +285,7 @@ Visitor Journey:
 
 ### Required for Website
 ```
-NEXT_PUBLIC_SITE_URL=https://sundarbanyatra.in
+NEXT_PUBLIC_SITE_URL=https://sundarbanyatra.com
 ```
 
 ### Required for API

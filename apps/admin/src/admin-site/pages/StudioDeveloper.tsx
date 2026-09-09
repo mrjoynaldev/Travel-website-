@@ -37,12 +37,12 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-const DOCS_BASE = "https://sundarbanyatra.in/docs";
+const DOCS_BASE = "https://sundarbanyatra.com/docs";
 // Production site origin (docs are served by the API). Update if the API deploys elsewhere.
-const API_BASE = "https://sundarbanyatra.in";
+const API_BASE = "https://sundarbanyatra.com";
 
 function agentPreamble(token: string) {
-  return `You are the Sundarban Yatri AI Editor -- the publishing agent for the Sundarban travel site https://sundarbanyatra.in.
+  return `You are the Sundarban Yatri AI Editor -- the publishing agent for the Sundarban travel site https://sundarbanyatra.com.
 
 ACCESS TOKEN -- full account control. Treat it as a secret; never print or commit it:
 SY_TOKEN=${token}
@@ -53,7 +53,7 @@ FIRST, before doing anything else:
    - ${DOCS_BASE}/AI-EDITOR-AGENT.md   (who you are, what you control, terminal workflow, guardrails)
    - ${DOCS_BASE}/POST-WRITING-SKILL.md (how to find ideas, validate them, interrogate before writing, structure and optimize posts)
    - ${DOCS_BASE}/API-ACCESS.md          (token security rules and CLI reference)
-2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes. If you do not have a local checkout of the repository, use Path B: download and run https://sundarbanyatra.in/docs/setup.sh in a fresh directory.
+2. Set up your environment exactly as AI-EDITOR-AGENT.md §2 describes. If you do not have a local checkout of the repository, use Path B: download and run https://sundarbanyatra.com/docs/setup.sh in a fresh directory.
 3. Run \`node blog.mjs whoami\` (or \`node cli/blog.mjs whoami\` inside a repo checkout) and confirm you are connected as admin.`;
 }
 
@@ -553,7 +553,7 @@ export function StudioDistribution() {
                   </span>
                 </div>
                 <a
-                  href={`https://sundarbanyatra.in/articles/${item.slug}`}
+                  href={`https://sundarbanyatra.com/articles/${item.slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-1 block truncate text-sm font-medium hover:underline"

@@ -3,12 +3,12 @@ import { NextRequest, NextResponse } from "next/server";
 const RETRYABLE = new Set([429, 502, 503, 504]);
 const MAX_ATTEMPTS = 4;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   if (pathname.startsWith("/api/keep-alive")) {
     return NextResponse.next();
   }
-  const apiOrigin = (process.env.API_URL || "https://codereportglobal-backend.onrender.com").replace(/\/+$/, "");
+  const apiOrigin = (process.env.API_URL || "http://localhost:4000").replace(/\/+$/, "");
   if (!apiOrigin) return NextResponse.next();
 
   const headers = new Headers(request.headers);
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     return new Response(res.body, {
       status: res.status,
       statusText: res.statusText,
-      headers: new Headers([...res.headers.entries(), ["x-proxy", "middleware"]]),
+      headers: new Headers([...res.headers.entries(), ["x-proxy", "proxy"]]),
     });
   }
   return NextResponse.json({ error: "upstream unavailable" }, { status: 502 });

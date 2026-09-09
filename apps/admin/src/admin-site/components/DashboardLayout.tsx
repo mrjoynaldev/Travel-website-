@@ -32,11 +32,13 @@ import {
   Bell,
   Bot,
   Boxes,
+  Clapperboard,
   Cpu,
   Download,
   FileText,
   Images,
   KeyRound,
+  HelpCircle,
   LayoutDashboard,
   LayoutTemplate,
   LogOut,
@@ -44,6 +46,8 @@ import {
   MessageSquare,
   Palette,
   PanelLeft,
+  PhoneCall,
+  PlugZap,
   ScrollText,
   Search,
   Send,
@@ -52,6 +56,7 @@ import {
   Tags,
   UploadCloud,
   Users,
+  UtensilsCrossed,
   X,
   TrendingUp,
   type LucideIcon,
@@ -98,8 +103,19 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
     ],
   },
   {
+    label: "Travel catalogue",
+    items: [
+      { icon: Boxes, label: "Tours", path: "/studio/catalog-tours" },
+      { icon: HelpCircle, label: "FAQs", path: "/studio/catalog-faqs" },
+      { icon: Clapperboard, label: "Video reviews", path: "/studio/reviews" },
+      { icon: UtensilsCrossed, label: "Food menu", path: "/studio/food-menu" },
+      { icon: PhoneCall, label: "Business & contact", path: "/studio/business" },
+    ],
+  },
+  {
     label: "Audience",
     items: [
+      { icon: PhoneCall, label: "Leads", path: "/studio/leads" },
       { icon: Mail, label: "Subscribers", path: "/studio/subscribers" },
       { icon: Bell, label: "Outbox", path: "/studio/notifications" },
     ],
@@ -142,6 +158,7 @@ const menuGroups: { label: string; items: MenuItem[] }[] = [
       { icon: ScrollText, label: "Audit log", path: "/studio/audit" },
       { icon: Download, label: "Export", path: "/studio/export" },
       { icon: KeyRound, label: "API tokens", path: "/studio/api-tokens" },
+      { icon: PlugZap, label: "MCP access", path: "/studio/mcp" },
       { icon: Send, label: "Distribution", path: "/studio/distribution" },
     ],
   },
@@ -165,14 +182,24 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
-    return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
+    if (typeof window === "undefined") return DEFAULT_WIDTH;
+    try {
+      const saved = window.localStorage.getItem(SIDEBAR_WIDTH_KEY);
+      const parsed = saved ? parseInt(saved, 10) : NaN;
+      return Number.isFinite(parsed) ? (parsed as number) : DEFAULT_WIDTH;
+    } catch {
+      return DEFAULT_WIDTH;
+    }
   });
   const [menuSearch, setMenuSearch] = useState("");
   const { loading, user } = useAuth();
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
+    try {
+      window.localStorage.setItem(SIDEBAR_WIDTH_KEY, sidebarWidth.toString());
+    } catch {
+      // ignore storage errors (private mode / SSR)
+    }
   }, [sidebarWidth]);
 
   if (loading) {
@@ -249,7 +276,7 @@ function DashboardLayoutContent({
   const isMobile = useIsMobile();
   const { data: publication } = trpc.blog.publication.useQuery();
   const { data: bootstrap } = trpc.studio.bootstrap.useQuery();
-  const studioName = `${publication?.name || "CodeReport Global"} Studio`;
+  const studioName = `${publication?.name || "Sundarban Yatri"} Studio`;
   const visibleMenuGroups = menuGroups
     .map(group => ({
       ...group,

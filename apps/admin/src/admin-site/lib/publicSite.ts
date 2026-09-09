@@ -1,5 +1,5 @@
 export const PUBLIC_SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://codereportglobal.indevs.in";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export const publicArticleUrl = (slug: string) =>
   `${PUBLIC_SITE_URL}/articles/${slug}`;

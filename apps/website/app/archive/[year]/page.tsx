@@ -5,7 +5,7 @@ import { serverTrpc } from "@web/lib/trpc-server";
 
 export const revalidate = 300;
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 type PostListItem = Awaited<ReturnType<typeof serverTrpc.blog.list.query>>["items"][number];
 

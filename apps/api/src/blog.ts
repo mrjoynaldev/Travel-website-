@@ -270,7 +270,7 @@ export const uploadInputSchema = z.object({
     "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "audio/mpeg", "audio/wav", "audio/mp4", "audio/ogg", "audio/webm", "video/mp4", "video/webm",
   ]),
-  base64: z.string().min(8).max(14_000_000),
+  base64: z.string().min(8).max(70_000_000),
   folder: z.string().trim().min(1).max(80).default("library"),
   altText: z.string().max(300).optional(),
   caption: z.string().max(500).optional(),
@@ -278,8 +278,13 @@ export const uploadInputSchema = z.object({
 
 export async function uploadMedia(actor: BlogActor, input: z.infer<typeof uploadInputSchema>) {
   const payload = Buffer.from(input.base64.replace(/^data:[^;]+;base64,/, ""), "base64");
-  if (payload.length === 0 || payload.length > 10 * 1024 * 1024) {
-    throw new Error("Media must be a valid file smaller than 10 MB.");
+  const maxBytes = input.mimeType.startsWith("video/") ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+  if (payload.length === 0 || payload.length > maxBytes) {
+    throw new Error(
+      input.mimeType.startsWith("video/")
+        ? "Video must be a valid file smaller than 50 MB."
+        : "Media must be a valid file smaller than 10 MB.",
+    );
   }
   if (input.mimeType === "image/svg+xml" && /<script|onload=|onerror=/i.test(payload.toString("utf8"))) {
     throw new Error("SVG files containing executable content are not accepted.");

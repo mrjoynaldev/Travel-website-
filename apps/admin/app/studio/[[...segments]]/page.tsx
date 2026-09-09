@@ -15,7 +15,18 @@ import {
   StudioDistribution,
   StudioSubscribers,
 } from "@/admin-site/pages/StudioDeveloper";
+import { StudioMcp } from "@/admin-site/pages/StudioMcp";
 import { StudioEditor } from "@/admin-site/pages/StudioEditor";
+import StudioLeads from "@/admin-site/pages/StudioLeads";
+import {
+  StudioBusiness,
+  StudioCatalogFaqs,
+  StudioCatalogTours,
+} from "@/admin-site/pages/StudioCatalog";
+import {
+  StudioFoodMenu,
+  StudioVideoReviews,
+} from "@/admin-site/pages/StudioShowcase";
 import { GravityEditor } from "@/admin-site/pages/GravityEditor";
 import StudioPreview from "@/admin-site/pages/StudioPreview";
 import {
@@ -57,6 +68,18 @@ function resolveStudioView(pathname: string) {
       return StudioResearch;
     case "team":
       return StudioTeam;
+    case "leads":
+      return StudioLeads;
+    case "catalog-tours":
+      return StudioCatalogTours;
+    case "catalog-faqs":
+      return StudioCatalogFaqs;
+    case "business":
+      return StudioBusiness;
+    case "reviews":
+      return StudioVideoReviews;
+    case "food-menu":
+      return StudioFoodMenu;
     case "notifications":
       return StudioNotifications;
     case "ai":
@@ -83,6 +106,8 @@ function resolveStudioView(pathname: string) {
       return StudioSubscribers;
     case "api-tokens":
       return StudioApiTokens;
+    case "mcp":
+      return StudioMcp;
     case "distribution":
       return StudioDistribution;
     default:
@@ -100,7 +125,9 @@ export default function StudioRoute() {
 
   if (!mounted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading studio…</p>
+      </div>
     );
   }
 

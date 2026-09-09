@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { CalendarDays, MapPin, Users, Clock3, MessageCircle, Phone } from "lucide-react";
 import { businessConfig, tripWhatsAppUrl } from "@web/lib/business";
+import type { Business } from "@web/lib/catalogue";
 
-export function TripPlannerCard() {
+export function TripPlannerCard({ business }: { business?: Business }) {
+  const biz = business ?? businessConfig;
   const [date, setDate] = useState("");
   const [travellers, setTravellers] = useState("2");
   const [days, setDays] = useState("2");
@@ -12,7 +14,7 @@ export function TripPlannerCard() {
   const [interest, setInterest] = useState("Tour + Safari");
 
   const details = { date, travellers, days, from, interest };
-  const waUrl = tripWhatsAppUrl(details);
+  const waUrl = tripWhatsAppUrl(details, biz.whatsapp);
 
   const hireQuery = (() => {
     const q = new URLSearchParams();
@@ -100,14 +102,14 @@ export function TripPlannerCard() {
           <MessageCircle className="h-4 w-4" /> Send on WhatsApp
         </a>
         <a
-          href={`tel:${businessConfig.phone}`}
+          href={`tel:${biz.phone}`}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#0f4532] transition-colors shadow-[0_16px_32px_-14px_rgba(24,92,67,.6)]"
         >
-          <Phone className="h-4 w-4" /> Call {businessConfig.phoneDisplay}
+          <Phone className="h-4 w-4" /> Call {biz.phoneDisplay}
         </a>
       </div>
       <p className="mt-3 text-center text-xs text-muted-foreground">
-        {businessConfig.hours} • Outside India? <a href={hireQuery} className="font-semibold text-primary hover:underline">Send an enquiry form instead →</a>
+        {biz.hours} • Outside India? <a href={hireQuery} className="font-semibold text-primary hover:underline">Send an enquiry form instead →</a>
       </p>
     </div>
   );

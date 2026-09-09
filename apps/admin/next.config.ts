@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const apiOrigin = (process.env.API_URL || "http://localhost:4000").replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
+  // Allow Google Cloud Shell preview hosts (e.g. 3100-cs-*.cloudshell.dev)
+  // plus direct IP access, otherwise Next blocks /_next dev assets → white screen.
+  allowedDevOrigins: ["**.cloudshell.dev", "**.googleusercontent.com", "**.trycloudflare.com", "10.88.0.4"],
   transpilePackages: [
     "@fieldnote/client-common",
     "@fieldnote/contracts",

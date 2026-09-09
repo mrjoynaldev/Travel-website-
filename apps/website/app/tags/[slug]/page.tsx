@@ -9,7 +9,7 @@ type PostListItem = Awaited<ReturnType<typeof serverTrpc.blog.list.query>>["item
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

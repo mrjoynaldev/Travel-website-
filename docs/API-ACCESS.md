@@ -1,9 +1,11 @@
-# Sundarban Yatri — API Access & CLI
+# Sundarban Yatri — API Access, MCP & CLI
 
-Programmatic access to manage your publication from the command line (or any
-script/CI job) using **scoped, revocable access tokens**.
+Programmatic access to manage your publication from AI agents, the command
+line (or any script/CI job) using **scoped, revocable access tokens**.
 
-- **Where tokens live:** Studio → **API tokens** (`/studio/api-tokens`).
+- **Where tokens live:** Studio → **MCP access** (`/studio/mcp`, recommended —
+  mints the token AND gives you the MCP config + master setup prompt) or
+  **API tokens** (`/studio/api-tokens`).
 - **How auth works:** the token is sent as `Authorization: Bearer sy_…` (older `crg_…` tokens keep working) and
   resolves to the owning contributor's profile, so it inherits exactly the
   same role-scoped permissions as that user.
@@ -27,6 +29,23 @@ effect immediately. Optional expiry is available at creation.
 
 ---
 
+## 1b. MCP access (recommended for AI agents — full control)
+
+`cli/mcp.mjs` is a zero-dependency **MCP server** (stdio) exposing 20 tools —
+posts, taxonomy, media, tours, FAQs, video reviews, food menu, leads,
+business — plus these docs as MCP **prompts** (`write-trip-guide`,
+`audit-tour`, `follow-up-leads`, `publish-check`, `food-reel-plan`,
+`season-prep`) and **resources** (every skill file, always fresh from
+`/docs`). The CLI below covers editorial only; **MCP is the only headless
+path for tours, reviews, menu, leads and business settings.**
+
+```bash
+SY_TOKEN="sy_…" SY_API_URL="https://sundarbanyatra.com" node cli/mcp.mjs --selftest
+# every line must say "ok" — then register it permanently in your agent
+# (opencode.json / `claude mcp add` / any MCP client — exact JSON + a
+#  copy-paste master prompt live on the Studio MCP access page).
+```
+
 ## 2. Configure the CLI
 
 The CLI is a zero-dependency-of-your-own Node script at `cli/blog.mjs`. The
@@ -37,8 +56,8 @@ the same env vars (see POST-WRITING-SKILL.md §9 for the channel rules).
 # Required
 export SY_TOKEN="sy_…"
 
-# Optional (defaults to https://sundarbanyatra.in)
-export SY_API_URL="https://sundarbanyatra.in"
+# Optional (defaults to https://sundarbanyatra.com)
+export SY_API_URL="https://sundarbanyatra.com"
 
 # Quick self-check
 node cli/blog.mjs whoami

@@ -20,16 +20,35 @@ function decodeHtmlInput(html: string): string {
 
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 150) || "untitled-post";
 
+// Brand media may be an absolute https URL (uploads, CDN) or a site-relative
+// path (bundled /logo.png, /og-default.png). Both must survive validation.
+const urlOrPath = (max: number) =>
+  z.string().max(max).refine(
+    value => value === "" || /^https?:\/\//i.test(value) || value.startsWith("/"),
+    { message: "Use an absolute https URL or a site-relative /path." },
+  ).optional();
+
 // IndexNow: instant URL submission to Bing/Yandex/Seznam (key file hosted at /38f216160dda9ea59525512b52c19573.txt).
 const INDEXNOW_KEY = "38f216160dda9ea59525512b52c19573";
+const canonicalHost = () => {
+  const origin = process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+  try {
+    return new URL(origin).host;
+  } catch {
+    return "sundarbanyatra.com";
+  }
+};
+const canonicalOrigin = () =>
+  (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
 export function indexNowPing(urls: string[]) {
+  const host = canonicalHost();
   void fetch("https://api.indexnow.org/indexnow", {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
     body: JSON.stringify({
-      host: "codereportglobal.indevs.in",
+      host,
       key: INDEXNOW_KEY,
-      keyLocation: `https://codereportglobal.indevs.in/${INDEXNOW_KEY}.txt`,
+      keyLocation: `https://${host}/${INDEXNOW_KEY}.txt`,
       urlList: urls,
     }),
   }).catch(() => {});
@@ -69,6 +88,70 @@ async function assertSectionSource(actor: any, sectionType: "featured" | "latest
   }
   if (categoryId || tagId) throw new TRPCError({ code: "BAD_REQUEST", message: "This homepage section type cannot use a category or tag source." });
 }
+
+const tourDetailSchema = z.object({
+  startPoint: z.string().max(200).default(""),
+  overview: z.array(z.string().max(2000)).default([]),
+  highlights: z.array(z.string().max(500)).default([]),
+  gallery: z.array(z.string().max(2048)).default([]),
+  itinerary: z.array(z.object({ day: z.string().max(40), title: z.string().max(200), desc: z.string().max(3000) })).default([]),
+  inclusions: z.array(z.string().max(500)).default([]),
+  exclusions: z.array(z.string().max(500)).default([]),
+  meetingPoint: z.string().max(500).default(""),
+  transport: z.string().max(500).default(""),
+  stay: z.string().max(500).default(""),
+});
+const tourInput = z.object({
+  title: z.string().trim().min(1).max(180),
+  slug: z.string().trim().max(180).optional(),
+  duration: z.string().trim().max(120).default(""),
+  days: z.number().int().min(1).max(60).default(1),
+  category: z.string().trim().max(120).default(""),
+  summary: z.string().trim().max(1000).default(""),
+  imageUrl: z.string().trim().max(2048).optional().or(z.literal("")),
+  featured: z.boolean().default(false),
+  priceNote: z.string().trim().max(200).optional().or(z.literal("")),
+  bestFor: z.string().trim().max(200).optional().or(z.literal("")),
+  detail: tourDetailSchema,
+  sortOrder: z.number().int().default(0),
+  status: z.enum(["draft", "published"]).default("draft"),
+});
+const reviewInput = z.object({
+  customerName: z.string().trim().min(1).max(120),
+  tourSlug: z.string().trim().max(180).default(""),
+  videoUrl: z.string().trim().min(1).max(2048),
+  thumbnailUrl: z.string().trim().max(2048).optional().or(z.literal("")),
+  quote: z.string().trim().max(1000).default(""),
+  rating: z.number().int().min(1).max(5).nullable().default(null),
+  sortOrder: z.number().int().default(0),
+  status: z.enum(["draft", "published"]).default("draft"),
+});
+const menuItemInput = z.object({
+  name: z.string().trim().min(1).max(180),
+  description: z.string().trim().max(1000).default(""),
+  priceNote: z.string().trim().max(200).default(""),
+  imageUrl: z.string().trim().max(2048).optional().or(z.literal("")),
+  category: z.string().trim().max(120).default(""),
+  sortOrder: z.number().int().default(0),
+  status: z.enum(["draft", "published"]).default("draft"),
+});
+const faqInput = z.object({
+  question: z.string().trim().min(1).max(500),
+  answer: z.string().trim().min(1).max(2000),
+  sortOrder: z.number().int().default(0),
+  status: z.enum(["draft", "published"]).default("published"),
+});
+const contactSchema = z.object({
+  name: z.string().max(120).optional(),
+  tagline: z.string().max(200).optional(),
+  organiser: z.string().max(120).optional(),
+  location: z.string().max(300).optional(),
+  phoneDisplay: z.string().max(40).optional(),
+  phone: z.string().max(40).optional(),
+  whatsapp: z.string().max(40).optional(),
+  email: z.string().max(320).optional(),
+  hours: z.string().max(120).optional(),
+});
 
 export const studioRouter = router({
   bootstrap: protectedProcedure.query(async ({ ctx }) => {
@@ -171,7 +254,7 @@ export const studioRouter = router({
       await queueWorkflowNotifications(actor, post, post.status, input.status, input.rejectionNote);
       await recordAudit(actor, "post.workflow_transition", "post", post.id, { from: post.status, to: input.status });
       await dispatchPendingNotifications(actor.siteId, post.id);
-      if (input.status === "published") indexNowPing([`https://codereportglobal.indevs.in/articles/${data.slug}`, "https://codereportglobal.indevs.in/"]);
+      if (input.status === "published") indexNowPing([`${canonicalOrigin()}/articles/${data.slug}`, `${canonicalOrigin()}/`]);
       return data;
     }),
     revisions: protectedProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
@@ -235,8 +318,19 @@ export const studioRouter = router({
   }),
 
   leads: router({
-    list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("leads").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }).limit(100); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load leads." }); return data ?? []; }),
-    updateStatus: protectedProcedure.input(z.object({ id: z.string().uuid(), status: z.enum(["new","contacted","won","lost"]) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("leads").update({ status: input.status }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found." }); return data; }),
+    list: protectedProcedure.input(z.object({ status: z.enum(["new","contacted","won","lost"]).optional(), search: z.string().trim().max(100).optional() }).default({})).query(async ({ ctx, input }) => {
+      const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]);
+      let query = getSupabase().from("leads").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }).limit(200);
+      if (input.status) query = query.eq("status", input.status);
+      if (input.search) {
+        const term = input.search.replace(/[,%]/g, "");
+        query = query.or(`name.ilike.%${term}%,email.ilike.%${term}%,phone.ilike.%${term}%,need.ilike.%${term}%`);
+      }
+      const { data, error } = await query;
+      if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load leads." });
+      return data ?? [];
+    }),
+    updateStatus: protectedProcedure.input(z.object({ id: z.string().uuid(), status: z.enum(["new","contacted","won","lost"]) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("leads").update({ status: input.status }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found." }); await recordAudit(actor, "lead.status_updated", "lead", data.id, { status: input.status }); return data; }),
   }),
 
   automations: router({
@@ -246,6 +340,39 @@ export const studioRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { error } = await getSupabase().from("automations").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not delete." }); await recordAudit(actor, "automation.deleted", "automation", input.id, {}); return { success: true }; }),
     listPosts: protectedProcedure.input(z.object({ platform: z.enum(["instagram"]), search: z.string().max(100).optional(), limit: z.number().int().min(1).max(50).default(20) })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const q = (input.search || "").toLowerCase().trim(); if (input.platform === "instagram") { const igId = process.env.FACEBOOK_IG_USER_ID; const token = process.env.INSTAGRAM_ACCESS_TOKEN || process.env.FACEBOOK_PAGE_ACCESS_TOKEN; if (!igId || !token) return []; const url = `https://graph.facebook.com/v26.0/${igId}/media?fields=id,caption,media_type,timestamp,permalink,thumbnail_url&limit=${input.limit}&access_token=${encodeURIComponent(token)}`; const res = await fetch(url); const j = await res.json().catch(()=>({})); const items = (j.data || []) as any[]; const filtered = q ? items.filter((p:any) => (p.caption||"").toLowerCase().includes(q)) : items; return filtered.slice(0, input.limit).map((p:any)=>({ id: p.id, title: (p.caption||"").slice(0,80) || p.id, caption: p.caption||"", media_type: p.media_type, timestamp: p.timestamp, permalink: p.permalink })); } else { const pageId = process.env.FACEBOOK_PAGE_ID; const token = process.env.FACEBOOK_PAGE_ACCESS_TOKEN; if (!pageId || !token) return []; const url = `https://graph.facebook.com/v26.0/${pageId}/posts?fields=id,message,created_time,permalink_url&limit=${input.limit}&access_token=${encodeURIComponent(token)}`; const res = await fetch(url); const j = await res.json().catch(()=>({})); const items = (j.data || []) as any[]; const filtered = q ? items.filter((p:any) => (p.message||"").toLowerCase().includes(q)) : items; return filtered.slice(0, input.limit).map((p:any)=>({ id: p.id, title: (p.message||"").slice(0,80) || p.id, caption: p.message||"", media_type: "POST", timestamp: p.created_time, permalink: p.permalink_url })); } }),
     logs: protectedProcedure.input(z.object({ automationId: z.string().uuid().optional(), limit: z.number().int().min(1).max(100).default(20) })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data: autos } = await getSupabase().from("automations").select("id").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); const ids = (autos ?? []).map((a:any)=>a.id); if (!ids.length) return []; let q = getSupabase().from("automation_logs").select("*, automations(keyword, post_title)").in("automation_id", ids).order("created_at", { ascending: false }).limit(input.limit); if (input.automationId) q = q.eq("automation_id", input.automationId); const { data, error } = await q; if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load logs." }); return data ?? []; }),
+  }),
+
+  catalog: router({
+    tours: router({
+      list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("tours").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("sort_order", { ascending: true }).order("created_at", { ascending: false }).limit(200); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load tours." }); return data ?? []; }),
+      create: protectedProcedure.input(tourInput).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const slug = slugify(input.slug || input.title); const { data, error } = await getSupabase().from("tours").insert({ organization_id: actor.organizationId, site_id: actor.siteId, slug, title: input.title, duration: input.duration, days: input.days, category: input.category, summary: input.summary, image_url: input.imageUrl || null, featured: input.featured, price_note: input.priceNote || null, best_for: input.bestFor || null, detail: input.detail, sort_order: input.sortOrder, status: input.status }).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "Tour could not be created. The slug may already exist." }); await recordAudit(actor, "tour.created", "tour", data.id, { status: data.status }); return data; }),
+      update: protectedProcedure.input(z.object({ id: z.string().uuid(), data: tourInput })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const slug = slugify(input.data.slug || input.data.title); const { data, error } = await getSupabase().from("tours").update({ slug, title: input.data.title, duration: input.data.duration, days: input.data.days, category: input.data.category, summary: input.data.summary, image_url: input.data.imageUrl || null, featured: input.data.featured, price_note: input.data.priceNote || null, best_for: input.data.bestFor || null, detail: input.data.detail, sort_order: input.data.sortOrder, status: input.data.status, updated_at: new Date().toISOString() }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "Tour could not be saved. The slug may already exist." }); await recordAudit(actor, "tour.updated", "tour", data.id, { status: data.status }); return data; }),
+      remove: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { error } = await getSupabase().from("tours").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not delete the tour." }); await recordAudit(actor, "tour.deleted", "tour", input.id, {}); return { success: true }; }),
+    }),
+    faqs: router({
+      list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("faqs").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("sort_order", { ascending: true }).limit(200); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load FAQs." }); return data ?? []; }),
+      create: protectedProcedure.input(faqInput).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("faqs").insert({ organization_id: actor.organizationId, site_id: actor.siteId, question: input.question, answer: input.answer, sort_order: input.sortOrder, status: input.status }).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "FAQ could not be created." }); await recordAudit(actor, "faq.created", "faq", data.id, {}); return data; }),
+      update: protectedProcedure.input(z.object({ id: z.string().uuid(), data: faqInput })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("faqs").update({ question: input.data.question, answer: input.data.answer, sort_order: input.data.sortOrder, status: input.data.status, updated_at: new Date().toISOString() }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "FAQ not found." }); await recordAudit(actor, "faq.updated", "faq", data.id, {}); return data; }),
+      remove: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { error } = await getSupabase().from("faqs").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not delete the FAQ." }); await recordAudit(actor, "faq.deleted", "faq", input.id, {}); return { success: true }; }),
+    }),
+    reviews: router({
+      list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("video_reviews").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("sort_order", { ascending: true }).order("created_at", { ascending: false }).limit(200); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load video reviews." }); return data ?? []; }),
+      create: protectedProcedure.input(reviewInput).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("video_reviews").insert({ organization_id: actor.organizationId, site_id: actor.siteId, customer_name: input.customerName, tour_slug: input.tourSlug, video_url: input.videoUrl, thumbnail_url: input.thumbnailUrl || null, quote: input.quote, rating: input.rating, sort_order: input.sortOrder, status: input.status }).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "Video review could not be created." }); await recordAudit(actor, "review.created", "video_review", data.id, { status: data.status }); return data; }),
+      update: protectedProcedure.input(z.object({ id: z.string().uuid(), data: reviewInput })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("video_reviews").update({ customer_name: input.data.customerName, tour_slug: input.data.tourSlug, video_url: input.data.videoUrl, thumbnail_url: input.data.thumbnailUrl || null, quote: input.data.quote, rating: input.data.rating, sort_order: input.data.sortOrder, status: input.data.status, updated_at: new Date().toISOString() }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "Video review not found." }); await recordAudit(actor, "review.updated", "video_review", data.id, { status: data.status }); return data; }),
+      remove: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { error } = await getSupabase().from("video_reviews").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not delete the video review." }); await recordAudit(actor, "review.deleted", "video_review", input.id, {}); return { success: true }; }),
+    }),
+    foodMenu: router({
+      list: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("food_menu_items").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("sort_order", { ascending: true }).order("created_at", { ascending: false }).limit(200); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load the food menu." }); return data ?? []; }),
+      create: protectedProcedure.input(menuItemInput).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("food_menu_items").insert({ organization_id: actor.organizationId, site_id: actor.siteId, name: input.name, description: input.description, price_note: input.priceNote, image_url: input.imageUrl || null, category: input.category, sort_order: input.sortOrder, status: input.status }).select("*").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "Menu item could not be created." }); await recordAudit(actor, "menu_item.created", "food_menu_item", data.id, { status: data.status }); return data; }),
+      update: protectedProcedure.input(z.object({ id: z.string().uuid(), data: menuItemInput })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("food_menu_items").update({ name: input.data.name, description: input.data.description, price_note: input.data.priceNote, image_url: input.data.imageUrl || null, category: input.data.category, sort_order: input.data.sortOrder, status: input.data.status, updated_at: new Date().toISOString() }).eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).select("*").single(); if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "Menu item not found." }); await recordAudit(actor, "menu_item.updated", "food_menu_item", data.id, { status: data.status }); return data; }),
+      remove: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { error } = await getSupabase().from("food_menu_items").delete().eq("id", input.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not delete the menu item." }); await recordAudit(actor, "menu_item.deleted", "food_menu_item", input.id, {}); return { success: true }; }),
+    }),
+
+  }),
+
+  business: router({
+    get: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { data, error } = await getSupabase().from("site_settings").select("contact").eq("site_id", actor.siteId).maybeSingle(); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load business settings." }); return (data?.contact ?? {}) as Record<string, unknown>; }),
+    update: protectedProcedure.input(z.object({ contact: contactSchema })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const { data, error } = await getSupabase().from("site_settings").upsert({ organization_id: actor.organizationId, site_id: actor.siteId, contact: input.contact, updated_at: new Date().toISOString(), updated_by: actor.profileId }, { onConflict: "site_id" }).select("id").single(); if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "Business settings could not be saved." }); await recordAudit(actor, "business.updated", "site_settings", data.id, {}); return { success: true }; }),
   }),
 
   analytics: protectedProcedure.input(z.object({ from: z.string().datetime().optional(), to: z.string().datetime().optional() })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor", "author"]); const to = input.to ?? new Date().toISOString(); const from = input.from ?? new Date(Date.now() - 30 * 86400000).toISOString(); return getAnalyticsSummary(actor, from, to); }),
@@ -324,7 +451,7 @@ export const studioRouter = router({
 
   settings: router({
     get: protectedProcedure.query(async ({ ctx }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const [site, settings] = await Promise.all([getSupabase().from("sites").select("id, name, slug, description, custom_domain, theme_settings").eq("id", actor.siteId).single(), getSupabase().from("site_settings").select("*").eq("site_id", actor.siteId).maybeSingle()]); if (site.error || !site.data || settings.error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load site settings." }); return { site: site.data, settings: settings.data }; }),
-    update: protectedProcedure.input(z.object({ name: z.string().trim().min(1).max(120), description: z.string().max(500).optional(), customDomain: z.string().trim().max(253).optional(), themeSettings: z.record(z.string(), z.unknown()).default({}), navigation: z.array(z.object({ label: z.string().trim().min(1).max(40), path: z.string().trim().min(1).max(300) })).max(20).default([]), defaultLocale: z.string().trim().min(2).max(12).default("en"), timezone: z.string().trim().min(1).max(64).default("UTC"), seoDefaults: z.record(z.string(), z.unknown()).default({}), featureFlags: z.record(z.string(), z.boolean()).default({}), brand: z.object({ tagline: z.string().max(180).optional(), logoUrl: z.string().url().max(2048).optional().or(z.literal("")), logoAlt: z.string().max(160).optional(), faviconUrl: z.string().url().max(2048).optional().or(z.literal("")), defaultOgImageUrl: z.string().url().max(2048).optional().or(z.literal("")), primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional() }).default({}), footerLinks: z.array(z.object({ label: z.string().trim().min(1).max(60), path: z.string().trim().min(1).max(300) })).max(20).default([]), contact: z.object({ email: z.string().email().max(320).optional().or(z.literal("")), name: z.string().max(120).optional() }).default({}) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const db = getSupabase(); const { error: siteError } = await db.from("sites").update({ name: input.name, description: input.description || null, custom_domain: input.customDomain || null, theme_settings: input.themeSettings }).eq("id", actor.siteId).eq("organization_id", actor.organizationId); if (siteError) throw new TRPCError({ code: "BAD_REQUEST", message: "The site settings could not be saved. The custom domain may already belong to another site." }); const { data, error } = await db.from("site_settings").upsert({ organization_id: actor.organizationId, site_id: actor.siteId, navigation: input.navigation, default_locale: input.defaultLocale, timezone: input.timezone, seo_defaults: input.seoDefaults, feature_flags: input.featureFlags, brand: input.brand, footer_links: input.footerLinks, contact: input.contact, updated_by: actor.profileId }, { onConflict: "site_id" }).select("*").single(); if (error || !data) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The scoped settings record could not be saved." }); await recordAudit(actor, "site.settings_updated", "site", actor.siteId, { changed: ["name", "description", "customDomain", "themeSettings", "navigation", "seoDefaults", "featureFlags", "brand", "footerLinks", "contact"] }); return data; }),
+    update: protectedProcedure.input(z.object({ name: z.string().trim().min(1).max(120), description: z.string().max(500).optional(), customDomain: z.string().trim().max(253).optional(), themeSettings: z.record(z.string(), z.unknown()).default({}), navigation: z.array(z.object({ label: z.string().trim().min(1).max(40), path: z.string().trim().min(1).max(300) })).max(20).default([]), defaultLocale: z.string().trim().min(2).max(12).default("en"), timezone: z.string().trim().min(1).max(64).default("UTC"), seoDefaults: z.record(z.string(), z.unknown()).default({}), featureFlags: z.record(z.string(), z.boolean()).default({}), brand: z.object({ tagline: z.string().max(180).optional(), logoUrl: urlOrPath(2048), logoAlt: z.string().max(160).optional(), faviconUrl: urlOrPath(2048), defaultOgImageUrl: urlOrPath(2048), primaryColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).optional(), heroMediaType: z.enum(["image", "video"]).optional(), heroImageUrl: urlOrPath(2048), heroVideoUrl: urlOrPath(2048), heroEyebrow: z.string().max(120).optional(), heroTitle: z.string().max(160).optional(), heroSubtitle: z.string().max(300).optional(), safariImageUrl: urlOrPath(2048), safariTitle: z.string().max(160).optional(), safariText: z.string().max(1000).optional(), safariPoints: z.array(z.string().max(160)).max(6).optional(), aboutImageUrl: urlOrPath(2048), trustItems: z.array(z.object({ icon: z.string().max(40).optional(), title: z.string().max(80), desc: z.string().max(300) })).max(6).optional() }).default({}), footerLinks: z.array(z.object({ label: z.string().trim().min(1).max(60), path: z.string().trim().min(1).max(300) })).max(20).default([]), contact: z.object({ email: z.string().email().max(320).optional().or(z.literal("")), name: z.string().max(120).optional() }).default({}) })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin"]); const db = getSupabase(); const { error: siteError } = await db.from("sites").update({ name: input.name, description: input.description || null, custom_domain: input.customDomain || null, theme_settings: input.themeSettings }).eq("id", actor.siteId).eq("organization_id", actor.organizationId); if (siteError) throw new TRPCError({ code: "BAD_REQUEST", message: "The site settings could not be saved. The custom domain may already belong to another site." }); const { data, error } = await db.from("site_settings").upsert({ organization_id: actor.organizationId, site_id: actor.siteId, navigation: input.navigation, default_locale: input.defaultLocale, timezone: input.timezone, seo_defaults: input.seoDefaults, feature_flags: input.featureFlags, brand: input.brand, footer_links: input.footerLinks, contact: input.contact, updated_by: actor.profileId }, { onConflict: "site_id" }).select("*").single(); if (error || !data) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The scoped settings record could not be saved." }); await recordAudit(actor, "site.settings_updated", "site", actor.siteId, { changed: ["name", "description", "customDomain", "themeSettings", "navigation", "seoDefaults", "featureFlags", "brand", "footerLinks", "contact"] }); return data; }),
   }),
 
   pages: router({

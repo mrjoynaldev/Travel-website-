@@ -117,6 +117,55 @@ export const blogRouter = router({
     return data ?? [];
   }),
 
+  tours: publicProcedure.query(async () => {
+    const site = await publicSiteOrThrow();
+    if (!site) return [];
+    const { data, error } = await getSupabase().from("tours").select("id, slug, title, duration, days, category, summary, image_url, featured, price_note, best_for, detail, sort_order, updated_at").eq("site_id", site.id).eq("status", "published").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load tours." });
+    return data ?? [];
+  }),
+
+  tourBySlug: publicProcedure.input(z.object({ slug: z.string().min(1).max(180) })).query(async ({ input }) => {
+    const site = await publicSiteOrThrow();
+    if (!site) throw new TRPCError({ code: "NOT_FOUND", message: "Publication not found." });
+    const { data, error } = await getSupabase().from("tours").select("id, slug, title, duration, days, category, summary, image_url, featured, price_note, best_for, detail, sort_order, updated_at").eq("site_id", site.id).eq("slug", input.slug).eq("status", "published").maybeSingle();
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load the tour." });
+    if (!data) throw new TRPCError({ code: "NOT_FOUND", message: "Tour not found." });
+    return data;
+  }),
+
+  faqs: publicProcedure.query(async () => {
+    const site = await publicSiteOrThrow();
+    if (!site) return [];
+    const { data, error } = await getSupabase().from("faqs").select("id, question, answer").eq("site_id", site.id).eq("status", "published").order("sort_order", { ascending: true });
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load FAQs." });
+    return data ?? [];
+  }),
+
+  destinations: publicProcedure.query(async () => {
+    const site = await publicSiteOrThrow();
+    if (!site) return [];
+    const { data, error } = await getSupabase().from("destinations").select("id, slug, name, summary, image_url, tag").eq("site_id", site.id).eq("status", "published").order("sort_order", { ascending: true });
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load destinations." });
+    return data ?? [];
+  }),
+
+  videoReviews: publicProcedure.query(async () => {
+    const site = await publicSiteOrThrow();
+    if (!site) return [];
+    const { data, error } = await getSupabase().from("video_reviews").select("id, customer_name, tour_slug, video_url, thumbnail_url, quote, rating").eq("site_id", site.id).eq("status", "published").order("sort_order", { ascending: true }).order("created_at", { ascending: false }).limit(24);
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load video reviews." });
+    return data ?? [];
+  }),
+
+  foodMenu: publicProcedure.query(async () => {
+    const site = await publicSiteOrThrow();
+    if (!site) return [];
+    const { data, error } = await getSupabase().from("food_menu_items").select("id, name, description, price_note, image_url, category").eq("site_id", site.id).eq("status", "published").order("sort_order", { ascending: true }).order("created_at", { ascending: false }).limit(60);
+    if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load the food menu." });
+    return data ?? [];
+  }),
+
   list: publicProcedure.input(z.object({ query: z.string().trim().max(100).optional(), category: z.string().max(120).optional(), tag: z.string().max(120).optional(), year: z.number().int().min(2000).max(2100).optional(), page: z.number().int().min(1).max(500).default(1) })).query(async ({ input }) => {
     const site = await publicSiteOrThrow();
     if (!site) return { items: [], total: 0, page: input.page, totalPages: 0 };
@@ -241,10 +290,40 @@ export const blogRouter = router({
     return { success: true };
   }),
 
-  submitLead: publicProcedure.input(z.object({ name: z.string().trim().min(2).max(120), email: z.string().email().max(320), need: z.string().trim().min(10).max(2000), source: z.string().max(80).optional() })).mutation(async ({ input }) => {
+  submitLead: publicProcedure.input(z.object({
+    name: z.string().trim().min(2).max(120),
+    // Email is optional: the /hire form captures phone-first, so an empty string / omission is valid.
+    email: z.union([z.literal(""), z.string().trim().email().max(320)]).optional(),
+    phone: z.string().trim().max(40).optional(),
+    travelDate: z.string().trim().max(24).optional(),
+    travellers: z.union([z.number().int().min(1).max(100), z.string().trim().max(20)]).optional(),
+    tour: z.string().trim().max(180).optional(),
+    need: z.string().trim().max(2000).optional(),
+    source: z.string().max(80).optional(),
+  })).mutation(async ({ input }) => {
     const site = await publicSiteOrThrow();
     if (!site) throw new TRPCError({ code: "NOT_FOUND", message: "Publication not found." });
-    const { error } = await getSupabase().from("leads").insert({ organization_id: site.organization_id, site_id: site.id, name: input.name, email: input.email.toLowerCase(), need: input.need, source: input.source ?? "hire-page" });
+    // The live leads table stores travel_date as a date and travellers as an integer,
+    // so coerce lenient public input into strict column types (null when invalid).
+    const travelDate = input.travelDate && /^\d{4}-\d{2}-\d{2}$/.test(input.travelDate) ? input.travelDate : null;
+    const travellersRaw = typeof input.travellers === "number" ? input.travellers : Number.parseInt(input.travellers ?? "", 10);
+    const travellers = Number.isInteger(travellersRaw) && travellersRaw >= 1 && travellersRaw <= 100 ? travellersRaw : null;
+    const phone = input.phone ?? null;
+    const need = input.need?.trim() || [input.tour && `Tour: ${input.tour}`, travelDate && `Date: ${travelDate}`, travellers && `Travellers: ${travellers}`, phone && `Phone: ${phone}`].filter(Boolean).join(" | ") || "New trip enquiry";
+    const { error } = await getSupabase().from("leads").insert({
+      organization_id: site.organization_id,
+      site_id: site.id,
+      name: input.name,
+      email: input.email ? input.email.toLowerCase() : null,
+      phone,
+      // The form field is "Phone / WhatsApp" — keep both columns in sync.
+      whatsapp: phone,
+      travel_date: travelDate,
+      travellers,
+      tour_slug: input.tour ?? null,
+      need,
+      source: input.source ?? "hire-page",
+    });
     if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not send lead." });
     return { success: true };
   }),

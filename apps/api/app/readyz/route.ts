@@ -10,9 +10,9 @@ export async function GET() {
       new Promise<never>((_, reject) => setTimeout(() => reject(new Error("database readiness probe timed out")), 5_000)),
     ]);
     const { error } = result;
-    if (error) return Response.json({ ok: false, service: "codereport-api", dependency: "database" }, { status: 503 });
-    return Response.json({ ok: true, service: "codereport-api", dependency: "database" });
+    if (error) return Response.json({ ok: false, service: "sundarban-yatri-api", dependency: "database" }, { status: 503 });
+    return Response.json({ ok: true, service: "sundarban-yatri-api", dependency: "database" });
   } catch {
-    return Response.json({ ok: false, service: "codereport-api", dependency: "database" }, { status: 503 });
+    return Response.json({ ok: false, service: "sundarban-yatri-api", dependency: "database" }, { status: 503 });
   }
 }

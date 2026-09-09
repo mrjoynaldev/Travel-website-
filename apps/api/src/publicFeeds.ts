@@ -61,7 +61,7 @@ async function latestPosts() {
   const postsWithMeta = (posts ?? []).map((post: any) => ({
     ...post,
     categoryNames: postCategoryMap.get(post.id) ?? [],
-    authorName: profileMap.get(post.author_id) ?? "CodeReport Global",
+    authorName: profileMap.get(post.author_id) ?? "Sundarban Yatri",
   }));
   return {
     site,
@@ -131,7 +131,7 @@ export async function newsSitemapXml(): Promise<FeedResult> {
       const post = entry.post;
       const title = stripHtml(post.title || post.slug);
       const date = new Date(post.published_at || post.updated_at).toISOString();
-      return `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><news:news><news:publication><news:name>CodeReport Global</news:name><news:language>en</news:language></news:publication><news:publication_date>${date}</news:publication_date><news:title>${xmlEscape(title)}</news:title></news:news></url>`;
+      return `<url><loc>${xmlEscape(`${base}/articles/${post.slug}`)}</loc><news:news><news:publication><news:name>Sundarban Yatri</news:name><news:language>en</news:language></news:publication><news:publication_date>${date}</news:publication_date><news:title>${xmlEscape(title)}</news:title></news:news></url>`;
     }).join("");
     return { body: `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">${urls}</urlset>`, contentType: "application/xml", status: 200 };
   } catch (error) {
@@ -171,11 +171,11 @@ export async function rssXml(): Promise<FeedResult> {
       .slice(0, 50)
       .map((post: any) => {
         const categoryXml = (post.categoryNames ?? []).map((c: string) => `<category>${xmlEscape(c)}</category>`).join("");
-        const authorName = post.authorName || "CodeReport Global";
+        const authorName = post.authorName || "Sundarban Yatri";
         return `<item><title>${xmlEscape(post.title)}</title><link>${xmlEscape(`${base}/articles/${post.slug}`)}</link><guid isPermaLink="true">${xmlEscape(`${base}/articles/${post.slug}`)}</guid><pubDate>${new Date(post.published_at).toUTCString()}</pubDate><dc:creator>${xmlEscape(authorName)}</dc:creator>${categoryXml}<description>${xmlEscape(post.excerpt || stripHtml(post.rendered_html).slice(0, 400))}</description><content:encoded>${cdata(post.rendered_html || "")}</content:encoded></item>`;
       })
       .join("");
-    const name = site?.name || process.env.SITE_NAME || "CodeReport Global";
+    const name = site?.name || process.env.SITE_NAME || "Sundarban Yatri";
     const body = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>${xmlEscape(name)}</title><link>${xmlEscape(base)}</link><description>${xmlEscape(site?.description || "Independent ideas, clearly told.")}</description><atom:link href="${xmlEscape(`${base}/rss.xml`)}" rel="self" type="application/rss+xml" />${items}</channel></rss>`;
     return { body, contentType: "application/rss+xml", status: 200 };
   } catch (error) {

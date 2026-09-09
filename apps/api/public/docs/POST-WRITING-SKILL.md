@@ -599,7 +599,7 @@ Publishing is half the job. Every published article gets a distribution pass
 so the piece earns reach AND backlinks without duplicate-content risk.
 
 Golden rules:
-1. **Own domain first.** sundarbanyatra.in is always the canonical
+1. **Own domain first.** sundarbanyatra.com is always the canonical
    home; every syndicated copy must point back with rel=canonical.
 2. **Wait for indexing before full-copy syndication**: as a new site wait
    7–10 days after publish (verify with GSC), then syndicate. Link drops and
@@ -619,7 +619,7 @@ Golden rules:
 **Link embedding (blue clickable) — how each platform makes links blue:**
 | Platform | Official doc | Blue link method | AI job (what you write) | System does |
 |---|---|---|---|---|
-| **dev.to** | `https://developers.forem.com/api/v0` | Markdown `[text](url)` + `canonical_url` front matter | `devto.md` teaser with `👉 Read full: [Title](url)` + `canonical_url: https://sundarbanyatra.in/articles/<slug>` | `POST /api/articles {body_markdown}` — front matter `published` ignored, JSON `published` controls state |
+| **dev.to** | `https://developers.forem.com/api/v0` | Markdown `[text](url)` + `canonical_url` front matter | `devto.md` teaser with `👉 Read full: [Title](url)` + `canonical_url: https://sundarbanyatra.com/articles/<slug>` | `POST /api/articles {body_markdown}` — front matter `published` ignored, JSON `published` controls state |
 | **Bluesky** | `https://docs.bsky.app/docs/advanced-guides/posts` `atproto.com/specs/lexicon#app.bsky.feed.post` | `app.bsky.richtext.facet#link` (UTF-8 byte offsets) + `app.bsky.embed.external` card | `bluesky.txt` **MUST** contain full `https://...` URL + 2–3 `#hashtags` on its own lines, ≤300 graphemes total | `apps/api/src/routers/distributionRouter.ts:62` `detectBlueskyFacets()` builds link/tag facets + `fetchBlueskyLinkCard()` builds `embed.external` from `og:image/og:title` (Supabase 1200×630 `apps/website/src/lib/social-image.ts:1`) |
 | **Mastodon** | `https://docs.joinmastodon.org/methods/statuses/` | Server auto-links `https://` + `#hashtag` | Plain text with full URL + 2 `#tags` — never shorten (URLs count as 23 chars in 500 budget) | `POST /api/v1/statuses {status, visibility:public, language:en}` — server creates `<a href>` + `tags[]` entities |
 | **Facebook Page** | `https://developers.facebook.com/docs/graph-api/reference/page/feed` `v26.0` | `link` param → blue link preview via `og:image` | `facebook.txt` with `Read full: {url}` on its own line + hashtags | `POST /{PAGE_ID}/feed {message, link, access_token}` → `https://www.facebook.com/{PAGE_ID}/posts/{id}` — preview uses our `og:image` |

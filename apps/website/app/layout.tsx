@@ -20,7 +20,7 @@ const dmMono = DM_Mono({
   weight: ["400", "500"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { TourDetail } from "@web/components/travel/TourDetail";
-import { TOURS, getTour } from "@web/lib/travel-data";
+import { getBusiness, getFaqs, getRelatedTours, getTour, getTours } from "@web/lib/catalogue";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
-export function generateStaticParams() {
-  return TOURS.map((t) => ({ slug: t.slug }));
+export async function generateStaticParams() {
+  const tours = await getTours();
+  return tours.map((t) => ({ slug: t.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const tour = getTour(slug);
+  const tour = await getTour(slug);
   if (!tour) return { title: "Tour not found" };
+  const image = (tour.gallery && tour.gallery[0]) || tour.image;
   return {
     title: `${tour.title} — Itinerary, Inclusions & Booking | Sundarban Yatri`,
     description: tour.summary,
@@ -23,13 +25,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       url: `${siteUrl()}/tours/${slug}`,
       title: tour.title,
       description: tour.summary,
-      images: [{ url: tour.gallery[0], width: 1200, height: 630 }],
+      images: image ? [{ url: image, width: 1200, height: 630 }] : undefined,
     },
   };
 }
 
 export default async function TourPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  if (!getTour(slug)) notFound();
-  return <TourDetail slug={slug} />;
+  const [tour, related, faqs, business] = await Promise.all([getTour(slug), getRelatedTours(slug), getFaqs(), getBusiness()]);
+  if (!tour) notFound();
+  return <TourDetail tour={tour} related={related} faqs={faqs} business={business} />;
 }

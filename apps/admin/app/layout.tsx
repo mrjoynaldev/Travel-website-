@@ -3,8 +3,8 @@ import "./globals.css";
 import { Providers } from "../src/providers";
 
 export const metadata: Metadata = {
-  title: "CodeReport Global Studio",
-  description: "Editorial workspace for CodeReport Global.",
+  title: "Sundarban Yatri Studio",
+  description: "Editorial workspace for Sundarban Yatri.",
   robots: { index: false, follow: false },
 };
 

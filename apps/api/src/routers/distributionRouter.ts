@@ -82,11 +82,12 @@ async function flipDevtoDraft(articleId: string, slug?: string, siteId?: string)
       }
       const title = String((post as any).title || slug).trim();
       const summary = String((post as any).meta_description || (post as any).excerpt || "").slice(0, 140) || title.slice(0, 130);
-      const url = `https://codereportglobal.indevs.in/articles/${(post as any).slug}`;
+      const siteOrigin = (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+      const url = `${siteOrigin}/articles/${(post as any).slug}`;
       const tagList = ((post as any).tags as any[] | null)?.map((r: any) => String(r.tag?.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")).filter((t: string) => t.length >= 3) ?? [];
       const tags = [...new Set([...tagList, "ai", "webdev", "programming", "news"])].slice(0, 4);
       const text = String((post as any).rendered_html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 600);
-      const teaser = `${summary}\n\n> Originally published at **CodeReport Global** — read the full guide at **${url}**.\n\n${text}…\n\n👉 **Read the full article:** ${url}`;
+      const teaser = `${summary}\n\n> Originally published at **Sundarban Yatri** — read the full guide at **${url}**.\n\n${text}…\n\n👉 **Read the full article:** ${url}`;
       const bodyMarkdown = `---\ntitle: ${title.replace(/\n/g, " ")}\npublished: true\ndescription: ${summary.replace(/\n/g, " ")}\ntags: ${tags.join(", ")}\ncanonical_url: ${url}${cover ? `\ncover_image: ${cover}` : ""}\n---\n\n${teaser}\n\n---\n*Canonical: ${url}*\n`;
       const retry = await fetch(`https://dev.to/api/articles/${articleId}`, {
         method: "PUT",

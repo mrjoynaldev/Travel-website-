@@ -21,6 +21,8 @@ const staticCacheHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Allow Google Cloud Shell preview hosts, otherwise Next blocks /_next dev assets → white screen.
+  allowedDevOrigins: ["**.cloudshell.dev", "**.googleusercontent.com", "**.trycloudflare.com", "10.88.0.4"],
   transpilePackages: ["@fieldnote/client-common"],
   experimental: {
     inlineCss: true,

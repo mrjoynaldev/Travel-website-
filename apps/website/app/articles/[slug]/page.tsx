@@ -9,7 +9,7 @@ export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 const titleOverrides: Record<string, string> = {
   "how-to-reach-sundarban": "How to Reach Sundarban from Kolkata (2026)",

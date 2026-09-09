@@ -28,7 +28,7 @@ export default function LoginPage() {
     <div className="grid min-h-screen place-items-center bg-[#fbfcfa] px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <p className="font-label text-[10px] tracking-widest text-primary">CODEREPORT GLOBAL</p>
+          <p className="font-label text-[10px] tracking-widest text-primary">SUNDARBAN YATRI</p>
           <h1 className="mt-3 font-display text-3xl font-semibold">Publication studio</h1>
           <p className="mt-2 text-sm text-muted-foreground">Sign in with your publication account to manage content.</p>
         </div>

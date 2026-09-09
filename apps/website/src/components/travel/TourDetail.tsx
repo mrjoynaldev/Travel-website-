@@ -3,15 +3,29 @@ import { TourCard } from "@web/components/travel/TourCard";
 import { Faq } from "@web/components/conversion/Faq";
 import { LeadForm } from "@web/components/conversion/LeadForm";
 import { businessConfig, buildWhatsAppUrl, tourWhatsAppMessage } from "@web/lib/business";
-import { FAQS, TOURS, getTour } from "@web/lib/travel-data";
+import type { Business, FAQItem, TourWithDetail } from "@web/lib/catalogue";
+import { FAQS, TOURS } from "@web/lib/travel-data";
+import type { Tour } from "@web/lib/travel-data";
 import { BedDouble, CalendarDays, Car, Check, Clock3, MapPin, MessageCircle, Phone, Ship, Users, X } from "lucide-react";
 import Link from "next/link";
 
-export function TourDetail({ slug }: { slug: string }) {
-  const tour = getTour(slug);
-  if (!tour) return null;
-  const wa = buildWhatsAppUrl(tourWhatsAppMessage(tour.title));
-  const related = TOURS.filter((t) => t.slug !== slug).slice(0, 3);
+const DEFAULT_FAQS: FAQItem[] = FAQS.map(item => ({ q: item.q, a: item.a }));
+
+export function TourDetail({
+  tour,
+  related,
+  faqs,
+  business,
+}: {
+  tour: TourWithDetail;
+  related?: Tour[];
+  faqs?: FAQItem[];
+  business?: Business;
+}) {
+  const biz = business ?? businessConfig;
+  const relatedTours = related ?? TOURS.filter((t) => t.slug !== tour.slug).slice(0, 3);
+  const faqList = faqs ?? DEFAULT_FAQS;
+  const wa = buildWhatsAppUrl(tourWhatsAppMessage(tour.title), biz.whatsapp);
 
   return (
     <>
@@ -111,13 +125,13 @@ export function TourDetail({ slug }: { slug: string }) {
             </div>
 
             <h2 className="mt-12 h2 font-display">Common questions</h2>
-            <div className="mt-5"><Faq items={FAQS.slice(0, 5)} /></div>
+            <div className="mt-5"><Faq items={faqList.slice(0, 5)} /></div>
 
             <div className="mt-10 rounded-[24px] bg-[#0f4532] p-7 lg:p-9 text-white">
               <p className="font-label text-[11px] text-[#d59b43]">Like this tour?</p>
               <h2 className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight">Call or WhatsApp — we&apos;ll lock your dates.</h2>
               <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
-                <a href={`tel:${businessConfig.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0f4532] hover:bg-[#f5e7cc] transition-colors"><Phone className="h-4 w-4" /> {businessConfig.phoneDisplay}</a>
+                <a href={`tel:${biz.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0f4532] hover:bg-[#f5e7cc] transition-colors"><Phone className="h-4 w-4" /> {biz.phoneDisplay}</a>
                 <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-4 w-4" /> WhatsApp This Tour</a>
               </div>
               <p className="mt-4 text-sm text-white/60">Outside India? Use the enquiry form in the side card →</p>
@@ -133,7 +147,7 @@ export function TourDetail({ slug }: { slug: string }) {
                 <span className="inline-flex items-center gap-1.5"><Ship className="h-4 w-4 text-primary" /> Licensed boat + permits handled</span>
               </div>
               <div className="mt-5 grid gap-2.5">
-                <a href={`tel:${businessConfig.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-[15px] font-bold text-white hover:bg-[#0f4532] transition-colors"><Phone className="h-4 w-4" /> Call to Book</a>
+                <a href={`tel:${biz.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-[15px] font-bold text-white hover:bg-[#0f4532] transition-colors"><Phone className="h-4 w-4" /> Call to Book</a>
                 <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-5 py-3 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
               </div>
               <div className="my-5 border-t border-dashed border-border" />
@@ -155,7 +169,7 @@ export function TourDetail({ slug }: { slug: string }) {
             <Link href="/tours" className="text-sm font-semibold text-primary hover:underline">All tours →</Link>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
-            {related.map((t) => <TourCard key={t.slug} tour={t} />)}
+            {relatedTours.map((t) => <TourCard key={t.slug} tour={t} />)}
           </div>
         </div>
       </section>

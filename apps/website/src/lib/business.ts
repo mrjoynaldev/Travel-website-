@@ -7,14 +7,14 @@ export const businessConfig = {
   // E.164 without + for tel:, digits for wa.me
   phone: "+918513819474",
   whatsapp: "918513819474",
-  email: "hello@sundarbanyatra.in",
+  email: "hello@sundarbanyatra.com",
   hours: "Mon–Sat, 9am–7pm IST",
 };
 
-export function buildWhatsAppUrl(message: string, tourTitle?: string) {
-  const base = `https://wa.me/${businessConfig.whatsapp}`;
-  const text = tourTitle ? `${message}\n\nTour: ${tourTitle}` : message;
-  return `${base}?text=${encodeURIComponent(text)}`;
+export function buildWhatsAppUrl(message: string, whatsapp?: string) {
+  const number = whatsapp ?? businessConfig.whatsapp;
+  const base = `https://wa.me/${number}`;
+  return `${base}?text=${encodeURIComponent(message)}`;
 }
 
 export const defaultWhatsAppMessage =
@@ -48,8 +48,8 @@ export function tripWhatsAppMessage(d: TripDetails) {
   return lines.join("\n");
 }
 
-export function tripWhatsAppUrl(d: TripDetails) {
-  return buildWhatsAppUrl(tripWhatsAppMessage(d));
+export function tripWhatsAppUrl(d: TripDetails, whatsapp?: string) {
+  return buildWhatsAppUrl(tripWhatsAppMessage(d), whatsapp);
 }
 
 export function trackEvent(name: string, props?: Record<string, unknown>) {

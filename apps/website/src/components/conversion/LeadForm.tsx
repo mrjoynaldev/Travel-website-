@@ -37,8 +37,11 @@ export function LeadForm({
     try {
       await trpcClient.blog.submitLead.mutate({
         name: form.name.trim(),
-        email: "",
-        need: `Tour: ${tourTitle ?? tourSlug ?? "general"} | Date: ${form.date || "-"} | Travellers: ${form.travellers} | Phone: ${form.phone} | Msg: ${form.message}`,
+        phone: form.phone.trim(),
+        travelDate: form.date || undefined,
+        travellers: form.travellers ? Number.parseInt(form.travellers, 10) || undefined : undefined,
+        tour: tourTitle ?? tourSlug ?? undefined,
+        need: form.message.trim() || undefined,
         source: tourSlug ? `tour-${tourSlug}` : "lead-form",
       });
       setSubmitted(true);

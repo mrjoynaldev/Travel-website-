@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: codereportglobal-api
+    name: sundarban-yatri-api
     env: node
     plan: free
     buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fieldnote/api build
@@ -21,4 +21,4 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        value: "https://codereportglobal.indevs.in,https://codereportglobal.vercel.app,https://codereportglobal-admin.vercel.app"
+        value: "https://sundarbanyatra.com,https://www.sundarbanyatra.com"

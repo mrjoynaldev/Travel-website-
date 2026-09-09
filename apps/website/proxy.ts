@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
  * too and breaks local dev. Therefore this redirect only runs in
  * production and never for loopback hosts.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host") || request.nextUrl.host;
   const isLoopback = /^(localhost|127\.0\.0\.1|\[?::1\]?)(:\d+)?$/i.test(host);
   if (isLoopback || process.env.NODE_ENV !== "production") {

@@ -10,8 +10,10 @@ import { Faq } from "@web/components/conversion/Faq";
 import { SectionHeader } from "@web/components/travel/SectionHeader";
 import { TourCard } from "@web/components/travel/TourCard";
 import { buildWhatsAppUrl, businessConfig, defaultWhatsAppMessage } from "@web/lib/business";
-import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE } from "@web/lib/travel-data";
-import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Compass, HeartHandshake, Loader2, Mail, MapPin, MessageCircle, Phone, Route, Ship } from "lucide-react";
+import type { Brand, Business, FAQItem, MenuItem, VideoReview } from "@web/lib/catalogue";
+import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE, TRUST_FEATURES, SAFARI_DEFAULT } from "@web/lib/travel-data";
+import type { Tour } from "@web/lib/travel-data";
+import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Clapperboard, Compass, HeartHandshake, Loader2, Mail, MapPin, MessageCircle, Phone, Route, Ship, Star, UtensilsCrossed } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition, useState } from "react";
@@ -36,7 +38,15 @@ type HomeViewProps = {
   search: string;
   category?: string;
   page: number;
+  tours?: Tour[];
+  faqs?: FAQItem[];
+  business?: Business;
+  videoReviews?: VideoReview[];
+  foodMenu?: MenuItem[];
+  brand?: Brand;
 };
+
+const DEFAULT_FAQS: FAQItem[] = FAQS.map(item => ({ q: item.q, a: item.a }));
 
 function buildQuery(params: Record<string, string | number | undefined>) {
   const url = new URLSearchParams();
@@ -48,14 +58,11 @@ function buildQuery(params: Record<string, string | number | undefined>) {
   return qs ? `/?${qs}` : "/";
 }
 
-const TRUST = [
-  { icon: Compass, title: "Trusted Local Guidance", desc: "Helpful destination knowledge and practical trip-planning support from people who know the delta." },
-  { icon: Route, title: "Thoughtful Itineraries", desc: "Trips designed around realistic travel times, tides and forest entry rules — never rushed." },
-  { icon: HeartHandshake, title: "Clear Communication", desc: "Easy access on WhatsApp, phone and enquiry forms. Real replies, no bots pushing sales." },
-  { icon: MapPin, title: "Planning Support", desc: "Guidance for route, timing, stay and tour selection — even if you book nothing with us." },
-];
+const TRUST_ICONS: Record<string, typeof Compass> = {
+  Compass, Route, HeartHandshake, MapPin, Ship, Binoculars, Phone, Star,
+};
 
-export default function HomeView({ categories, sections, posts, search, category, page }: HomeViewProps) {
+export default function HomeView({ categories, sections, posts, search, category, page, tours, faqs, business, videoReviews, foodMenu, brand }: HomeViewProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState(search);
@@ -99,25 +106,44 @@ export default function HomeView({ categories, sections, posts, search, category
     }
   };
 
-  const waGeneral = buildWhatsAppUrl(defaultWhatsAppMessage);
+  const biz = business ?? businessConfig;
+  const toursList = tours ?? TOURS;
+  const faqList = faqs ?? DEFAULT_FAQS;
+  const reviewList = videoReviews ?? [];
+  const menuList = foodMenu ?? [];
+  const trustList = brand?.trustItems?.length ? brand.trustItems : TRUST_FEATURES;
+  const safariImage = brand?.safariImageUrl?.trim() || SAFARI_IMAGE;
+  const safariTitle = brand?.safariTitle?.trim() || SAFARI_DEFAULT.title;
+  const safariText = brand?.safariText?.trim() || SAFARI_DEFAULT.text;
+  const safariPoints = brand?.safariPoints?.length ? brand.safariPoints : SAFARI_DEFAULT.points;
+  const heroImage = brand?.heroImageUrl?.trim() || HERO_IMAGE;
+  const heroVideo = brand?.heroMediaType === "video" ? brand?.heroVideoUrl?.trim() : "";
+  const heroEyebrow = brand?.heroEyebrow?.trim() || "Sundarban Travel • Tours • Guides";
+  const heroTitle = brand?.heroTitle?.trim() || "Plan Your Sundarban Journey with Confidence";
+  const heroSubtitle = brand?.heroSubtitle?.trim() || "Discover mangrove waterways, wildlife, villages and memorable boat journeys — with practical guides and thoughtfully planned Sundarban tours.";
+  const waGeneral = buildWhatsAppUrl(defaultWhatsAppMessage, biz.whatsapp);
   const isFiltering = Boolean(search || category);
   const isLoading = isPending;
 
   return (
     <>
-      {/* HERO */}
+      {/* HERO — background + copy come from the brand kit, bundled cover as fallback */}
       <section className="relative overflow-hidden bg-[#0a1913] text-white">
-        <img src={HERO_IMAGE} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" />
+        {heroVideo ? (
+          <video src={heroVideo} poster={heroImage} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <img src={heroImage} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" />
+        )}
         <div className="absolute inset-0 yatri-hero-veil" />
         <div className="relative container pb-24 pt-16 md:pb-32 md:pt-24 lg:pb-36 lg:pt-28">
           <p className="inline-flex items-center gap-2 rounded-full bg-white/12 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] backdrop-blur-sm border border-white/20">
-            Sundarban Travel • Tours • Guides
+            {heroEyebrow}
           </p>
           <h1 className="mt-5 max-w-3xl hero-title font-display">
-            Plan Your Sundarban Journey with Confidence
+            {heroTitle}
           </h1>
           <p className="mt-5 max-w-xl text-[1.05rem] lg:text-lg leading-8 text-white/85">
-            Discover mangrove waterways, wildlife, villages and memorable boat journeys — with practical guides and thoughtfully planned Sundarban tours.
+            {heroSubtitle}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a href="#tours" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[15px] font-semibold text-[#0f4532] hover:bg-[#f5e7cc] transition-colors">
@@ -133,7 +159,7 @@ export default function HomeView({ categories, sections, posts, search, category
 
       {/* TRIP PLANNER — overlaps hero */}
       <section className="container relative z-10 -mt-14 md:-mt-16">
-        <TripPlannerCard />
+        <TripPlannerCard business={biz} />
       </section>
 
       {/* POPULAR TOURS */}
@@ -145,7 +171,7 @@ export default function HomeView({ categories, sections, posts, search, category
           action={<a href="/tours" className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all">Compare all tours <ArrowRight className="h-4 w-4" /></a>}
         />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-          {TOURS.map((t) => (
+          {toursList.map((t) => (
             <TourCard key={t.slug} tour={t} />
           ))}
         </div>
@@ -157,13 +183,16 @@ export default function HomeView({ categories, sections, posts, search, category
         <div className="container yatri-section">
           <SectionHeader eyebrow="Why choose us" title="Why Travellers Choose Sundarban Yatri" align="center" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-            {TRUST.map((f) => (
-              <div key={f.title} className="rounded-[20px] border border-border bg-background p-6 lg:p-7">
-                <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#ddebe3] text-primary"><f.icon className="h-5 w-5" /></span>
-                <h3 className="mt-4 font-display text-[1.1rem] font-semibold tracking-tight">{f.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">{f.desc}</p>
-              </div>
-            ))}
+            {trustList.map((f) => {
+              const Icon = TRUST_ICONS[f.icon] ?? Compass;
+              return (
+                <div key={f.title} className="rounded-[20px] border border-border bg-background p-6 lg:p-7">
+                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-[#ddebe3] text-primary"><Icon className="h-5 w-5" /></span>
+                  <h3 className="mt-4 font-display text-[1.1rem] font-semibold tracking-tight">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{f.desc}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -172,19 +201,19 @@ export default function HomeView({ categories, sections, posts, search, category
       <section id="safari" className="container yatri-section scroll-mt-24">
         <div className="grid overflow-hidden rounded-[28px] border border-border bg-white lg:grid-cols-2">
           <div className="relative min-h-[320px] lg:min-h-[480px]">
-            <img src={SAFARI_IMAGE} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={safariImage} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
             <span className="absolute left-5 top-5 yatri-chip bg-white/95">Safari • Licensed boats</span>
           </div>
           <div className="p-7 md:p-10 lg:p-12 flex flex-col justify-center">
             <p className="font-label text-[11px] text-primary">Sundarban Safari</p>
-            <h2 className="mt-3 h2 font-display">Creeks, watchtowers and quiet patience</h2>
+            <h2 className="mt-3 h2 font-display">{safariTitle}</h2>
             <p className="mt-4 leading-8 text-muted-foreground">
-              Safari here is a water journey — permitted creeks, forest guides, and watchtowers at Sajnekhali, Sudhanyakhali and Dobanki. Mornings are misty, afternoons golden, and every turn feels unscripted.
+              {safariText}
             </p>
             <ul className="mt-5 grid gap-2 text-[14.5px] text-foreground">
-              <li className="flex gap-2.5"><Binoculars className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Forest guide + permits handled</li>
-              <li className="flex gap-2.5"><Ship className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Small-group boats, shade + washroom</li>
-              <li className="flex gap-2.5"><BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> Honest briefing — no guaranteed sightings</li>
+              {safariPoints.map(point => (
+                <li key={point} className="flex gap-2.5"><Binoculars className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {point}</li>
+              ))}
             </ul>
             <div className="mt-7 flex flex-wrap gap-3">
               <a href="/hire?interest=safari" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-semibold text-white hover:bg-[#0f4532] transition-colors">Explore Safari Tours</a>
@@ -263,6 +292,81 @@ export default function HomeView({ categories, sections, posts, search, category
         </div>
       </section>
 
+      {/* TRAVELLER VIDEO STORIES — only real uploads, hidden until published */}
+      {!isFiltering && reviewList.length > 0 && (
+        <section id="stories" className="container yatri-section scroll-mt-24">
+          <SectionHeader
+            eyebrow="Traveller stories"
+            title="Hear It From People Who Went"
+            desc="Short clips travellers shared after their Sundarban trip — unscripted, in their own words."
+          />
+          <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {reviewList.slice(0, 6).map(review => (
+              <article key={review.id} className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5">
+                <video
+                  src={review.video_url}
+                  poster={review.thumbnail_url ?? undefined}
+                  controls
+                  preload="none"
+                  playsInline
+                  className="aspect-[4/3] w-full bg-black object-cover"
+                />
+                <div className="p-5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold">{review.customer_name}</p>
+                    {typeof review.rating === "number" && (
+                      <span className="inline-flex items-center gap-0.5" aria-label={`${review.rating} out of 5 stars`}>
+                        {[1, 2, 3, 4, 5].map(n => (
+                          <Star key={n} className={`h-3.5 w-3.5 ${n <= (review.rating ?? 0) ? "fill-amber-400 text-amber-400" : "text-slate-300"}`} />
+                        ))}
+                      </span>
+                    )}
+                  </div>
+                  {review.quote && <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">“{review.quote}”</p>}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* FOOD ON THE JOURNEY — gallery of what the kitchen serves */}
+      {!isFiltering && menuList.length > 0 && (
+        <section id="food" className="bg-[#eff4ee] scroll-mt-24">
+          <div className="container yatri-section">
+            <SectionHeader
+              eyebrow="Food & meals"
+              title="What Travellers Eat on the Trip"
+              desc="Real plates from our tours and stays — cooked fresh, served hot on the boat and at the resort."
+            />
+            <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {menuList.slice(0, 8).map(item => (
+                <article key={item.id} className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-black/5">
+                  {item.image_url && (
+                    <div className="relative aspect-square overflow-hidden">
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="p-4">
+                    <div className="flex items-center gap-1.5 text-primary">
+                      <UtensilsCrossed className="h-3.5 w-3.5" />
+                      {item.category && <span className="text-xs font-medium text-muted-foreground">{item.category}</span>}
+                    </div>
+                    <h3 className="mt-1.5 font-semibold leading-snug">{item.name}</h3>
+                    {item.price_note && <p className="mt-1 text-xs text-muted-foreground">{item.price_note}</p>}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* FAQ — honest substitute for fabricated reviews */}
       <section id="faq" className="container yatri-section scroll-mt-24">
         <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-14">
@@ -275,7 +379,7 @@ export default function HomeView({ categories, sections, posts, search, category
               <a href="/hire" className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-white px-6 text-sm font-semibold hover:border-primary/40 hover:text-primary">Get a Quote</a>
             </div>
           </div>
-          <Faq items={FAQS} />
+          <Faq items={faqList} />
         </div>
       </section>
 
@@ -289,9 +393,9 @@ export default function HomeView({ categories, sections, posts, search, category
               <h2 className="mt-3 font-display text-3xl md:text-4xl lg:text-[2.8rem] font-bold tracking-tight leading-[1.05]">Ready to Plan Your Sundarban Trip?</h2>
               <p className="mt-4 max-w-lg leading-8 text-white/80">One call sorts it all — dates, safari, stay. Tap below and talk to a human.</p>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                <a href={`tel:${businessConfig.phone}`} className="inline-flex min-h-14 flex-col items-center justify-center rounded-2xl bg-white px-6 py-3 text-[#0f4532] hover:bg-[#f5e7cc] transition-colors">
-                  <span className="flex items-center gap-2 text-[15px] font-bold"><Phone className="h-5 w-5" /> {businessConfig.phoneDisplay}</span>
-                  <span className="mt-0.5 block text-xs font-medium text-[#0f4532]/70">Tap to call • {businessConfig.hours}</span>
+                <a href={`tel:${biz.phone}`} className="inline-flex min-h-14 flex-col items-center justify-center rounded-2xl bg-white px-6 py-3 text-[#0f4532] hover:bg-[#f5e7cc] transition-colors">
+                  <span className="flex items-center gap-2 text-[15px] font-bold"><Phone className="h-5 w-5" /> {biz.phoneDisplay}</span>
+                  <span className="mt-0.5 block text-xs font-medium text-[#0f4532]/70">Tap to call • {biz.hours}</span>
                 </a>
                 <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-5 w-5" /> WhatsApp Us</a>
               </div>

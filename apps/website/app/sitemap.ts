@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-import { TOURS } from "@web/lib/travel-data";
+import { getTours } from "@web/lib/catalogue";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteUrl().replace(/\/$/, "");
   const staticRoutes = ["", "/tours", "/hire", "/about", "/contact", "/archive"];
   const entries: MetadataRoute.Sitemap = staticRoutes.map((p) => ({
@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: p === "" ? "daily" : "weekly",
     priority: p === "" ? 1 : 0.8,
   }));
-  for (const t of TOURS) entries.push({ url: `${base}/tours/${t.slug}`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 });
+  const tours = await getTours();
+  for (const t of tours) entries.push({ url: `${base}/tours/${t.slug}`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 });
   return entries;
 }

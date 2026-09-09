@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { businessConfig, buildWhatsAppUrl, defaultWhatsAppMessage } from "@web/lib/business";
+import { buildWhatsAppUrl, defaultWhatsAppMessage } from "@web/lib/business";
+import { getBrand, getBusiness } from "@web/lib/catalogue";
 import { BOAT_IMAGE } from "@web/lib/travel-data";
 import { Compass, HeartHandshake, MapPin, MessageCircle, Phone, Route, ShieldCheck } from "lucide-react";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export const metadata: Metadata = {
   title: "About Sundarban Yatri — Local Guidance for the Sundarbans",
@@ -20,8 +21,10 @@ const VALUES = [
   { icon: ShieldCheck, t: "No fiction", d: "We never publish fabricated ratings, fake reviews, invented availability or guaranteed sightings." },
 ];
 
-export default function AboutPage() {
-  const wa = buildWhatsAppUrl(defaultWhatsAppMessage);
+export default async function AboutPage() {
+  const [business, brand] = await Promise.all([getBusiness(), getBrand()]);
+  const wa = buildWhatsAppUrl(defaultWhatsAppMessage, business.whatsapp);
+  const aboutImage = brand.aboutImageUrl.trim() || BOAT_IMAGE;
   return (
     <>
       <section className="border-b border-border bg-[#eff4ee]">
@@ -30,13 +33,13 @@ export default function AboutPage() {
             <p className="font-label text-[11px] text-primary">About Sundarban Yatri</p>
             <h1 className="mt-3 h1 font-display">Explore. Experience. Understand the Sundarbans.</h1>
             <p className="mt-4 body-lg text-muted-foreground">We are a Sundarban-focused travel team: practical guides, thoughtfully planned tours, and straight answers before you spend a rupee.</p>
-            <p className="mt-4 inline-block rounded-full border border-border bg-white px-4 py-1.5 text-[13px] text-muted-foreground">Organised by <span className="font-semibold text-foreground">{businessConfig.organiser}</span> · {businessConfig.location}</p>
+            <p className="mt-4 inline-block rounded-full border border-border bg-white px-4 py-1.5 text-[13px] text-muted-foreground">Organised by <span className="font-semibold text-foreground">{business.organiser}</span> · {business.location}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link href="/tours" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-bold text-white hover:bg-[#0f4532]">Browse Tours</Link>
               <Link href="/contact" className="inline-flex h-12 items-center rounded-full border border-border bg-white px-7 text-[15px] font-semibold hover:border-primary/40 hover:text-primary">Contact Us</Link>
             </div>
           </div>
-          <img src={BOAT_IMAGE} alt="Boat cruising a Sundarban creek" className="aspect-[4/3] w-full rounded-[24px] object-cover" />
+          <img src={aboutImage} alt="Boat cruising a Sundarban creek" className="aspect-[4/3] w-full rounded-[24px] object-cover" />
         </div>
       </section>
 
@@ -80,11 +83,11 @@ export default function AboutPage() {
 
       <section className="container yatri-section">
         <div className="rounded-[24px] bg-[#0f4532] p-7 text-white lg:p-9">
-          <p className="font-label text-[11px] text-[#d59b43]">Talk to us — {businessConfig.hours}</p>
+          <p className="font-label text-[11px] text-[#d59b43]">Talk to us — {business.hours}</p>
           <h2 className="mt-2 font-display text-2xl font-bold tracking-tight lg:text-3xl">Questions? A human replies.</h2>
           <p className="mt-3 max-w-xl leading-7 text-white/75">Call or WhatsApp with your dates and group size. If we are not the right fit, we will tell you that too.</p>
           <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
-            <a href={`tel:${businessConfig.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0f4532] transition-colors hover:bg-[#f5e7cc]"><Phone className="h-4 w-4" /> {businessConfig.phoneDisplay}</a>
+            <a href={`tel:${business.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0f4532] transition-colors hover:bg-[#f5e7cc]"><Phone className="h-4 w-4" /> {business.phoneDisplay}</a>
             <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#178a45]"><MessageCircle className="h-4 w-4" /> WhatsApp Us</a>
           </div>
         </div>

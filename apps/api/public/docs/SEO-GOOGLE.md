@@ -1,7 +1,7 @@
 # Google Search Central — Official Rules Digest (verified 2026-08-22)
 
 Distilled from https://developers.google.com/search/docs (all sections read in full).
-This is the compliance reference for CodeReport Global. When a rule here conflicts
+This is the compliance reference for Sundarban Yatri. When a rule here conflicts
 with any SEO folklore, THIS file wins.
 
 ## 1. Core stance on AI content (our #1 strategic fact)
@@ -60,7 +60,7 @@ Consequence path: manual action → fix → reconsideration request.
 
 - `<title>` sources: title element, h1, prominent headings, og:title, anchors.
 - Good title = unique per page, descriptive, concise, no stuffing, no repeated
-  boilerplate; brand once with a delimiter (`Article Title · CodeReport Global` —
+  boilerplate; brand once with a delimiter (`Article Title · Sundarban Yatri` —
   our Next.js template does this ✓). Rewrite triggers to avoid: half-empty titles,
   obsolete years, multiple equal-weight headings, duplicated site name.
 - Meta descriptions: unique per page, accurate summary of what the reader GAINS;

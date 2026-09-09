@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import HomeView from "@web/components/HomeView";
 import { serverTrpc } from "@web/lib/trpc-server";
+import { getBrand, getBusiness, getFaqs, getFoodMenu, getTours, getVideoReviews } from "@web/lib/catalogue";
 
 export const revalidate = 300;
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.in";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export const metadata: Metadata = {
   title: "Sundarban Yatri — Sundarban Tours, Safari, Destinations & Travel Guides",
@@ -39,5 +40,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     console.error("[home] failed to load the feed:", error);
   }
 
-  return <HomeView categories={categories} sections={sections} posts={posts} search={search} category={category} page={page} />;
+  const [tours, faqs, business, videoReviews, foodMenu, brand] = await Promise.all([getTours(), getFaqs(), getBusiness(), getVideoReviews(), getFoodMenu(), getBrand()]);
+
+  return <HomeView categories={categories} sections={sections} posts={posts} search={search} category={category} page={page} tours={tours} faqs={faqs} business={business} videoReviews={videoReviews} foodMenu={foodMenu} brand={brand} />;
 }

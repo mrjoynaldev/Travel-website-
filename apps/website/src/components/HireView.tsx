@@ -5,23 +5,31 @@ import { Faq } from "@web/components/conversion/Faq";
 import { TourCard } from "@web/components/travel/TourCard";
 import { SectionHeader } from "@web/components/travel/SectionHeader";
 import { businessConfig, buildWhatsAppUrl } from "@web/lib/business";
+import type { Business, FAQItem } from "@web/lib/catalogue";
 import { TOURS, FAQS } from "@web/lib/travel-data";
+import type { Tour } from "@web/lib/travel-data";
 import { Check, Clock3, Globe2, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
-function PlanTripInner() {
+const DEFAULT_FAQS: FAQItem[] = FAQS.map(item => ({ q: item.q, a: item.a }));
+
+function PlanTripInner({ tours, faqs, business }: { tours?: Tour[]; faqs?: FAQItem[]; business?: Business }) {
   const params = useSearchParams();
   const tourSlug = params.get("tour") || undefined;
   const interest = params.get("interest") || undefined;
+  const biz = business ?? businessConfig;
+  const toursList = tours ?? TOURS;
+  const faqList = faqs ?? DEFAULT_FAQS;
   const prefill = [tourSlug, interest, params.get("destination"), params.get("from")]
     .filter(Boolean)
     .join(" • ");
-  const activeTour = TOURS.find((t) => t.slug === tourSlug);
+  const activeTour = toursList.find((t) => t.slug === tourSlug);
   const wa = buildWhatsAppUrl(
     activeTour
       ? `Hello Sundarban Yatri, I am interested in the ${activeTour.title}.\n\nTravel date:\nTravellers:\nStarting location:`
-      : "Hello Sundarban Yatri, I want to plan a Sundarban trip. Please share tour options."
+      : "Hello Sundarban Yatri, I want to plan a Sundarban trip. Please share tour options.",
+    biz.whatsapp
   );
 
   return (
@@ -34,21 +42,21 @@ function PlanTripInner() {
             Dates, safari slots, stay, route — fastest on call or WhatsApp. No payment, no spam, reply in working hours.
           </p>
           <div className="mt-6 flex flex-wrap gap-6 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" /> {businessConfig.hours}</span>
+            <span className="inline-flex items-center gap-2"><Clock3 className="h-4 w-4 text-primary" /> {biz.hours}</span>
             <span className="inline-flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-primary" /> No advance needed to enquire</span>
           </div>
 
           {/* Primary: Call + WhatsApp cards */}
           <div className="mt-8 grid gap-4 md:grid-cols-2 max-w-3xl">
             <a
-              href={`tel:${businessConfig.phone}`}
+              href={`tel:${biz.phone}`}
               className="yatri-card group flex items-center gap-5 p-6 lg:p-7 !bg-primary !border-primary text-white"
             >
               <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/15"><Phone className="h-6 w-6" /></span>
               <span>
                 <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-white/70">Call us — fastest</span>
-                <span className="mt-1 block font-display text-2xl lg:text-[1.7rem] font-bold tracking-tight">{businessConfig.phoneDisplay}</span>
-                <span className="mt-1 block text-[13px] text-white/70">Tap to call • {businessConfig.hours}</span>
+                <span className="mt-1 block font-display text-2xl lg:text-[1.7rem] font-bold tracking-tight">{biz.phoneDisplay}</span>
+                <span className="mt-1 block text-[13px] text-white/70">Tap to call • {biz.hours}</span>
               </span>
             </a>
             <a
@@ -82,7 +90,7 @@ function PlanTripInner() {
       <section className="container yatri-section">
         <SectionHeader eyebrow="Tours" title="Which tour fits you?" desc="Pick a starting point — then call or WhatsApp us to lock dates. Every itinerary can be customised." />
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {TOURS.map((t) => <TourCard key={t.slug} tour={t} />)}
+          {toursList.map((t) => <TourCard key={t.slug} tour={t} />)}
         </div>
       </section>
 
@@ -103,7 +111,7 @@ function PlanTripInner() {
           </div>
           <div>
             <h3 className="font-display text-xl font-semibold">Quick questions</h3>
-            <div className="mt-4"><Faq items={FAQS.slice(0, 4)} /></div>
+            <div className="mt-4"><Faq items={faqList.slice(0, 4)} /></div>
           </div>
         </div>
       </section>
@@ -111,10 +119,10 @@ function PlanTripInner() {
   );
 }
 
-export default function HireView() {
+export default function HireView({ tours, faqs, business }: { tours?: Tour[]; faqs?: FAQItem[]; business?: Business }) {
   return (
     <Suspense fallback={<div className="container py-24 text-center text-sm text-muted-foreground">Loading trip planner…</div>}>
-      <PlanTripInner />
+      <PlanTripInner tours={tours} faqs={faqs} business={business} />
     </Suspense>
   );
 }

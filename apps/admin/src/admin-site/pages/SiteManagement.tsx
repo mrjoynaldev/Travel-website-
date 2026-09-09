@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { FileText, Image, Loader2, Palette, Save } from "lucide-react";
+import { ArrowDown, ArrowUp, FileText, Image, Loader2, Palette, Plus, Save, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -42,6 +42,8 @@ function Workspace({
 }
 
 type LinkItem = { label: string; path: string };
+
+const TRUST_ICON_OPTIONS = ["Compass", "Route", "HeartHandshake", "MapPin", "Ship", "Binoculars", "Phone", "Star"];
 const parseLinks = (source: string, label: string) => {
   const value = JSON.parse(source);
   if (
@@ -72,6 +74,18 @@ export function StudioBranding() {
   const [ogImage, setOgImage] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#1b563f");
   const [accentColor, setAccentColor] = useState("#e4a741");
+  const [heroMediaType, setHeroMediaType] = useState<"image" | "video">("image");
+  const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroVideoUrl, setHeroVideoUrl] = useState("");
+  const [heroEyebrow, setHeroEyebrow] = useState("");
+  const [heroTitle, setHeroTitle] = useState("");
+  const [heroSubtitle, setHeroSubtitle] = useState("");
+  const [safariImageUrl, setSafariImageUrl] = useState("");
+  const [safariTitle, setSafariTitle] = useState("");
+  const [safariText, setSafariText] = useState("");
+  const [safariPoints, setSafariPoints] = useState("");
+  const [aboutImageUrl, setAboutImageUrl] = useState("");
+  const [trustItems, setTrustItems] = useState<{ icon: string; title: string; desc: string }[]>([]);
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [navigation, setNavigation] = useState("[]");
@@ -90,6 +104,25 @@ export function StudioBranding() {
     setOgImage(brand.defaultOgImageUrl || "");
     setPrimaryColor(brand.primaryColor || "#1b563f");
     setAccentColor(brand.accentColor || "#e4a741");
+    setHeroMediaType(brand.heroMediaType === "video" ? "video" : "image");
+    setHeroImageUrl(brand.heroImageUrl || "");
+    setHeroVideoUrl(brand.heroVideoUrl || "");
+    setHeroEyebrow(brand.heroEyebrow || "");
+    setHeroTitle(brand.heroTitle || "");
+    setHeroSubtitle(brand.heroSubtitle || "");
+    setSafariImageUrl(brand.safariImageUrl || "");
+    setSafariTitle(brand.safariTitle || "");
+    setSafariText(brand.safariText || "");
+    setSafariPoints(Array.isArray(brand.safariPoints) ? brand.safariPoints.join("\n") : "");
+    setAboutImageUrl(brand.aboutImageUrl || "");
+    setTrustItems(
+      Array.isArray(brand.trustItems)
+        ? brand.trustItems
+            .filter((item): item is { icon?: string; title: string; desc: string } => !!item && typeof item.title === "string" && typeof item.desc === "string")
+            .map(item => ({ icon: typeof item.icon === "string" ? item.icon : "Compass", title: item.title, desc: item.desc }))
+            .slice(0, 6)
+        : []
+    );
     setContactName(contact.name || "");
     setContactEmail(contact.email || "");
     setNavigation(JSON.stringify(record.settings?.navigation || [], null, 2));
@@ -128,6 +161,18 @@ export function StudioBranding() {
           defaultOgImageUrl: ogImage,
           primaryColor,
           accentColor,
+          heroMediaType,
+          heroImageUrl,
+          heroVideoUrl,
+          heroEyebrow,
+          heroTitle,
+          heroSubtitle,
+          safariImageUrl,
+          safariTitle,
+          safariText,
+          safariPoints: safariPoints.split("\n").map(line => line.trim()).filter(Boolean).slice(0, 6),
+          aboutImageUrl,
+          trustItems,
         },
         footerLinks: footer,
         contact: { name: contactName, email: contactEmail },
@@ -241,24 +286,38 @@ export function StudioBranding() {
           <div className="mt-6 space-y-4">
             <div>
               <label className="text-xs font-medium text-muted-foreground">
-                Logo URL
+                Logo (tap to upload)
               </label>
-              <MediaUploadButton
-                accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-                folder="brand"
-                label="Upload logo"
-                className="mt-1.5"
-                onUploaded={asset => {
-                  setLogoUrl(asset.url);
-                  toast.success("Logo uploaded.");
-                }}
-              />
-              <Input
-                value={logoUrl}
-                onChange={event => setLogoUrl(event.target.value)}
-                placeholder="https://…"
-                className="mt-1.5"
-              />
+              {logoUrl ? (
+                <div className="mt-1.5 flex items-center gap-3 rounded-lg border border-border bg-white p-2">
+                  <img src={logoUrl} alt={logoAlt || "Logo"} className="h-10 w-auto max-w-28 rounded object-contain" />
+                  <div className="flex gap-2">
+                    <MediaUploadButton
+                      accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                      folder="brand"
+                      label="Replace"
+                      onUploaded={asset => {
+                        setLogoUrl(asset.url);
+                        toast.success("Logo uploaded.");
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setLogoUrl("")}>
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <MediaUploadButton
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                  folder="brand"
+                  label="Tap to upload logo"
+                  className="mt-1.5"
+                  onUploaded={asset => {
+                    setLogoUrl(asset.url);
+                    toast.success("Logo uploaded.");
+                  }}
+                />
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">
@@ -272,45 +331,73 @@ export function StudioBranding() {
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">
-                Favicon URL
+                Favicon (tap to upload)
               </label>
-              <MediaUploadButton
-                accept="image/png,image/webp,image/gif,image/svg+xml,image/jpeg"
-                folder="brand"
-                label="Upload favicon"
-                className="mt-1.5"
-                onUploaded={asset => {
-                  setFaviconUrl(asset.url);
-                  toast.success("Favicon uploaded.");
-                }}
-              />
-              <Input
-                value={faviconUrl}
-                onChange={event => setFaviconUrl(event.target.value)}
-                placeholder="https://…"
-                className="mt-1.5"
-              />
+              {faviconUrl ? (
+                <div className="mt-1.5 flex items-center gap-3 rounded-lg border border-border bg-white p-2">
+                  <img src={faviconUrl} alt="Favicon" className="h-8 w-8 rounded object-contain" />
+                  <div className="flex gap-2">
+                    <MediaUploadButton
+                      accept="image/png,image/webp,image/gif,image/svg+xml,image/jpeg"
+                      folder="brand"
+                      label="Replace"
+                      onUploaded={asset => {
+                        setFaviconUrl(asset.url);
+                        toast.success("Favicon uploaded.");
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setFaviconUrl("")}>
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <MediaUploadButton
+                  accept="image/png,image/webp,image/gif,image/svg+xml,image/jpeg"
+                  folder="brand"
+                  label="Tap to upload favicon"
+                  className="mt-1.5"
+                  onUploaded={asset => {
+                    setFaviconUrl(asset.url);
+                    toast.success("Favicon uploaded.");
+                  }}
+                />
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">
-                Default social-image URL
+                Default social image (tap to upload)
               </label>
-              <MediaUploadButton
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                folder="brand"
-                label="Upload social image"
-                className="mt-1.5"
-                onUploaded={asset => {
-                  setOgImage(asset.url);
-                  toast.success("Social image uploaded.");
-                }}
-              />
-              <Input
-                value={ogImage}
-                onChange={event => setOgImage(event.target.value)}
-                placeholder="https://…"
-                className="mt-1.5"
-              />
+              {ogImage ? (
+                <div className="mt-1.5 flex items-center gap-3 rounded-lg border border-border bg-white p-2">
+                  <img src={ogImage} alt="Social preview" className="h-12 w-20 rounded object-cover" />
+                  <div className="flex gap-2">
+                    <MediaUploadButton
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      folder="brand"
+                      label="Replace"
+                      onUploaded={asset => {
+                        setOgImage(asset.url);
+                        toast.success("Social image uploaded.");
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setOgImage("")}>
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <MediaUploadButton
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  folder="brand"
+                  label="Tap to upload social image"
+                  className="mt-1.5"
+                  onUploaded={asset => {
+                    setOgImage(asset.url);
+                    toast.success("Social image uploaded.");
+                  }}
+                />
+              )}
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">
@@ -358,6 +445,287 @@ export function StudioBranding() {
           </div>
         </section>
       </div>
+      <section className="mt-6 rounded-xl border border-border bg-white p-6 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-label text-[10px] text-primary">Homepage hero</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold">
+              First-screen background
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              What travellers see first. Pick a still image or a streaming
+              video loop — video uses the image as its loading poster.
+            </p>
+          </div>
+          <div className="inline-flex self-start rounded-full border border-border bg-background p-1">
+            {(["image", "video"] as const).map(mode => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setHeroMediaType(mode)}
+                className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition-colors ${heroMediaType === mode ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
+          <div className="overflow-hidden rounded-xl bg-black">
+            {heroMediaType === "video" && heroVideoUrl ? (
+              <video src={heroVideoUrl} poster={heroImageUrl || undefined} controls preload="metadata" playsInline className="aspect-video w-full" />
+            ) : heroImageUrl ? (
+              <img src={heroImageUrl} alt={heroEyebrow || "Homepage hero preview"} className="aspect-video w-full object-cover" />
+            ) : (
+              <div className="grid aspect-video w-full place-items-center bg-muted p-6 text-center text-sm text-muted-foreground">
+                No hero media yet — the site falls back to its bundled cover image.
+              </div>
+            )}
+          </div>
+          <div className="space-y-4">
+            <div className="rounded-xl border border-border bg-background/60 p-4">
+              <label className="text-xs font-medium text-muted-foreground">
+                Hero image (tap to upload — also the video poster)
+              </label>
+              {heroImageUrl ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <MediaUploadButton
+                    accept="image/jpeg,image/png,image/webp"
+                    folder="brand"
+                    label="Replace image"
+                    onUploaded={asset => {
+                      setHeroImageUrl(asset.url);
+                      toast.success("Hero image uploaded — save below to publish.");
+                    }}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setHeroImageUrl("")}>
+                    <X className="h-4 w-4" /> Remove
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <MediaUploadButton
+                    accept="image/jpeg,image/png,image/webp"
+                    folder="brand"
+                    label="Tap to upload image"
+                    onUploaded={asset => {
+                      setHeroImageUrl(asset.url);
+                      toast.success("Hero image uploaded — save below to publish.");
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="rounded-xl border border-border bg-background/60 p-4">
+              <label className="text-xs font-medium text-muted-foreground">
+                Hero video loop (tap to upload · MP4/WebM · max 50 MB)
+              </label>
+              {heroVideoUrl ? (
+                <div className="mt-2">
+                  <p className="truncate font-mono text-xs text-muted-foreground">{heroVideoUrl.split("/").pop()}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <MediaUploadButton
+                      accept="video/mp4,video/webm"
+                      folder="brand"
+                      maxMB={50}
+                      label="Replace video"
+                      onUploaded={asset => {
+                        setHeroVideoUrl(asset.url);
+                        setHeroMediaType("video");
+                        toast.success("Hero video uploaded — save below to publish.");
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => { setHeroVideoUrl(""); setHeroMediaType("image"); }}>
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-2">
+                  <MediaUploadButton
+                    accept="video/mp4,video/webm"
+                    folder="brand"
+                    maxMB={50}
+                    label="Tap to upload video"
+                    onUploaded={asset => {
+                      setHeroVideoUrl(asset.url);
+                      setHeroMediaType("video");
+                      toast.success("Hero video uploaded — save below to publish.");
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">
+                Eyebrow line
+              </label>
+              <Input value={heroEyebrow} onChange={event => setHeroEyebrow(event.target.value)} placeholder="Sundarban Travel • Tours • Guides" className="mt-1.5" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">
+                Headline
+              </label>
+              <Input value={heroTitle} onChange={event => setHeroTitle(event.target.value)} placeholder="Plan Your Sundarban Journey with Confidence" className="mt-1.5" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">
+                Subheading
+              </label>
+              <Textarea value={heroSubtitle} onChange={event => setHeroSubtitle(event.target.value)} rows={2} placeholder="Discover mangrove waterways, wildlife, villages…" className="mt-1.5 w-full bg-background" />
+            </div>
+            <p className="text-xs leading-5 text-muted-foreground">
+              Empty headline fields keep the current homepage copy. Press
+              “Save identity” above to publish hero changes.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+          <p className="font-label text-[10px] text-primary">Homepage safari block</p>
+          <h2 className="mt-2 font-display text-2xl font-semibold">Safari feature</h2>
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">
+                Safari photo (tap to upload)
+              </label>
+              {safariImageUrl ? (
+                <div className="mt-1.5 space-y-2">
+                  <img src={safariImageUrl} alt="Safari preview" className="aspect-video w-full rounded-xl object-cover" />
+                  <div className="flex flex-wrap gap-2">
+                    <MediaUploadButton
+                      accept="image/jpeg,image/png,image/webp"
+                      folder="brand"
+                      label="Replace photo"
+                      onUploaded={asset => {
+                        setSafariImageUrl(asset.url);
+                        toast.success("Safari photo uploaded — save to publish.");
+                      }}
+                    />
+                    <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setSafariImageUrl("")}>
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-1.5">
+                  <MediaUploadButton
+                    accept="image/jpeg,image/png,image/webp"
+                    folder="brand"
+                    label="Tap to upload photo"
+                    onUploaded={asset => {
+                      setSafariImageUrl(asset.url);
+                      toast.success("Safari photo uploaded — save to publish.");
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Heading</label>
+              <Input value={safariTitle} onChange={event => setSafariTitle(event.target.value)} placeholder="Creeks, watchtowers and quiet patience" className="mt-1.5" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Intro text</label>
+              <Textarea value={safariText} onChange={event => setSafariText(event.target.value)} rows={3} className="mt-1.5 w-full bg-background" />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground">Checklist (one per line, max 6)</label>
+              <Textarea value={safariPoints} onChange={event => setSafariPoints(event.target.value)} rows={3} className="mt-1.5 w-full bg-background font-mono text-xs" />
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+            <p className="font-label text-[10px] text-primary">About page</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold">Story photo</h2>
+            {aboutImageUrl ? (
+              <div className="mt-4 space-y-2">
+                <img src={aboutImageUrl} alt="About preview" className="aspect-[4/3] w-full rounded-xl object-cover" />
+                <div className="flex flex-wrap gap-2">
+                  <MediaUploadButton
+                    accept="image/jpeg,image/png,image/webp"
+                    folder="brand"
+                    label="Replace photo"
+                    onUploaded={asset => {
+                      setAboutImageUrl(asset.url);
+                      toast.success("About photo uploaded — save to publish.");
+                    }}
+                  />
+                  <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setAboutImageUrl("")}>
+                    <X className="h-4 w-4" /> Remove
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4">
+                <MediaUploadButton
+                  accept="image/jpeg,image/png,image/webp"
+                  folder="brand"
+                  label="Tap to upload photo"
+                  onUploaded={asset => {
+                    setAboutImageUrl(asset.url);
+                    toast.success("About photo uploaded — save to publish.");
+                  }}
+                />
+              </div>
+            )}
+          </div>
+          <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-label text-[10px] text-primary">Homepage trust badges</p>
+                <h2 className="mt-2 font-display text-2xl font-semibold">Why choose us</h2>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                disabled={trustItems.length >= 6}
+                onClick={() => setTrustItems(items => [...items, { icon: "Compass", title: "", desc: "" }].slice(0, 6))}
+              >
+                <Plus className="h-4 w-4" /> Add
+              </Button>
+            </div>
+            <div className="mt-4 space-y-3">
+              {trustItems.map((item, index) => (
+                <div key={index} className="rounded-xl border border-border bg-background/60 p-3">
+                  <div className="grid gap-2 sm:grid-cols-[130px_1fr_auto]">
+                    <Select value={TRUST_ICON_OPTIONS.includes(item.icon) ? item.icon : "Compass"} onValueChange={value => setTrustItems(items => items.map((it, i) => (i === index ? { ...it, icon: value } : it)))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {TRUST_ICON_OPTIONS.map(name => (
+                          <SelectItem key={name} value={name}>{name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Input value={item.title} onChange={event => setTrustItems(items => items.map((it, i) => (i === index ? { ...it, title: event.target.value } : it)))} placeholder="Badge heading" />
+                    <div className="flex gap-1.5">
+                      <Button type="button" variant="outline" size="sm" disabled={index === 0} onClick={() => setTrustItems(items => { const next = [...items]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })} aria-label="Move up">
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" disabled={index === trustItems.length - 1} onClick={() => setTrustItems(items => { const next = [...items]; [next[index + 1], next[index]] = [next[index], next[index + 1]]; return next; })} aria-label="Move down">
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" onClick={() => setTrustItems(items => items.filter((_, i) => i !== index))} aria-label="Remove badge">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <Textarea value={item.desc} onChange={event => setTrustItems(items => items.map((it, i) => (i === index ? { ...it, desc: event.target.value } : it)))} rows={2} placeholder="One or two honest sentences" className="mt-2 w-full bg-white text-sm" />
+                </div>
+              ))}
+              {!trustItems.length && (
+                <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                  No badges — the homepage falls back to its bundled set until you add some.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
     </Workspace>
   );
 }

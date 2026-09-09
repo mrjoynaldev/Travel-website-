@@ -9,7 +9,7 @@
  *
  * Env vars:
  *   SY_TOKEN     Required. API access token (shown once at creation).
- *   SY_API_URL   Optional. Defaults to https://sundarbanyatra.in
+ *   SY_API_URL   Optional. Defaults to https://sundarbanyatra.com
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { readFileSync } from "node:fs";
@@ -17,8 +17,8 @@ import { extname } from "node:path";
 import superjson from "superjson";
 import { gravityToHtml } from "./gravity.mjs";
 
-const API_URL = (process.env.SY_API_URL || process.env.SY_API_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.SY_SITE_URL || process.env.SY_SITE_URL || "https://sundarbanyatra.in").replace(/\/+$/, "");
+const API_URL = (process.env.SY_API_URL || process.env.SY_API_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || process.env.SY_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || parseFlag("--token");
 
 const liveUrl = slug => `${PUBLIC_SITE}/articles/${slug}`;
@@ -408,9 +408,9 @@ async function main() {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
-          host: "sundarbanyatra.in",
+          host: "sundarbanyatra.com",
           key: KEY,
-          keyLocation: `https://sundarbanyatra.in/${KEY}.txt`,
+          keyLocation: `https://sundarbanyatra.com/${KEY}.txt`,
           urlList: urls,
         }),
       });

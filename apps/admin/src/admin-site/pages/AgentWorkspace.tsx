@@ -195,7 +195,7 @@ export default function AgentWorkspace() {
                   className={`max-w-[92%] rounded-xl p-4 text-sm leading-6 ${message.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-white shadow-sm ring-1 ring-border"}`}
                 >
                   <p className="mb-2 font-label text-[10px] opacity-70">
-                    {message.role === "user" ? "YOU" : "CODEREPORT AGENT"}
+                    {message.role === "user" ? "YOU" : "YATRI AGENT"}
                   </p>
                   {message.role === "assistant" ? (
                     <Streamdown>{message.content}</Streamdown>

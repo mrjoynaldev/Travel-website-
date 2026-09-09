@@ -122,6 +122,30 @@ export const TOURS: Tour[] = [
   },
 ];
 
+export type TrustFeature = { icon: string; title: string; desc: string };
+
+// Single source of truth for the "Why choose us" badges: the database
+// (brand.trustItems) wins when present; this is the fallback + seed stock.
+export const TRUST_FEATURES: TrustFeature[] = [
+  { icon: "Compass", title: "Trusted Local Guidance", desc: "Helpful destination knowledge and practical trip-planning support from people who know the delta." },
+  { icon: "Route", title: "Thoughtful Itineraries", desc: "Trips designed around realistic travel times, tides and forest entry rules — never rushed." },
+  { icon: "HeartHandshake", title: "Clear Communication", desc: "Easy access on WhatsApp, phone and enquiry forms. Real replies, no bots pushing sales." },
+  { icon: "MapPin", title: "Planning Support", desc: "Guidance for route, timing, stay and tour selection — even if you book nothing with us." },
+];
+
+export const TRUST_ICONS = ["Compass", "Route", "HeartHandshake", "MapPin", "Ship", "Binoculars", "Phone", "Star"] as const;
+
+// Fallback + seed stock for the homepage safari feature block.
+export const SAFARI_DEFAULT = {
+  title: "Creeks, watchtowers and quiet patience",
+  text: "Safari here is a water journey — permitted creeks, forest guides, and watchtowers at Sajnekhali, Sudhanyakhali and Dobanki. Mornings are misty, afternoons golden, and every turn feels unscripted.",
+  points: [
+    "Forest guide + permits handled",
+    "Small-group boats, shade + washroom",
+    "Honest briefing — no guaranteed sightings",
+  ],
+};
+
 export const FAQS = [
   {
     q: "How do I reach the Sundarbans?",
