@@ -1,4 +1,5 @@
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { authFetch } from "@/lib/api";
 import type { AppRouter } from "@shared/app-router";
 import superjson from "superjson";
 
@@ -11,7 +12,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
     httpBatchLink({
       url: `${apiOrigin}/api/trpc`,
       transformer: superjson,
-      fetch: (input, init) => fetch(input, { ...init, credentials: "include" }),
+      fetch: authFetch,
     }),
   ],
 });

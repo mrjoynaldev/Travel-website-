@@ -23,7 +23,11 @@ export const appRouter = router({
           const user = await signInWithPassword(input.email, input.password);
           const token = await createSessionToken({ openId: user.id, name: user.name, email: user.email });
           setSessionCookie(ctx.req, ctx.resHeaders, token);
-          return { success: true as const, user };
+          // Also handed to the client: static-hosted frontends (Firebase) talk
+          // to this API cross-origin, where browsers may refuse the third-party
+          // session cookie. The client stores it and sends it as a Bearer
+          // fallback that authenticateRequest already accepts.
+          return { success: true as const, user, sessionToken: token };
         } catch (error) {
           if (error instanceof SupabaseAuthError) {
             throw new TRPCError({ code: "UNAUTHORIZED", message: error.message });
@@ -39,7 +43,7 @@ export const appRouter = router({
           if (result.session) {
             const token = await createSessionToken({ openId: result.session.id, name: result.session.name, email: result.session.email });
             setSessionCookie(ctx.req, ctx.resHeaders, token);
-            return { success: true as const, confirmationRequired: false, user: result.session };
+            return { success: true as const, confirmationRequired: false, user: result.session, sessionToken: token };
           }
           return { success: true as const, confirmationRequired: true, user: null as null };
         } catch (error) {

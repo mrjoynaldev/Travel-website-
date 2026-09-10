@@ -5,7 +5,7 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import superjson from "superjson";
 import { Toaster } from "sonner";
 import { trpc } from "@/lib/trpc";
-import { credentialsFetch, getTrpcUrl } from "@/lib/api";
+import { authFetch, getTrpcUrl } from "@/lib/api";
 import { startLogin } from "@/const";
 import { UNAUTHED_ERR_MSG } from "@fieldnote/contracts/const";
 
@@ -34,7 +34,7 @@ queryClient.getMutationCache().subscribe((event) => {
 });
 
 const trpcClient = trpc.createClient({
-  links: [httpBatchLink({ url: getTrpcUrl(), transformer: superjson, fetch: credentialsFetch })],
+  links: [httpBatchLink({ url: getTrpcUrl(), transformer: superjson, fetch: authFetch })],
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
+import { setSessionToken } from "@/lib/api";
 import { Loader2, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,7 +15,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const signIn = trpc.auth.signIn.useMutation({
-    onSuccess: () => router.push("/studio"),
+    onSuccess: data => {
+      // Persist the session JWT as well: static hosting talks cross-origin
+      // and some browsers refuse the third-party cookie (see authFetch).
+      if (data.sessionToken) setSessionToken(data.sessionToken);
+      router.push("/studio");
+    },
     onError: error => toast.error(error.message),
   });
 

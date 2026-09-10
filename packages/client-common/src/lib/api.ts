@@ -37,6 +37,50 @@ export const getTrpcUrl = (): string => apiUrl("/api/trpc");
 export const credentialsFetch: typeof fetch = (input, init) =>
   fetch(input, { ...init, credentials: "include" });
 
+const SESSION_TOKEN_KEY = "sy_session";
+
+/** Browser-only session-token store (null during SSR/prerender). */
+export const getSessionToken = (): string | null => {
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return null;
+    return window.localStorage.getItem(SESSION_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+export const setSessionToken = (token: string): void => {
+  try {
+    window.localStorage.setItem(SESSION_TOKEN_KEY, token);
+  } catch {
+    // private mode etc. — cookie path still applies
+  }
+};
+
+export const clearSessionToken = (): void => {
+  try {
+    window.localStorage.removeItem(SESSION_TOKEN_KEY);
+  } catch {
+    // ignore
+  }
+};
+
+/**
+ * Auth fetch for static-hosted frontends (Firebase) talking cross-origin to
+ * the API: sends the httpOnly cookie AND, when a sign-in stored one, the
+ * session JWT as a Bearer fallback for browsers that block third-party
+ * cookies (Safari ITP, Brave, Firefox strict, Incognito). The server accepts
+ * either via authenticateRequest; cookie stays the primary mechanism.
+ */
+export const authFetch: typeof fetch = (input, init) => {
+  const headers = new Headers(init?.headers);
+  if (!headers.has("authorization")) {
+    const token = getSessionToken();
+    if (token) headers.set("authorization", `Bearer ${token}`);
+  }
+  return fetch(input, { ...init, headers, credentials: "include" });
+};
+
 export const resolveMediaUrl = (url?: string | null): string => {
   if (!url) return "";
   if (/^(https?:)?\/\//.test(url)) return url.startsWith("//") ? `https:${url}` : url;
