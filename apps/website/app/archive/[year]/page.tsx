@@ -25,6 +25,15 @@ export async function generateMetadata({ params }: { params: Promise<{ year: str
   };
 }
 
+export async function generateStaticParams() {
+  try {
+    const archives = await serverTrpc.blog.archives.query();
+    return archives.length ? archives.map(a => ({ year: String(a.year) })) : [{ year: "2000" }];
+  } catch {
+    return [];
+  }
+}
+
 export default async function YearArchivePage({ params }: { params: Promise<{ year: string }> }) {
   const year = Number((await params).year);
   if (!Number.isInteger(year) || year < 2000 || year > 2100) notFound();

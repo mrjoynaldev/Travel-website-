@@ -1,24 +1,13 @@
 import type { NextConfig } from "next";
 
-const apiOrigin = (process.env.API_URL || "http://localhost:4000").replace(/\/+$/, "");
-
-const securityHeaders = [
-  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-];
-
-const seoCacheHeaders = [
-  { key: "Cache-Control", value: "public, max-age=3600, s-maxage=3600" },
-];
-
-const staticCacheHeaders = [
-  { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-];
-
+// Static export for Firebase Hosting (see firebase.json at the repo root).
+// There is no Next.js server in production:
+// - Security/SEO/cache headers are served from firebase.json.
+// - Browsers call the Render API directly via NEXT_PUBLIC_API_URL
+//   (apps/website/.env for local dev, build-time env for Firebase).
+// - Sitemap/robots/RSS/llms.txt are generated at build time, not proxied.
 const nextConfig: NextConfig = {
+  output: "export",
   reactStrictMode: true,
   poweredByHeader: false,
   // Allow Google Cloud Shell preview hosts, otherwise Next blocks /_next dev assets → white screen.
@@ -34,32 +23,6 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,
-  },
-  async headers() {
-    return [
-      {
-        source: "/(.*)",
-        headers: securityHeaders,
-      },
-      {
-        source: "/(robots\\.txt|sitemap\\.xml|rss\\.xml|news-sitemap\\.xml|llms\\.txt)",
-        headers: seoCacheHeaders,
-      },
-      {
-        source: "/(.*)\\.(ico|png|jpg|jpeg|gif|webp|avif|svg|woff|woff2|ttf|eot|css|js)",
-        headers: staticCacheHeaders,
-      },
-    ];
-  },
-  async rewrites() {
-    return [
-      { source: "/api/:path*", destination: `${apiOrigin}/api/:path*` },
-      { source: "/manus-storage/:path*", destination: `${apiOrigin}/manus-storage/:path*` },
-      { source: "/robots.txt", destination: `${apiOrigin}/robots.txt` },
-      { source: "/sitemap.xml", destination: `${apiOrigin}/sitemap.xml` },
-      { source: "/rss.xml", destination: `${apiOrigin}/rss.xml` },
-      { source: "/news-sitemap.xml", destination: `${apiOrigin}/news-sitemap.xml` },
-    ];
   },
 };
 

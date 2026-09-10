@@ -1,8 +1,11 @@
 import type { NextConfig } from "next";
 
-const apiOrigin = (process.env.API_URL || "http://localhost:4000").replace(/\/+$/, "");
-
+// Static export for Firebase Hosting (see firebase.json at the repo root).
+// There is no Next.js server in production: the browser talks to the Render
+// API directly via NEXT_PUBLIC_API_URL (apps/admin/.env for local dev,
+// build-time env for Firebase).
 const nextConfig: NextConfig = {
+  output: "export",
   // Allow Google Cloud Shell preview hosts (e.g. 3100-cs-*.cloudshell.dev)
   // plus direct IP access, otherwise Next blocks /_next dev assets → white screen.
   allowedDevOrigins: ["**.cloudshell.dev", "**.googleusercontent.com", "**.trycloudflare.com", "10.88.0.4"],
@@ -13,16 +16,6 @@ const nextConfig: NextConfig = {
   ],
   experimental: {
     optimizePackageImports: ["lucide-react"],
-  },
-  async rewrites() {
-    return [
-      { source: "/api/:path*", destination: `${apiOrigin}/api/:path*` },
-      { source: "/docs/:path*", destination: `${apiOrigin}/docs/:path*` },
-      { source: "/manus-storage/:path*", destination: `${apiOrigin}/manus-storage/:path*` },
-      { source: "/robots.txt", destination: `${apiOrigin}/robots.txt` },
-      { source: "/sitemap.xml", destination: `${apiOrigin}/sitemap.xml` },
-      { source: "/rss.xml", destination: `${apiOrigin}/rss.xml` },
-    ];
   },
 };
 

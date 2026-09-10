@@ -27,6 +27,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+// Static routes (about, contact, …) always win over [slug]; excluding their
+// names here keeps the export deterministic instead of order-dependent.
+const RESERVED = new Set([
+  "about", "contact", "hire", "tours", "archive", "articles", "authors",
+  "topics", "tags", "api", "login", "llms.txt", "sitemap.xml", "robots.txt",
+]);
+
+export async function generateStaticParams() {
+  try {
+    const pages = await serverTrpc.blog.pages.query();
+    const slugs = pages.map(p => p.slug).filter(slug => slug && !RESERVED.has(slug));
+    return slugs.length ? slugs.map(slug => ({ slug })) : [{ slug: "__pending__" }];
+  } catch {
+    return [];
+  }
+}
+
 export default async function SitePage({ params }: Props) {
   const { slug } = await params;
   let page: { title: string; rendered_html: string; updated_at: string | null };

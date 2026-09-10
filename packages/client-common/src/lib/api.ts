@@ -1,18 +1,24 @@
 /**
  * Unified API origin for the decoupled deployments.
  *
- * - When `VITE_API_URL` is set (e.g. `https://api.example.com`), every client
- *   request is sent cross-origin to the Render-hosted backend and relative
- *   asset URLs (media, storage) are resolved against that origin.
- * - When unset, the app falls back to same-origin `/api/trpc` for local
- *   development inside the monolith.
+ * - When set (`NEXT_PUBLIC_API_URL` for Next.js browser bundles — inlined at
+ *   build time — or `VITE_API_URL`), every request goes cross-origin to the
+ *   hosted backend (Render) and relative asset URLs resolve against it.
+ * - When unset, the app falls back to same-origin `/api/trpc` (local dev
+ *   with Next.js rewrites, or Vite proxy).
  */
 const viteEnv: Record<string, string | undefined> =
   typeof (import.meta as unknown as { env?: Record<string, string | undefined> }).env === "object"
     ? (import.meta as unknown as { env: Record<string, string | undefined> }).env
     : {};
 
-export const API_URL: string = viteEnv.VITE_API_URL ?? (typeof process !== "undefined" ? process.env.VITE_API_URL : undefined) ?? "";
+const nodeEnv: Record<string, string | undefined> =
+  typeof process !== "undefined" && typeof process.env === "object"
+    ? (process.env as Record<string, string | undefined>)
+    : {};
+
+export const API_URL: string =
+  viteEnv.VITE_API_URL ?? nodeEnv.NEXT_PUBLIC_API_URL ?? nodeEnv.VITE_API_URL ?? "";
 
 export const apiUrl = (path: string): string => (API_URL ? `${API_URL}${path}` : path);
 

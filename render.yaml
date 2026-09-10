@@ -3,13 +3,15 @@ services:
     name: sundarban-yatri-api
     env: node
     plan: free
-    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @fieldnote/api build
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @fieldnote/api build
     startCommand: pnpm --filter @fieldnote/api start
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3000
+      # NOTE: do NOT set PORT — Render injects it and the start script listens on $PORT.
+      - key: NODE_VERSION
+        value: "22"
       - key: CANONICAL_ORIGIN
         sync: false
       - key: VITE_SUPABASE_URL

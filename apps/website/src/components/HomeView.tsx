@@ -70,26 +70,51 @@ export default function HomeView({ categories, sections, posts, search, category
   const [submitting, setSubmitting] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>(category);
   const [showEnquiry, setShowEnquiry] = useState(false);
+  // Static hosting has no server re-render: the prerendered feed below is the
+  // first paint, and every interaction refetches live data in the browser.
+  const [feed, setFeed] = useState(posts);
+  const [feedPage, setFeedPage] = useState(page);
+  const [feedLoading, setFeedLoading] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => () => clearTimeout(searchTimer.current), []);
 
-  const navigate = (params: Record<string, string | number | undefined>) => {
-    startTransition(() => router.push(buildQuery({ search: searchInput.trim() || undefined, category: categoryFilter, ...params })));
+  const loadFeed = async (query: string | undefined, topic: string | undefined, nextPage: number) => {
+    setFeedLoading(true);
+    try {
+      setFeed(await trpcClient.blog.list.query({ page: nextPage, query: query || undefined, category: topic }));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Search could not be loaded.");
+    } finally {
+      setFeedLoading(false);
+    }
+  };
+
+  const navigate = (params: { search?: string; category?: string | null; page?: number }) => {
+    const nextSearch = params.search !== undefined ? params.search : searchInput.trim() || undefined;
+    const nextCategory = params.category === undefined ? categoryFilter : (params.category ?? undefined);
+    const nextPage = params.page ?? 1;
+    if (params.category !== undefined) setCategoryFilter(params.category ?? undefined);
+    if (params.search !== undefined) setSearchInput(params.search);
+    setFeedPage(nextPage);
+    startTransition(() => {
+      router.push(buildQuery({ search: nextSearch, category: nextCategory, page: nextPage }));
+      void loadFeed(nextSearch, nextCategory, nextPage);
+    });
   };
 
   const onSearchChange = (value: string) => {
     setSearchInput(value);
     clearTimeout(searchTimer.current);
     searchTimer.current = setTimeout(() => {
-      startTransition(() => router.push(buildQuery({ search: value.trim() || undefined, category: categoryFilter, page: 1 })));
+      navigate({ search: value.trim(), page: 1 });
     }, 350);
   };
 
   const setTopic = (topic?: string) => {
     clearTimeout(searchTimer.current);
     setCategoryFilter(topic);
-    navigate({ category: topic, page: 1 });
+    navigate({ category: topic ?? null, page: 1 });
   };
 
   const subscribe = async () => {
@@ -122,8 +147,8 @@ export default function HomeView({ categories, sections, posts, search, category
   const heroTitle = brand?.heroTitle?.trim() || "Plan Your Sundarban Journey with Confidence";
   const heroSubtitle = brand?.heroSubtitle?.trim() || "Discover mangrove waterways, wildlife, villages and memorable boat journeys — with practical guides and thoughtfully planned Sundarban tours.";
   const waGeneral = buildWhatsAppUrl(defaultWhatsAppMessage, biz.whatsapp);
-  const isFiltering = Boolean(search || category);
-  const isLoading = isPending;
+  const isFiltering = Boolean(searchInput.trim() || categoryFilter);
+  const isLoading = isPending || feedLoading;
 
   return (
     <>
@@ -249,18 +274,18 @@ export default function HomeView({ categories, sections, posts, search, category
             </div>
             {isLoading ? (
               <div className="grid min-h-40 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-            ) : posts.items.length ? (
+            ) : feed.items.length ? (
               <>
                 <div className="mt-6 grid gap-x-7 gap-y-10 md:grid-cols-3">
-                  {posts.items.slice(0, 6).map((p) => (
+                  {feed.items.slice(0, 6).map((p) => (
                     <ArticleCard key={p.id} post={p} />
                   ))}
                 </div>
-                {posts.totalPages > 1 && (
+                {feed.totalPages > 1 && (
                   <div className="mt-8 flex items-center justify-center gap-2">
-                    <Button variant="outline" disabled={page <= 1} onClick={() => navigate({ page: page - 1 })} className="rounded-full">Previous</Button>
-                    <span className="text-sm text-muted-foreground">Page {page} of {posts.totalPages}</span>
-                    <Button variant="outline" disabled={page >= posts.totalPages} onClick={() => navigate({ page: page + 1 })} className="rounded-full">Next</Button>
+                    <Button variant="outline" disabled={feedPage <= 1} onClick={() => navigate({ page: feedPage - 1 })} className="rounded-full">Previous</Button>
+                    <span className="text-sm text-muted-foreground">Page {feedPage} of {feed.totalPages}</span>
+                    <Button variant="outline" disabled={feedPage >= feed.totalPages} onClick={() => navigate({ page: feedPage + 1 })} className="rounded-full">Next</Button>
                   </div>
                 )}
               </>

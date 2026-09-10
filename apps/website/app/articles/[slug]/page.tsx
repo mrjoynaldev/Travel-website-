@@ -9,6 +9,12 @@ export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
 
+export async function generateStaticParams() {
+  const { getAllPublishedRefs } = await import("@web/lib/catalogue");
+  const { slugs } = await getAllPublishedRefs();
+  return slugs.length ? slugs.map(slug => ({ slug })) : [{ slug: "__pending__" }];
+}
+
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 const titleOverrides: Record<string, string> = {
@@ -34,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const description = metaDescriptionOverrides[slug] || post.meta_description?.trim() || post.excerpt?.trim() || undefined;
     const canonical = post.canonical_url?.trim() || `${siteUrl()}/articles/${post.slug}`;
   const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
-    const image = optimizedSocialImage(uploadedImage) || `${siteUrl()}/api/og?title=${encodeURIComponent(title)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
+    const image = optimizedSocialImage(uploadedImage) || `${siteUrl()}/og-default.png`;
     const keywords = (post.tags ?? []).map((tag: { name: string }) => tag.name);
     return {
       title,
@@ -86,7 +92,7 @@ export default async function ArticlePage({ params }: Props) {
   const canonical = post.canonical_url?.trim() || pageUrl;
   const articleTitle = titleOverrides[slug] || post.meta_title?.trim() || post.title;
   const uploadedImage = post.og_image_url?.trim() || post.featuredMedia?.url;
-  const image = uploadedImage || `${siteUrl()}/api/og?title=${encodeURIComponent(articleTitle)}&kicker=${encodeURIComponent(post.categories?.[0]?.name ?? "")}`;
+  const image = uploadedImage || `${siteUrl()}/og-default.png`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [

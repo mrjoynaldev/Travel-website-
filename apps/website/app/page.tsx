@@ -3,8 +3,6 @@ import HomeView from "@web/components/HomeView";
 import { serverTrpc } from "@web/lib/trpc-server";
 import { getBrand, getBusiness, getFaqs, getFoodMenu, getTours, getVideoReviews } from "@web/lib/catalogue";
 
-export const revalidate = 300;
-
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export const metadata: Metadata = {
@@ -15,14 +13,10 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: [`${siteUrl()}/og-default.png`] },
 };
 
-type SearchParams = { search?: string | string[]; category?: string | string[]; page?: string | string[] };
-
-export default async function HomePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const params = await searchParams;
-  const search = typeof params.search === "string" ? params.search : "";
-  const category = typeof params.category === "string" ? params.category : undefined;
-  const page = Math.max(1, parseInt(typeof params.page === "string" ? params.page : "1", 10) || 1);
-
+// Static export: the homepage prerenders with default feed values. Search,
+// topic and pagination interactions fetch live data in the browser
+// (HomeView), so no searchParams are read here at build time.
+export default async function HomePage() {
   let categories: Awaited<ReturnType<typeof serverTrpc.blog.categories.query>> = [];
   let sections: Awaited<ReturnType<typeof serverTrpc.blog.sections.query>> = [];
   let posts: Awaited<ReturnType<typeof serverTrpc.blog.list.query>> = { items: [], total: 0, page: 1, totalPages: 0 };
@@ -31,7 +25,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     const [categoriesResult, sectionsResult, listResult] = await Promise.all([
       serverTrpc.blog.categories.query(),
       serverTrpc.blog.sections.query(),
-      serverTrpc.blog.list.query({ page, query: search || undefined, category }),
+      serverTrpc.blog.list.query({ page: 1 }),
     ]);
     categories = categoriesResult;
     sections = sectionsResult;
@@ -42,5 +36,5 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   const [tours, faqs, business, videoReviews, foodMenu, brand] = await Promise.all([getTours(), getFaqs(), getBusiness(), getVideoReviews(), getFoodMenu(), getBrand()]);
 
-  return <HomeView categories={categories} sections={sections} posts={posts} search={search} category={category} page={page} tours={tours} faqs={faqs} business={business} videoReviews={videoReviews} foodMenu={foodMenu} brand={brand} />;
+  return <HomeView categories={categories} sections={sections} posts={posts} search="" page={1} tours={tours} faqs={faqs} business={business} videoReviews={videoReviews} foodMenu={foodMenu} brand={brand} />;
 }

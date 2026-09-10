@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { getTours } from "@web/lib/catalogue";
 
+export const dynamic = "force-static";
+
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

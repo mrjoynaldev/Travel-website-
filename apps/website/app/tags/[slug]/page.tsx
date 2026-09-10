@@ -32,6 +32,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export async function generateStaticParams() {
+  try {
+    const tags = await serverTrpc.blog.tags.query();
+    const list = tags.length ? tags : [{ slug: "__pending__" }];
+  return list.map(t => ({ slug: t.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export default async function TagPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   let tag: { id: string; name: string; slug: string } | undefined;

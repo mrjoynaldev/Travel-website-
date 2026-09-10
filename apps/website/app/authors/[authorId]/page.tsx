@@ -27,6 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export async function generateStaticParams() {
+  const { getAllPublishedRefs } = await import("@web/lib/catalogue");
+  const { authorIds } = await getAllPublishedRefs();
+  return authorIds.length ? authorIds.map(authorId => ({ authorId })) : [{ authorId: "00000000-0000-0000-0000-000000000000" }];
+}
+
 export default async function AuthorPage({ params }: Props) {
   const { authorId } = await params;
   let author: { id: string; display_name: string; bio: string | null; avatar_url: string | null; website_url: string | null };

@@ -70,6 +70,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+export async function generateStaticParams() {
+  try {
+    const categories = await serverTrpc.blog.categories.query();
+    const list = categories.length ? categories : [{ slug: "__pending__" }];
+  return list.map(c => ({ slug: c.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   let category: { id: string; name: string; slug: string; description: string | null } | undefined;

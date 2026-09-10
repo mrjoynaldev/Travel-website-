@@ -77,6 +77,32 @@ export async function getTour(slug: string): Promise<TourWithDetail | undefined>
   }
 }
 
+/**
+ * Build-time helper for static export: every published article slug + author
+ * id, paged through the CMS so no guide is left out of the prerender.
+ * Never throws — an empty list just means unknown slugs 404 until rebuild.
+ */
+export async function getAllPublishedRefs(): Promise<{ slugs: string[]; authorIds: string[] }> {
+  const slugs = new Set<string>();
+  const authorIds = new Set<string>();
+  try {
+    let page = 1;
+    for (;;) {
+      const result = await serverTrpc.blog.list.query({ page });
+      for (const item of result.items ?? []) {
+        if (item.slug) slugs.add(item.slug);
+        const authorId = (item as { author_id?: string }).author_id ?? item.author?.id;
+        if (authorId) authorIds.add(authorId);
+      }
+      if (page >= (result.totalPages || 1) || page >= 50) break;
+      page += 1;
+    }
+  } catch {
+    // fall through with whatever was collected
+  }
+  return { slugs: [...slugs], authorIds: [...authorIds] };
+}
+
 export async function getRelatedTours(slug: string, limit = 3): Promise<Tour[]> {
   const tours = await getTours();
   return tours.filter(t => t.slug !== slug).slice(0, limit);
