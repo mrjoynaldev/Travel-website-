@@ -37,7 +37,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://sundarban-yatri-api.onrender.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://travel-website-n69r.onrender.com";
 const DOCS_BASE = `${API_BASE}/docs`;
 
 function agentPreamble(token: string) {

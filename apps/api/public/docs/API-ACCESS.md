@@ -40,7 +40,7 @@ business — plus these docs as MCP **prompts** (`write-trip-guide`,
 path for tours, reviews, menu, leads and business settings.**
 
 ```bash
-SY_TOKEN="sy_…" SY_API_URL="https://sundarban-yatri-api.onrender.com" node cli/mcp.mjs --selftest
+SY_TOKEN="sy_…" SY_API_URL="https://travel-website-n69r.onrender.com" node cli/mcp.mjs --selftest
 # every line must say "ok" — then register it permanently in your agent
 # (opencode.json / `claude mcp add` / any MCP client — exact JSON + a
 #  copy-paste master prompt live on the Studio MCP access page).
@@ -56,8 +56,8 @@ the same env vars (see POST-WRITING-SKILL.md §9 for the channel rules).
 # Required
 export SY_TOKEN="sy_…"
 
-# Optional (defaults to https://sundarban-yatri-api.onrender.com)
-export SY_API_URL="https://sundarban-yatri-api.onrender.com"
+# Optional (defaults to https://travel-website-n69r.onrender.com)
+export SY_API_URL="https://travel-website-n69r.onrender.com"
 
 # Quick self-check
 node cli/blog.mjs whoami

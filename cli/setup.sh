@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Sundarban Yatri - one-command CLI bootstrap for external AI agents.
-# Usage:  mkdir -p ~/sy-cli && cd ~/sy-cli && curl -fsSL https://sundarban-yatri-api.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
+# Usage:  mkdir -p ~/sy-cli && cd ~/sy-cli && curl -fsSL https://travel-website-n69r.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
 set -e
 
-BASE="https://sundarban-yatri-api.onrender.com/docs"
+BASE="https://travel-website-n69r.onrender.com/docs"
 DIR="$(pwd)"
 
 echo "-> Downloading CLI files..."
@@ -20,10 +20,10 @@ cat <<'SY_DONE'
 
 Sundarban Yatri CLI ready in'" $DIR"'
 
-Next steps (as documented in https://sundarban-yatri-api.onrender.com/docs/AI-EDITOR-AGENT.md):
+Next steps (as documented in https://travel-website-n69r.onrender.com/docs/AI-EDITOR-AGENT.md):
 
   export SY_TOKEN="sy_..."                                                  # from Studio -> API tokens
-  export SY_API_URL="https://sundarban-yatri-api.onrender.com"
+  export SY_API_URL="https://travel-website-n69r.onrender.com"
   node blog.mjs whoami                                                      # ALWAYS run first
 
 If whoami fails, stop and report - never attempt to work around auth.

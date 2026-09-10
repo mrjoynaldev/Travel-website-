@@ -9,7 +9,7 @@
  *
  * Env vars:
  *   SY_TOKEN     Required. API access token (shown once at creation).
- *   SY_API_URL   Optional. Defaults to https://sundarban-yatri-api.onrender.com
+ *   SY_API_URL   Optional. Defaults to https://travel-website-n69r.onrender.com
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { readFileSync } from "node:fs";
@@ -17,7 +17,7 @@ import { extname } from "node:path";
 import superjson from "superjson";
 import { gravityToHtml } from "./gravity.mjs";
 
-const API_URL = (process.env.SY_API_URL || "https://sundarban-yatri-api.onrender.com").replace(/\/+$/, "");
+const API_URL = (process.env.SY_API_URL || "https://travel-website-n69r.onrender.com").replace(/\/+$/, "");
 const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || parseFlag("--token");
 

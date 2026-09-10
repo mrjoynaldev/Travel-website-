@@ -3,7 +3,7 @@
 # Usage: SY_TOKEN=sy_... bash cli/smoke.sh [slug]
 set -u
 SITE="https://sundarbanyatra.com"
-API="${SY_API_URL:-https://sundarban-yatri-api.onrender.com}"
+API="${SY_API_URL:-https://travel-website-n69r.onrender.com}"
 ADMIN="https://sundarbanyatra.com"
 TOKEN="${SY_TOKEN:-$SY_TOKEN}"
 SLUG="${1:-sundarban-safari-guide}"

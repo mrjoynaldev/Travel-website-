@@ -16,18 +16,18 @@
  * Env vars:
  *   SY_TOKEN    Required. API access token, scope read+write.
  *               Create one in Studio → "MCP access" (shown once).
- *   SY_API_URL  Optional. Defaults to https://sundarban-yatri-api.onrender.com
+ *   SY_API_URL  Optional. Defaults to https://travel-website-n69r.onrender.com
  *               (use http://localhost:4000 for local dev).
  *
  * Permanent install (example — opencode):
  *   { "mcp": { "sundarban-yatri": {
  *     "type": "local",
  *     "command": ["node", "/abs/path/to/mcp.mjs"],
- *     "environment": { "SY_TOKEN": "sy_...", "SY_API_URL": "https://sundarban-yatri-api.onrender.com" }
+ *     "environment": { "SY_TOKEN": "sy_...", "SY_API_URL": "https://travel-website-n69r.onrender.com" }
  *   } } }
  */
 
-const API_URL = (process.env.SY_API_URL || "https://sundarban-yatri-api.onrender.com").replace(/\/+$/, "");
+const API_URL = (process.env.SY_API_URL || "https://travel-website-n69r.onrender.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || "";
 const SELFTEST = process.argv.includes("--selftest");
 const MAX_OUT = 20000;

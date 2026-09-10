@@ -8,7 +8,7 @@ the editorial skill in `docs/POST-WRITING-SKILL.md` and the publishing
 contract below.
 
 Companion documents (read the ones your task touches — all live at
-`https://sundarban-yatri-api.onrender.com/docs/<filename>` and as MCP resources):
+`https://travel-website-n69r.onrender.com/docs/<filename>` and as MCP resources):
 - `docs/POST-WRITING-SKILL.md` — how to find ideas, validate them, and write
   guides that rank (read before writing anything).
 - `docs/LEAD-SKILL.md` — **the money skill**: audiences, funnel, CTA rules,
@@ -61,7 +61,7 @@ prompts/resources. Prefer MCP tools over CLI whenever both exist.
 ```bash
 cd <repo-root>                                                    # e.g. ~/sundarban-yatri
 export SY_TOKEN="sy_…"                                            # from Studio → API tokens
-export SY_API_URL="https://sundarban-yatri-api.onrender.com"
+export SY_API_URL="https://travel-website-n69r.onrender.com"
 node cli/blog.mjs whoami                                          # ALWAYS run first
 ```
 
@@ -69,15 +69,15 @@ node cli/blog.mjs whoami                                          # ALWAYS run f
 
 ```bash
 mkdir -p ~/sy-cli && cd ~/sy-cli
-curl -fsSL https://sundarban-yatri-api.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
+curl -fsSL https://travel-website-n69r.onrender.com/docs/setup.sh -o setup.sh && bash setup.sh
 export SY_TOKEN="sy_…"
-export SY_API_URL="https://sundarban-yatri-api.onrender.com"
+export SY_API_URL="https://travel-website-n69r.onrender.com"
 node blog.mjs whoami                                              # ALWAYS run first
 ```
 
 The bootstrap downloads `blog.mjs` + `gravity.mjs` + `distribute.mjs` from this
 site and installs the two npm dependencies. All documentation lives at
-`https://sundarban-yatri-api.onrender.com/docs/<filename>`.
+`https://travel-website-n69r.onrender.com/docs/<filename>`.
 
 If `whoami` fails, stop and report — never attempt to work around auth.
 

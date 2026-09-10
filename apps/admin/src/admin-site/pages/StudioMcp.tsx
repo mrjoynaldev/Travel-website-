@@ -18,7 +18,7 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://sundarban-yatri-api.onrender.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://travel-website-n69r.onrender.com";
 const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 function masterPrompt(token: string): string {
