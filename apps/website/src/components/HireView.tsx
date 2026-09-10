@@ -9,7 +9,7 @@ import type { Business, FAQItem } from "@web/lib/catalogue";
 import { TOURS, FAQS } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
 import { Check, Clock3, Globe2, Phone, ShieldCheck } from "lucide-react";
-import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 

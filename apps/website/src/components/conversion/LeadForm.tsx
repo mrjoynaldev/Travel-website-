@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { toast } from "sonner";
 import { trpcClient } from "@web/lib/trpc-client";
 import { buildWhatsAppUrl, tourWhatsAppMessage } from "@web/lib/business";
@@ -65,9 +66,9 @@ export function LeadForm({
           href={buildWhatsAppUrl(tourWhatsAppMessage(tourTitle ?? "a Sundarban tour"))}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-flex h-11 items-center rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white hover:bg-[#178a45] transition-colors"
+          className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white hover:bg-[#178a45] transition-colors"
         >
-          Continue on WhatsApp
+          <WhatsAppIcon className="h-4 w-4" /> Continue on WhatsApp
         </a>
       </div>
     );

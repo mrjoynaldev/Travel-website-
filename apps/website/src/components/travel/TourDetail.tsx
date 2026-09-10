@@ -7,7 +7,7 @@ import type { Business, FAQItem, TourWithDetail } from "@web/lib/catalogue";
 import { FAQS, TOURS } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
 import { BedDouble, CalendarDays, Car, Check, Clock3, MapPin, Phone, Ship, Users, X } from "lucide-react";
-import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import Link from "next/link";
 
 const DEFAULT_FAQS: FAQItem[] = FAQS.map(item => ({ q: item.q, a: item.a }));

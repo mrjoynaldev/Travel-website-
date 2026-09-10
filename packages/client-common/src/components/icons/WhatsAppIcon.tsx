@@ -1,6 +1,7 @@
 // Official WhatsApp brand glyph (Simple Icons, viewBox 0 0 24 24).
-// Renders in currentColor so it inherits the button text color — use white
-// on the green WhatsApp buttons, or #25D366 on light surfaces.
+// Renders in currentColor so it inherits the surrounding text color — white
+// on the green WhatsApp buttons, or green (#1fa855) on light surfaces.
+// Single shared copy for the website + Studio: do not duplicate this path.
 export function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg

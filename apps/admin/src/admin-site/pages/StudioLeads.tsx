@@ -16,12 +16,12 @@ import {
   CalendarDays,
   Loader2,
   Mail,
-  MessageCircle,
   Phone,
   Search,
   Target,
   Users,
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -275,7 +275,7 @@ export default function StudioLeads() {
                               updateStatus.mutate({ id: lead.id, status: "contacted" })
                             }
                           >
-                            <MessageCircle className="h-3.5 w-3.5" />
+                            <WhatsAppIcon className="h-3.5 w-3.5" />
                             WhatsApp
                           </a>
                         </Button>

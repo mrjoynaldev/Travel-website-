@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CalendarDays, MapPin, Users, Clock3, Phone } from "lucide-react";
-import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { businessConfig, tripWhatsAppUrl } from "@web/lib/business";
 import type { Business } from "@web/lib/catalogue";
 

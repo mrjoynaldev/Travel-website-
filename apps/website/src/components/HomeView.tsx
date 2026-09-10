@@ -14,7 +14,7 @@ import type { Brand, Business, FAQItem, MenuItem, VideoReview } from "@web/lib/c
 import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE, TRUST_FEATURES, SAFARI_DEFAULT } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
 import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Clapperboard, Compass, HeartHandshake, Loader2, Mail, MapPin, Phone, Route, Ship, Star, UtensilsCrossed } from "lucide-react";
-import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition, useState } from "react";

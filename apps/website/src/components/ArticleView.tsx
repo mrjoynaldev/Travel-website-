@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Clock3, MessageCircle, Phone, Send, Share2 } from "lucide-react";
-import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { businessConfig, buildWhatsAppUrl } from "@web/lib/business";
