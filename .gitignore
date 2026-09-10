@@ -116,3 +116,9 @@ client/public/__manus__/version.json
 .env*
 .vercel/
 codereportglobal-*.json
+
+# Next.js static export output (rebuilt on deploy)
+apps/*/out/
+
+# Firebase deploy cache
+.firebase/

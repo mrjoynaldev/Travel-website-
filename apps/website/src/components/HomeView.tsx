@@ -13,7 +13,8 @@ import { buildWhatsAppUrl, businessConfig, defaultWhatsAppMessage } from "@web/l
 import type { Brand, Business, FAQItem, MenuItem, VideoReview } from "@web/lib/catalogue";
 import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE, TRUST_FEATURES, SAFARI_DEFAULT } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
-import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Clapperboard, Compass, HeartHandshake, Loader2, Mail, MapPin, MessageCircle, Phone, Route, Ship, Star, UtensilsCrossed } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Binoculars, BookOpen, Clapperboard, Compass, HeartHandshake, Loader2, Mail, MapPin, Phone, Route, Ship, Star, UtensilsCrossed } from "lucide-react";
+import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useTransition, useState } from "react";
@@ -175,7 +176,7 @@ export default function HomeView({ categories, sections, posts, search, category
               Explore Sundarban Tours <ArrowRight className="h-4 w-4" />
             </a>
             <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#1fa855] px-7 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors">
-              <MessageCircle className="h-4 w-4" /> WhatsApp Us
+              <WhatsAppIcon className="h-4 w-4" /> WhatsApp Us
             </a>
           </div>
           <p className="mt-6 text-[13px] tracking-wide text-white/70">Local guidance • Flexible itineraries • Easy enquiry</p>
@@ -400,7 +401,7 @@ export default function HomeView({ categories, sections, posts, search, category
             <h2 className="mt-3 h2 font-display">Questions Travellers Ask Before They Go</h2>
             <p className="mt-4 leading-7 text-muted-foreground">Straight answers on routes, days, inclusions and seasons. For anything specific, WhatsApp us — a human replies.</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white"><MessageCircle className="h-4 w-4" /> Ask on WhatsApp</a>
+              <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white"><WhatsAppIcon className="h-4 w-4" /> Ask on WhatsApp</a>
               <a href="/hire" className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-white px-6 text-sm font-semibold hover:border-primary/40 hover:text-primary">Get a Quote</a>
             </div>
           </div>
@@ -422,7 +423,7 @@ export default function HomeView({ categories, sections, posts, search, category
                   <span className="flex items-center gap-2 text-[15px] font-bold"><Phone className="h-5 w-5" /> {biz.phoneDisplay}</span>
                   <span className="mt-0.5 block text-xs font-medium text-[#0f4532]/70">Tap to call • {biz.hours}</span>
                 </a>
-                <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-5 w-5" /> WhatsApp Us</a>
+                <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><WhatsAppIcon className="h-5 w-5" /> WhatsApp Us</a>
               </div>
               <button onClick={() => setShowEnquiry((v) => !v)} aria-expanded={showEnquiry} className="mt-4 text-sm font-medium text-white/70 underline underline-offset-4 hover:text-white transition-colors">
                 {showEnquiry ? "Hide enquiry form ↑" : "Outside India? Send an enquiry form instead →"}

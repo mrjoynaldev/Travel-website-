@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, MapPin, Users, Clock3, MessageCircle, Phone } from "lucide-react";
+import { CalendarDays, MapPin, Users, Clock3, Phone } from "lucide-react";
+import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
 import { businessConfig, tripWhatsAppUrl } from "@web/lib/business";
 import type { Business } from "@web/lib/catalogue";
 
@@ -99,7 +100,7 @@ export function TripPlannerCard({ business }: { business?: Business }) {
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors shadow-[0_16px_32px_-14px_rgba(31,168,85,.6)]"
         >
-          <MessageCircle className="h-4 w-4" /> Send on WhatsApp
+          <WhatsAppIcon className="h-4 w-4" /> Send on WhatsApp
         </a>
         <a
           href={`tel:${biz.phone}`}

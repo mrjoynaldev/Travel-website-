@@ -6,7 +6,8 @@ import { businessConfig, buildWhatsAppUrl, tourWhatsAppMessage } from "@web/lib/
 import type { Business, FAQItem, TourWithDetail } from "@web/lib/catalogue";
 import { FAQS, TOURS } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
-import { BedDouble, CalendarDays, Car, Check, Clock3, MapPin, MessageCircle, Phone, Ship, Users, X } from "lucide-react";
+import { BedDouble, CalendarDays, Car, Check, Clock3, MapPin, Phone, Ship, Users, X } from "lucide-react";
+import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
 import Link from "next/link";
 
 const DEFAULT_FAQS: FAQItem[] = FAQS.map(item => ({ q: item.q, a: item.a }));
@@ -132,7 +133,7 @@ export function TourDetail({
               <h2 className="mt-2 font-display text-2xl lg:text-3xl font-bold tracking-tight">Call or WhatsApp — we&apos;ll lock your dates.</h2>
               <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
                 <a href={`tel:${biz.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0f4532] hover:bg-[#f5e7cc] transition-colors"><Phone className="h-4 w-4" /> {biz.phoneDisplay}</a>
-                <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-4 w-4" /> WhatsApp This Tour</a>
+                <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><WhatsAppIcon className="h-4 w-4" /> WhatsApp This Tour</a>
               </div>
               <p className="mt-4 text-sm text-white/60">Outside India? Use the enquiry form in the side card →</p>
             </div>
@@ -148,7 +149,7 @@ export function TourDetail({
               </div>
               <div className="mt-5 grid gap-2.5">
                 <a href={`tel:${biz.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-[15px] font-bold text-white hover:bg-[#0f4532] transition-colors"><Phone className="h-4 w-4" /> Call to Book</a>
-                <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-5 py-3 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><MessageCircle className="h-4 w-4" /> WhatsApp</a>
+                <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-5 py-3 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><WhatsAppIcon className="h-4 w-4" /> WhatsApp</a>
               </div>
               <div className="my-5 border-t border-dashed border-border" />
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Outside India? Enquire by form</p>

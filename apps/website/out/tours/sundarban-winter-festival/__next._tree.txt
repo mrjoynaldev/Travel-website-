@@ -1,5 +1,0 @@
-:HL["/_next/static/media/36363bfb06833f56-s.p.38hmww4cj4vme.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["/_next/static/media/a73419dd2ba2d841-s.p.2yee423r7ahpo.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
-:HL["https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?auto=format&fit=crop&w=1200&q=80","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":4112,"slots":{"children":{"name":"tours","param":null,"prefetchHints":4160,"slots":{"children":{"name":"slug","param":{"type":"d","key":"sundarban-winter-festival","siblings":[]},"prefetchHints":4192,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":4256,"slots":null}}}}}}},"staleTime":300,"buildId":"rlCS-eFt9mSlncLJscvBH"}

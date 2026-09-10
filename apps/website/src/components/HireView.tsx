@@ -8,7 +8,8 @@ import { businessConfig, buildWhatsAppUrl } from "@web/lib/business";
 import type { Business, FAQItem } from "@web/lib/catalogue";
 import { TOURS, FAQS } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
-import { Check, Clock3, Globe2, MessageCircle, Phone, ShieldCheck } from "lucide-react";
+import { Check, Clock3, Globe2, Phone, ShieldCheck } from "lucide-react";
+import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -65,7 +66,7 @@ function PlanTripInner({ tours, faqs, business }: { tours?: Tour[]; faqs?: FAQIt
               rel="noopener noreferrer"
               className="yatri-card group flex items-center gap-5 p-6 lg:p-7"
             >
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#1fa855]/12 text-[#1fa855]"><MessageCircle className="h-6 w-6" /></span>
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#1fa855]/12 text-[#1fa855]"><WhatsAppIcon className="h-6 w-6" /></span>
               <span>
                 <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">WhatsApp us</span>
                 <span className="mt-1 block font-display text-2xl lg:text-[1.7rem] font-bold tracking-tight group-hover:text-primary transition-colors">Chat now →</span>

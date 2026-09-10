@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageCircle, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { businessConfig, buildWhatsAppUrl, defaultWhatsAppMessage, trackEvent } from "@web/lib/business";
+import { WhatsAppIcon } from "@web/components/icons/WhatsAppIcon";
 
 export function StickyMobileCta({ tourTitle }: { tourTitle?: string }) {
   const wa = buildWhatsAppUrl(tourTitle ? `Hello Sundarban Yatri, I am interested in ${tourTitle}.` : defaultWhatsAppMessage);
@@ -15,7 +16,7 @@ export function StickyMobileCta({ tourTitle }: { tourTitle?: string }) {
           onClick={() => trackEvent("whatsapp_click", { source: "sticky" })}
           className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-[#1fa855] text-sm font-semibold text-white"
         >
-          <MessageCircle className="h-4 w-4" /> WhatsApp
+          <WhatsAppIcon className="h-4 w-4" /> WhatsApp
         </a>
         <a
           href={`tel:${businessConfig.phone}`}
