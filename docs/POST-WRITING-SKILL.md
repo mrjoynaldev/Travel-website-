@@ -1,12 +1,12 @@
 # SKILL: Travel Guide Writing for Sundarban Yatri
 
-> **GOAL — comprehensive system:** Every guide is a **lead path to a trip** (call / WhatsApp first, `/hire` plan-trip form secondary for international travellers), not an ad play. You serve the **user website** (public guides + hire CTA), via **Admin Studio** control, as the **AI agent** with full `SY_TOKEN` systematic control. See `docs/ROADMAP.md` and `docs/AI-EDITOR-AGENT.md: TARGET GOAL`.
+> **GOAL — comprehensive system:** Every guide is a **lead path to a trip**, written for **ONE target lead segment** from `docs/LEAD-SKILL.md §1` (Kolkata families / couples / photographers & birders / international travellers), closed by call/WhatsApp first, `/hire` plan-trip form secondary for international travellers — never an ad play. You serve the **user website** (public guides + hire CTA), via **Admin Studio** control, as the **AI agent** with full `SY_TOKEN` systematic control. See `docs/LEAD-SKILL.md` (audiences + funnel), `docs/ROADMAP.md` and `docs/AI-EDITOR-AGENT.md: TARGET GOAL`.
 
 Editorial operating system for the AI Editor Agent. Derived from a full SEO
 course (search-intent-first keyword strategy, topic clusters, on-page
 checklists, link-worthy content, AI-search visibility). Follow it in order:
-**find → validate → interrogate → angle → structure → write → optimize →
-publish → distribute → capture lead.**
+**target segment → find → validate → interrogate → angle → structure → write →
+optimize → publish → distribute → capture lead.**
 
 ---
 
@@ -39,7 +39,8 @@ A topic earns a post only when it scores on all four:
 | Attribute | Question |
 |---|---|
 | Demand | Do people actually search this? (long-tail is fine: "best…" "how to fix…" "vs" "pricing") |
-| Fit | Does it serve our audience (travellers) and our hubs? |
+| Segment | Which LEAD-SKILL §1 buyer is this for — families / couples / photographers & birders / international? One dominant segment, never a blur. Their §1 worry must be closable on this page. |
+| Fit | Does it serve our hubs and that segment's trip? |
 | Intent | What does the searcher want — route, cost, itinerary, comparison? Can we satisfy exactly that? |
 | Difficulty | Can a brand-new site realistically rank? Prefer specific long-tail over head terms. |
 
@@ -97,9 +98,9 @@ how badly current answers serve them.
 - Weak SERP +2 — top-5 has ≥2 weak blogs/docs pages you can beat on depth, freshness, or runnable proof
 
 **Output:** a research note in the kit (`research.md`) with the numbers per
-source + the score + the verdict. It feeds the brief (§12) and the source
-map (§5e). No research note with numbers = no brief = no draft. A score
-built on guesses is a score of zero.
+source + the score + the verdict + the named lead segment (§4d). It feeds the
+brief (§12) and the source map (§5e). No research note with numbers = no brief =
+no draft. A score built on guesses is a score of zero.
 
 Search behavior shift: users increasingly paste **full conversational
 questions** into Google and assistants ("I want to pick up a new hobby… can you
@@ -186,9 +187,11 @@ actually wants (route ≠ cost ≠ itinerary ≠ comparison). Mismatched intent 
 inside body copy (topic hub + ≥1 related guide + ≥1 tour page) plus a close-of-post call/WhatsApp CTA
 button. Internal linking is the highest effort-to-value tactic in SEO and
 the engine of multi-page sessions.
-4. **Stage-aware CTA:** explainer → link the deeper guide or hub;
-cost/itinerary/comparison → link the matching tour page + call/WhatsApp. Every link moves the reader one step
-down the funnel toward a trip, never sideways to something unrelated.
+4. **Segment-aware CTA:** explainer → link the deeper guide or hub;
+cost/itinerary/comparison → link the matching tour page + call/WhatsApp (the
+`/hire` form only for the international segment). Every link moves the named
+reader one step down the funnel toward a trip, never sideways to something
+unrelated.
 5. **Free-value exchange:** cost breakdown tables, day-wise itineraries, packing checklists,
 comparison tables. These convert a visit into a remembered
 brand, earn bookmarks, and become the assets other sites link to.
@@ -202,7 +205,8 @@ brand, earn bookmarks, and become the assets other sites link to.
 Answer these in one short paragraph each before drafting:
 
 1. **Who searches this and what do they want?** (intent sentence — one
-line: `A traveller planning [trip] who wants [route/cost/plan] for [month/group]`.)
+line: `A [LEAD-SKILL §1 segment] planning [trip] who wants [route/cost/plan] for [month/group], worried about [their segment's worry], closed by [their segment's conversion lever].` —
+e.g. `A Kolkata family planning a weekend trip who wants a 2-day cost & itinerary for December, worried about food/toilets/kids, closed by clear inclusions + a call CTA.` Pick ONE segment; a page written for everyone converts no one.)
     Match the format to the intent type: informational → destination/explainer guide,
     transactional/comparison (`vs`, `best`, `which tour`) → head-to-head or
     decision post, cost/planning → breakdown with verified numbers.
@@ -252,11 +256,17 @@ Before any draft exists, complete this sentence and show it to the editor:
 
 Before drafting, run this structured workflow:
 
-**STEP 1: Search intent + query mapping**
+**STEP 1: Search intent + query mapping + segment**
 Generate 5–10 real search queries. Identify:
 - Planning intent ("how to reach", "cost", "best time", "itinerary")
 - Learning intent ("what is", "how safari works", "what to carry")
 - Comparison intent ("X vs Y", "2-day vs 3-day")
+Then name the buyer: **which LEAD-SKILL §1 segment searches this question?**
+Families ask "is 1 day enough / food / toilets / kids"; couples ask "privacy /
+best 2D/1N / sunset"; photographers & birders ask "honest odds / watchtowers /
+first light"; international ask "permits / how to reach / payment / language".
+Record the segment in the research note (§1b) and the brief (§12) — a
+question with no named buyer is not ready to write.
 
 **STEP 2: Title generation**
 Generate 3 title options using the CTR format: `[Topic] + [Outcome] + [Context]`
@@ -300,21 +310,58 @@ Pick the BEST one — specific promise, no vague openers (`Beautiful…`,
 - Secondary variations naturally in H2/H3
 - DO NOT keyword stuff
 
-**STEP 6: Traveller-first writing style**
+**STEP 6: Segment-first writing style**
 - Clear > clever
 - Practical > theoretical
 - Routes/timings/costs > adjectives
+- Write directly to the named segment's worry (§4d table) — families get food/kids/toilet answers, couples get stay/privacy answers, birders get odds/timing answers, internationals get permit/reach/payment answers
 - Real trip questions > generic advice
 
 **STEP 7: Quality filter (reject if any fail)**
 - No actionable trip detail → reject
 - Too generic → reject
+- No named lead segment from §4d → reject (writes for everyone, converts no one)
 - Doesn't answer a real traveller question → reject
 - Invented sightings, prices or reviews → reject
 - Doesn't match queries → reject
 
 **STEP 8: Authority building (after article)**
 Generate 3–5 related guide ideas in the same topic plus the tours/destinations to link. Must interlink.
+
+### 4d. Lead-specific content generation (target ONE buyer per guide)
+
+Every guide names its buyer from `LEAD-SKILL.md §1` **before** research and
+keeps that name in the brief, the research note and the draft. One segment per
+post — splitting segments splits the CTA and dilutes conversion. The segment
+dictates the worry you close, the evidence you show, the H2s you answer and
+the close you build:
+
+| Segment (LEAD-SKILL §1) | Worry to close | Evidence = proof | H2 questions to answer | Close |
+|---|---|---|---|---|
+| Kolkata families | Safety, food, toilets, kids, "is 1 day enough?" | veg food proof, clear inclusions, kid-friendly route & rest stops | Is 1 day enough? What food do we get? Are toilets/rest stops available? | Call/WhatsApp → tour page; weekend + festival dates stated honestly |
+| Couples | Privacy, stay quality, sunset points | 2D/1N imagery, real food + stay photos | Best 2D/1N plans? Which stay for privacy? Where is the sunset point? | Call/WhatsApp → 2D/1N tour |
+| Photographers / birders | Safari-odds honesty, watchtowers, timing | honest odds, Dobanki canopy walk, early-start schedule (Nov–Feb migrants) | What are real sighting odds? Best watchtower & first-light time? What gear/carry? | Call/WhatsApp → safari tour |
+| International travellers | Permits, how to reach, payment, language | permit clarity, reach detail (Kolkata → gateways), payment methods, email-ready answers | How do I get permits? How do I reach from Kolkata? Can I pay online? Do you speak English? | `/hire` form + email-ready detailed answers (form-first is correct here) |
+
+Lead-specific content generation rules:
+
+- **Research note (§1b) records the segment** alongside the demand score: the
+  same query answered for two different buyers is two different pages
+  (`sundarban for family` ≠ `sundarban for photographers`).
+- **Entry promise carries the segment:** title/intro must state who this is
+  for when the query implies it (`Sundarban with Kids — Is 1 Day Enough?`,
+  `Sundarban for Photographers — Odds, Towers & First Light`).
+- **Every H2 closes the segment's worry** from the table; if an H2 only serves
+  a different segment, cut it — one buyer per page.
+- **Proof beats adjectives:** families get food/toilet/kid logistics proof,
+  birders get odds/timing proof, internationals get permit/reach/payment proof.
+  Never a generic "great for families" claim without the specific that makes it true.
+- **CTA matches the segment's channel from LEAD-SKILL §2:** call/WhatsApp first
+  for all domestic segments (families, couples, photographers/birders); `/hire`
+  form-first only for international travellers, who plan months ahead.
+- **Inverse check (anti-leak):** a guide that gets traffic but no enquiries in
+  30 days gets its segment/CTA audited per LEAD-SKILL §6 before any new content
+  is written.
 
 ## 5. Structure blueprint
 
@@ -688,7 +735,7 @@ Before `studio.posts.create`, you MUST answer all 17. If any answer is `No/Weak`
 
 **Part 1 — Before writing (most important):**
 1. What EXACT question am I answering? One line. If you can’t → don’t write.
-2. Who is searching this? (family/couple/photographer/international) If vague → generic → not indexed.
+2. Who is searching this? (ONE LEAD-SKILL §1 segment — family/couple/photographer/international — not "everyone". If vague → generic → not indexed.)
 3. What are top 5 results missing? (shallow? no timings? no costs?) Your information gain = your value.
 4. Is this trip-answering? (answers ✅ vs inspires ❌) Trip-answering indexes faster.
 
@@ -745,14 +792,17 @@ row. No brief = no draft.
 
 ```md
 # Brief: [working title]
+- Target segment (LEAD-SKILL §1, ONE): [Kolkata families / couples / photographers & birders / international]
+- Segment worry to close (from §4d): [e.g. food/toilets/kids for families]
+- Lead CTA: [call/WhatsApp → tour page | /hire form (international only)]
 - Primary keyword: [exact query, e.g. sundarban tour cost for 2 days]
 - Secondary queries: [2–4 intent variants from §3d]
-- Intent (one line): A traveller planning [trip] who wants [route/cost/plan] for [month/group]
+- Intent (one line): A [segment] planning [trip] who wants [route/cost/plan] for [month/group], worried about [segment worry], closed by [segment lever]
 - Niche lane: Reach / Cost+Itinerary / Safari / Places → hub: /topics/[slug]
 - CTR title (≤60): [Topic] + [Outcome] + [Context]
 - Meta description (150–160): [place/question first] + [answer + hook]
 - Slug: [2–5 words]
-- H2 plan: [question-shaped subheads, one per variant]
+- H2 plan: [question-shaped subheads, one per variant, each closing the segment worry]
 - Facts tables: [timings/costs/inclusions + check dates]
 - Internal links: UP [hub URL + anchor] / SIDEWAYS [2 sibling URLs + anchors] / TOUR [tour URL + anchor]
 - Sources (3–5 primary URLs): [official notice, operator page, timetable, thread]
@@ -762,6 +812,6 @@ row. No brief = no draft.
 ```
 
 Calendar columns (spreadsheet or kit index): ID · Date · Type
-(spoke / hub-update) · Title · Keyword · Intent · Slug · Hub ·
+(spoke / hub-update) · Title · Segment · Keyword · Intent · Slug · Hub ·
 Status (idea / brief / draft / review / published) · Internal links ·
 Sources · Performance (impressions / clicks / CTR / position, weekly).

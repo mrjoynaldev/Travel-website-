@@ -18,30 +18,31 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
-const SITE_URL = "https://sundarbanyatra.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://sundarban-yatri-api.onrender.com";
+const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
 
 function masterPrompt(token: string): string {
-  return `You are the full-control site agent for Sundarban Yatri (https://sundarbanyatra.com) — tours, safari, destinations, travel guides and trip enquiries. You can manage EVERYTHING on the site through its MCP server. With that power comes one duty: never break the owner's trust.
+  return `You are the full-control site agent for Sundarban Yatri (${API_URL}) — tours, safari, destinations, travel guides and trip enquiries. You can manage EVERYTHING on the site through its MCP server. With that power comes one duty: never break the owner's trust.
 
 SECRET — full account control. Store it as an environment variable, never print it, never commit it, never paste it anywhere except the config below:
 SY_TOKEN=${token}
-SY_API_URL=${SITE_URL}
+SY_API_URL=${API_URL}
 
 PERMANENT SETUP — do this once, in order, and make it survive restarts:
 1. Get the MCP server file. If this machine has the site repo, it is at cli/mcp.mjs. Otherwise download it:
-   mkdir -p ~/sy-cli && cd ~/sy-cli && curl -fsSL ${SITE_URL}/docs/mcp.mjs -o mcp.mjs
+   mkdir -p ~/sy-cli && cd ~/sy-cli && curl -fsSL ${API_URL}/docs/mcp.mjs -o mcp.mjs
    It needs plain node only — zero npm dependencies.
 2. Verify the connection BEFORE anything else:
-   SY_TOKEN="${token}" SY_API_URL="${SITE_URL}" node ~/sy-cli/mcp.mjs --selftest
+   SY_TOKEN="${token}" SY_API_URL="${API_URL}" node ~/sy-cli/mcp.mjs --selftest
    Every line must say "ok". If anything FAILs, stop and report the exact output — never work around auth.
 3. Install it PERMANENTLY in this agent, using the first option that fits:
    a) opencode — add to opencode.json and restart the session:
       { "mcp": { "sundarban-yatri": { "type": "local",
         "command": ["node", "/home/USER/sy-cli/mcp.mjs"],
-        "environment": { "SY_TOKEN": "${token}", "SY_API_URL": "${SITE_URL}" } } } }
+        "environment": { "SY_TOKEN": "${token}", "SY_API_URL": "${API_URL}" } } } }
       (Replace /home/USER with the real absolute path to mcp.mjs on THIS machine.)
    b) Claude Code — run:
-      claude mcp add --transport stdio sundarban-yatri --env SY_TOKEN=${token} --env SY_API_URL=${SITE_URL} -- node /home/USER/sy-cli/mcp.mjs
+      claude mcp add --transport stdio sundarban-yatri --env SY_TOKEN=${token} --env SY_API_URL=${API_URL} -- node /home/USER/sy-cli/mcp.mjs
    c) Any other MCP client — register a stdio server: command "node", args ["/abs/path/mcp.mjs"], env SY_TOKEN + SY_API_URL as above.
 4. Prove it stuck: list the available tools, prompts and resources, call "whoami", and read the LEAD-SKILL.md resource. Report back: (i) where you saved the config, (ii) how many tools/prompts/skills you see, (iii) the identity whoami returns, (iv) the one-line goal of the business in your own words. Only then accept further tasks.
 
@@ -61,7 +62,7 @@ function mcpConfig(token: string): string {
         "sundarban-yatri": {
           type: "local",
           command: ["node", "/home/USER/sy-cli/mcp.mjs"],
-          environment: { SY_TOKEN: token, SY_API_URL: SITE_URL },
+          environment: { SY_TOKEN: token, SY_API_URL: API_URL },
         },
       },
     },
@@ -206,7 +207,7 @@ export function StudioMcp() {
           <h2 className="font-display text-xl font-semibold">2 · Connect it once</h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             After minting, the ready-to-paste MCP config appears here. Your agent needs <code>node</code> and the <code>mcp.mjs</code> file
-            (ships with the repo at <code>cli/mcp.mjs</code>, downloadable at <code>{SITE_URL}/docs/mcp.mjs</code>).
+            (ships with the repo at <code>cli/mcp.mjs</code>, downloadable at <code>{API_URL}/docs/mcp.mjs</code>).
             Replace <code>/home/USER</code> with the real path on the agent&apos;s machine.
           </p>
           <div className="mt-4">
@@ -267,7 +268,7 @@ export function StudioMcp() {
           <h2 className="font-display text-xl font-semibold">Skill library — how the agent thinks</h2>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             Every file targets the same customer (Sundarban tourists) and the same goal
-            (trip-enquiry leads). Served live at <code>{SITE_URL}/docs/&lt;file&gt;</code>.
+            (trip-enquiry leads). Served live at <code>{API_URL}/docs/&lt;file&gt;</code>.
           </p>
           <div className="mt-4 grid gap-2.5 md:grid-cols-2">
             {[
@@ -285,7 +286,7 @@ export function StudioMcp() {
             ].map(([file, what]) => (
               <a
                 key={file}
-                href={`${SITE_URL}/docs/${file}`}
+                href={`${API_URL}/docs/${file}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-xl bg-background/70 p-3.5 transition-colors hover:bg-muted"

@@ -68,7 +68,7 @@ async function dispatchViaResend(notification: PendingNotification): Promise<str
     headers: {
       Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
       "Content-Type": "application/json",
-      "Idempotency-Key": `codereport-${notification.id}`,
+      "Idempotency-Key": `sundarban-yatri-${notification.id}`,
     },
     body: JSON.stringify({ from: process.env.EMAIL_FROM, to: [notification.recipient_email], subject: notification.subject, text: notification.body_text }),
   });

@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
-  const verifyToken = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN || process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN || "codereport-verify";
+  const verifyToken = process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN || process.env.FACEBOOK_WEBHOOK_VERIFY_TOKEN || "sundarban-yatri-verify";
   if (mode === "subscribe" && token === verifyToken) {
     return new NextResponse(challenge, { status: 200 });
   }
@@ -96,7 +96,7 @@ async function handlePostback(auto: any, senderId: string, payload: string) {
         body: JSON.stringify({
           recipient: { id: senderId },
           message: {
-            text: `Please follow @codereportglobal first to unlock your guide — tap Follow and then "Following done" 💜`,
+            text: `Please follow @${process.env.INSTAGRAM_HANDLE || "sundarbanyatri"} first to unlock your guide — tap Follow and then "Following done" 💜`,
             quick_replies: [{ content_type: "text", title: "Following done", payload: `VERIFY_FOLLOW_${auto.id}_${senderId}` }]
           },
           access_token: token,
@@ -134,7 +134,7 @@ async function handlePostback(auto: any, senderId: string, payload: string) {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           recipient: { id: senderId },
-          message: { text: `Still not following — tap Follow: https://instagram.com/codereportglobal then tap "Following done" again.` },
+          message: { text: `Still not following — tap Follow: https://instagram.com/${process.env.INSTAGRAM_HANDLE || "sundarbanyatri"} then tap "Following done" again.` },
           access_token: token,
         }),
       });
@@ -206,14 +206,14 @@ async function handleAutomation(auto: any, ctx: { commentId: string; text: strin
       let useQuickReplies = false;
       let quickReplies: any[] = [];
       if (auto.follow_required && isFollower === false) {
-        fullMessage = `Hey! To get your guide, please follow @codereportglobal first — then tap "Following done" and I’ll send it right over 💜\n\n${dmText}`;
+        fullMessage = `Hey! To get your guide, please follow @${process.env.INSTAGRAM_HANDLE || "sundarbanyatri"} first — then tap "Following done" and I’ll send it right over 💜\n\n${dmText}`;
         useQuickReplies = true;
         // URL button to profile + quick reply for verification
         quickReplies = [
           { content_type: "text", title: "Following done", payload: `VERIFY_FOLLOW_${auto.id}_${ctx.fromId}` }
         ];
         // Note: URL button to Instagram profile is not via quick_replies, but via generic template — for private reply we include link as text
-        fullMessage += `\n\nFollow here: https://instagram.com/codereportglobal`;
+        fullMessage += `\n\nFollow here: https://instagram.com/${process.env.INSTAGRAM_HANDLE || "sundarbanyatri"}`;
       } else {
         fullMessage = dmText;
         if (buttonUrl) fullMessage += `\n\n${buttonText}: ${buttonUrl}`;

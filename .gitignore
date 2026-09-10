@@ -122,3 +122,8 @@ apps/*/out/
 
 # Firebase deploy cache
 .firebase/
+
+# pnpm tools / local artifacts (not part of the workspace)
+.npmrc
+pnpm
+package-lock.json

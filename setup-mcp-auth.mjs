@@ -39,7 +39,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`✅ Callback server listening on http://127.0.0.1:${PORT}/mcp/oauth/callback`);
   console.log(`\n📋 Next: Run in another terminal:`);
-  console.log(`   cd /home/adityazyrogami/codereportglobal && opencode mcp auth meta-devtools --print-logs`);
+  console.log(`   cd ${process.cwd()} && opencode mcp auth meta-devtools --print-logs`);
   console.log(`\n   Then copy the https://www.facebook.com/.../dialog/oauth?... link it prints`);
   console.log(`   and open it in your browser (logged in as adityahalderdev).`);
   console.log(`\n⏳ Waiting for callback on http://127.0.0.1:${PORT}/mcp/oauth/callback ... (Ctrl+C to cancel)`);

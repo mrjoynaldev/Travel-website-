@@ -1,7 +1,7 @@
 #!/bin/bash
 # Production-ready Meta MCP setup — tested, single command, waits for browser login
 set -e
-cd /home/adityazyrogami/codereportglobal
+cd "$(dirname "$0")"
 
 echo "🔧 Meta MCP Production Setup — testing..."
 echo ""
@@ -57,12 +57,12 @@ elif grep -q "Dynamic registration is not available" /tmp/mcp-auth-prod.log 2>/d
   echo "✅ Fallback that IS working today (no MCP needed):"
   echo "   • Studio → Automations /studio/automations (we just shipped, 750/hour, 3s DM)"
   echo "   • Graph Explorer: https://developers.facebook.com/tools/explorer/"
-  echo "   • Webhook: https://codereportglobal-backend.onrender.com/api/webhooks/instagram (verify: codereport-verify)"
+  echo "   • Webhook: https://sundarban-yatri-api.onrender.com/api/webhooks/instagram (verify: sundarban-yatri-verify)"
   echo ""
   echo "   Retry this command in 24h, or run: opencode mcp list --print-logs to check"
 elif grep -q "No OAuth-capable" /tmp/mcp-auth-prod.log 2>/dev/null; then
   echo ""
-  echo "✗ Config not loaded — run from project dir: cd /home/adityazyrogami/codereportglobal && bash setup-meta-mcp-prod.sh"
+  echo "✗ Config not loaded — run from project dir: cd $(pwd) && bash setup-meta-mcp-prod.sh"
 else
   echo ""
   echo "⚠️  Unknown state — log:"

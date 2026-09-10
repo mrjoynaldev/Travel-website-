@@ -1494,7 +1494,7 @@ export function StudioExport() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `codereport-global-export.${format === "json" ? "json" : "md"}`;
+    link.download = `sundarban-yatri-export.${format === "json" ? "json" : "md"}`;
     link.click();
     URL.revokeObjectURL(url);
     toast.success("Content export downloaded and audited.");

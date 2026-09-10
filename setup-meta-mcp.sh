@@ -1,7 +1,7 @@
 #!/bin/bash
 # Single-command Meta MCP auth — prints link, waits for login, verifies
 set -e
-cd /home/adityazyrogami/codereportglobal
+cd "$(dirname "$0")"
 echo "🔧 Meta MCP Quick Auth — single command"
 echo "This will start the OAuth flow and wait for your browser login..."
 echo ""

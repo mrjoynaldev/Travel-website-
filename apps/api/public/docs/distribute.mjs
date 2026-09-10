@@ -11,7 +11,7 @@
  *
  * Env vars:
  *   SY_TOKEN     Required. API access token (shown once at creation).
- *   SY_API_URL   Optional. Defaults to https://sundarbanyatra.com
+ *   SY_API_URL   Optional. Defaults to https://sundarban-yatri-api.onrender.com
  *   SY_SITE_URL  Optional. Defaults to https://sundarbanyatra.com
  *   SY_KITS_DIR  Optional. Defaults to ~/sy-cli/kits/<slug>/
  *
@@ -26,8 +26,8 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import superjson from "superjson";
 
-const API_URL = (process.env.SY_API_URL || process.env.SY_API_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.SY_SITE_URL || process.env.SY_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+const API_URL = (process.env.SY_API_URL || "https://sundarban-yatri-api.onrender.com").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
 
 if (!TOKEN) {
