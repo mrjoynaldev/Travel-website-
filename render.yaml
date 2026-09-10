@@ -23,4 +23,4 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        value: "https://sundarbanyatra.com,https://www.sundarbanyatra.com"
+        value: "https://sundarbanyatri.com,https://www.sundarbanyatri.com"

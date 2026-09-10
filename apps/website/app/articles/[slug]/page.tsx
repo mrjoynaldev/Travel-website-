@@ -15,7 +15,7 @@ export async function generateStaticParams() {
   return slugs.length ? slugs.map(slug => ({ slug })) : [{ slug: "__pending__" }];
 }
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 const titleOverrides: Record<string, string> = {
   "how-to-reach-sundarban": "How to Reach Sundarban from Kolkata (2026)",

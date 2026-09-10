@@ -7,7 +7,7 @@ import { buildWhatsAppUrl, defaultWhatsAppMessage } from "@web/lib/business";
 import { getBusiness, getFaqs, getTours } from "@web/lib/catalogue";
 import { MessageCircle, Phone } from "lucide-react";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   title: "Sundarban Tour Packages — 1 Day, 2D/1N, 3D/2N & Custom",

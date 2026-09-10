@@ -42,7 +42,7 @@ const defaultNavigation: NavigationItem[] = [
 
 const FALLBACK_WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "918513819474";
 const FALLBACK_PHONE = "+918513819474";
-const FALLBACK_EMAIL = "hello@sundarbanyatra.com";
+const FALLBACK_EMAIL = "hello@sundarbanyatri.com";
 
 export function PublicShell({ publication, pages = [], children }: { publication?: PublicationInfo | null; pages?: PublicPageInfo[]; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);

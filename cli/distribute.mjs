@@ -4,7 +4,7 @@
  *
  * Generates ready-to-paste share kits for every published article so each piece
  * earns reach AND backlinks without duplicate-content risk. Canonical home is
- * ALWAYS sundarbanyatra.com (see POST-WRITING-SKILL.md §9).
+ * ALWAYS sundarbanyatri.com (see POST-WRITING-SKILL.md §9).
  *
  *   SY_TOKEN=sy_... node distribute.mjs kit <slug>
  *   SY_TOKEN=sy_... node distribute.mjs kit <slug> --out ~/somewhere
@@ -12,7 +12,7 @@
  * Env vars:
  *   SY_TOKEN     Required. API access token (shown once at creation).
  *   SY_API_URL   Optional. Defaults to https://travel-website-n69r.onrender.com
- *   SY_SITE_URL  Optional. Defaults to https://sundarbanyatra.com
+ *   SY_SITE_URL  Optional. Defaults to https://sundarbanyatri.com
  *   SY_KITS_DIR  Optional. Defaults to ~/sy-cli/kits/<slug>/
  *
  * Channel tiers (POST-WRITING-SKILL.md §9):
@@ -27,7 +27,7 @@ import { join, resolve } from "node:path";
 import superjson from "superjson";
 
 const API_URL = (process.env.SY_API_URL || "https://travel-website-n69r.onrender.com").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatri.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || (process.argv.find(a => a.startsWith("--token=")) || "").slice(8);
 
 if (!TOKEN) {
@@ -292,7 +292,7 @@ Information gain (why their readers care): [FILL IN — the one thing no other o
   files["checklist.md"] = `# Distribution checklist — ${title}
 Article: ${url}
 Published: ${post.published_at ? new Date(post.published_at).toISOString().slice(0, 10) : "unknown"}
-Golden rule: sundarbanyatra.com is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
+Golden rule: sundarbanyatri.com is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
 
 ## AUTO channels (system posts within hard daily cap)
 - [ ] dev.to — review devto.md (teaser), flip published:true, confirm canonical_url renders

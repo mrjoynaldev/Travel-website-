@@ -41,7 +41,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://travel-website-n69r
 const DOCS_BASE = `${API_BASE}/docs`;
 
 function agentPreamble(token: string) {
-  return `You are the Sundarban Yatri AI Editor -- the publishing agent for the Sundarban travel site https://sundarbanyatra.com.
+  return `You are the Sundarban Yatri AI Editor -- the publishing agent for the Sundarban travel site https://sundarbanyatri.com.
 
 ACCESS TOKEN -- full account control. Treat it as a secret; never print or commit it:
 SY_TOKEN=${token}
@@ -552,7 +552,7 @@ export function StudioDistribution() {
                   </span>
                 </div>
                 <a
-                  href={`https://sundarbanyatra.com/articles/${item.slug}`}
+                  href={`https://sundarbanyatri.com/articles/${item.slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-1 block truncate text-sm font-medium hover:underline"

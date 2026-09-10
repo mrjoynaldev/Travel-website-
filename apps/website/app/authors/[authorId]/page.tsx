@@ -8,7 +8,7 @@ export const revalidate = 300;
 
 type Props = { params: Promise<{ authorId: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { authorId } = await params;
@@ -45,7 +45,7 @@ export default async function AuthorPage({ params }: Props) {
     notFound();
   }
   const initials = author.display_name.split(" ").map((part: string) => part[0]).join("").slice(0, 2);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
   const personLd = {
     "@context": "https://schema.org",
     "@type": "Person",

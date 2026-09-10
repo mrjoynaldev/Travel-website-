@@ -82,7 +82,7 @@ async function flipDevtoDraft(articleId: string, slug?: string, siteId?: string)
       }
       const title = String((post as any).title || slug).trim();
       const summary = String((post as any).meta_description || (post as any).excerpt || "").slice(0, 140) || title.slice(0, 130);
-      const siteOrigin = (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+      const siteOrigin = (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com").replace(/\/+$/, "");
       const url = `${siteOrigin}/articles/${(post as any).slug}`;
       const tagList = ((post as any).tags as any[] | null)?.map((r: any) => String(r.tag?.name || "").toLowerCase().replace(/[^a-z0-9]/g, "")).filter((t: string) => t.length >= 3) ?? [];
       const tags = [...new Set([...tagList, "ai", "webdev", "programming", "news"])].slice(0, 4);

@@ -13,7 +13,7 @@ export function StudioAutomations() {
   const postsIG = trpc.studio.automations.listPosts.useQuery({ platform: "instagram", limit: 20 });
   const create = trpc.studio.automations.create.useMutation({ onSuccess: () => { autos.refetch(); toast.success("Automation created"); }, onError: e => toast.error(e.message) });
   const del = trpc.studio.automations.delete.useMutation({ onSuccess: () => { autos.refetch(); toast.success("Deleted"); }, onError: e => toast.error(e.message) });
-  const [form, setForm] = useState({ platform: "instagram" as "instagram", post_id: "", post_title: "", keywords: "GUIDE, guide, Link, link", any_comment: false, dm_template: "Hey! Here’s your guide:", button_text: "Read Full Guide", button_url: "https://sundarbanyatra.com/articles/", follow_required: true, search: "" });
+  const [form, setForm] = useState({ platform: "instagram" as "instagram", post_id: "", post_title: "", keywords: "GUIDE, guide, Link, link", any_comment: false, dm_template: "Hey! Here’s your guide:", button_text: "Read Full Guide", button_url: "https://sundarbanyatri.com/articles/", follow_required: true, search: "" });
 
   const filteredPosts = postsIG.data?.filter((p: any) => !form.search || p.title.toLowerCase().includes(form.search.toLowerCase()) || p.caption.toLowerCase().includes(form.search.toLowerCase())) ?? [];
 
@@ -33,7 +33,7 @@ export function StudioAutomations() {
           <div><Label>DM template *</Label><Textarea value={form.dm_template} onChange={e=>setForm({...form, dm_template:e.target.value})} placeholder="Hey {name}! Here’s your full guide:" rows={3} className="mt-1" /></div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div><Label>Button text</Label><Input value={form.button_text} onChange={e=>setForm({...form, button_text:e.target.value})} placeholder="Read Full Guide" className="mt-1" /></div>
-            <div><Label>Button link (admin-managed) *</Label><Input value={form.button_url} onChange={e=>setForm({...form, button_url:e.target.value})} placeholder="https://sundarbanyatra.com/articles/..." className="mt-1" /></div>
+            <div><Label>Button link (admin-managed) *</Label><Input value={form.button_url} onChange={e=>setForm({...form, button_url:e.target.value})} placeholder="https://sundarbanyatri.com/articles/..." className="mt-1" /></div>
           </div>
           <Button onClick={()=>{ if(!form.post_id||(!form.keywords && !form.any_comment)||!form.dm_template||!form.button_url) return toast.error("Fill post, keywords (or Any comment), DM and button link"); create.mutate({ platform: form.platform, post_id: form.post_id, post_title: form.post_title, keywords: form.keywords, any_comment: form.any_comment, dm_template: form.dm_template, button_text: form.button_text, button_url: form.button_url, follow_required: form.follow_required }); }} disabled={create.isPending}>Create automation</Button>
         </div>

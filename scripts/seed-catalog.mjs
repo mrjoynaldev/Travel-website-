@@ -104,10 +104,10 @@ const contact = settings?.contact ?? {};
 if (contact.email === "hello@sundarbanyatra.in") {
   const { error: contactError } = await db
     .from("site_settings")
-    .update({ contact: { ...contact, email: "hello@sundarbanyatra.com" }, updated_at: new Date().toISOString() })
+    .update({ contact: { ...contact, email: "hello@sundarbanyatri.com" }, updated_at: new Date().toISOString() })
     .eq("site_id", site.id);
   if (contactError) throw new Error(`Contact email fix failed: ${contactError.message}`);
-  console.log("contact: email updated to hello@sundarbanyatra.com");
+  console.log("contact: email updated to hello@sundarbanyatri.com");
 } else {
   console.log(`contact: left as-is (${contact.email ?? "none"})`);
 }

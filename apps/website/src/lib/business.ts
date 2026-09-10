@@ -7,7 +7,7 @@ export const businessConfig = {
   // E.164 without + for tel:, digits for wa.me
   phone: "+918513819474",
   whatsapp: "918513819474",
-  email: "hello@sundarbanyatra.com",
+  email: "hello@sundarbanyatri.com",
   hours: "Mon–Sat, 9am–7pm IST",
 };
 

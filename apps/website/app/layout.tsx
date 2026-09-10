@@ -20,7 +20,7 @@ const dmMono = DM_Mono({
   weight: ["400", "500"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -54,6 +54,7 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
   },
   verification: {
+    google: "38f216160dda9ea59525512b52c19573",
     yandex: "f5a900063c4544c5",
   },
 };
@@ -90,6 +91,28 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   url: SITE_URL,
                   logo: `${SITE_URL}/logo.png`,
                   description: publication?.description || "Your trusted guide to planning a Sundarban journey — tours, destinations, safari and practical travel guides.",
+                },
+                {
+                  "@type": "LocalBusiness",
+                  "@id": `${SITE_URL}/#localbusiness`,
+                  name: "Sundarban Yatri",
+                  url: SITE_URL,
+                  logo: `${SITE_URL}/logo.png`,
+                  description: "Sundarban-focused travel team — tours, safari, destinations and practical travel guides for the Sundarbans.",
+                  areaServed: {
+                    "@type": "Place",
+                    name: "Sundarbans",
+                    address: {
+                      "@type": "PostalAddress",
+                      addressRegion: "West Bengal",
+                      addressCountry: "IN",
+                    },
+                  },
+                  serviceType: ["Sundarban Tours", "Sundarban Safari", "Travel Guides"],
+                  priceRange: "$$",
+                  telephone: "+91-8513819474",
+                  email: "hello@sundarbanyatri.com",
+                  sameAs: [],
                 },
                 {
                   "@type": "WebSite",

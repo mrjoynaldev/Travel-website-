@@ -5,7 +5,7 @@ import { getBrand, getBusiness } from "@web/lib/catalogue";
 import { BOAT_IMAGE } from "@web/lib/travel-data";
 import { Compass, HeartHandshake, MapPin, MessageCircle, Phone, Route, ShieldCheck } from "lucide-react";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   title: "About Sundarban Yatri — Local Guidance for the Sundarbans",

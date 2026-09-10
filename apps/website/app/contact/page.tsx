@@ -7,7 +7,7 @@ import { buildWhatsAppUrl, defaultWhatsAppMessage } from "@web/lib/business";
 import { getBusiness, getFaqs } from "@web/lib/catalogue";
 import { Clock3, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   title: "Contact Sundarban Yatri — Call, WhatsApp or Enquire",

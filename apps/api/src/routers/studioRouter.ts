@@ -31,15 +31,15 @@ const urlOrPath = (max: number) =>
 // IndexNow: instant URL submission to Bing/Yandex/Seznam (key file hosted at /38f216160dda9ea59525512b52c19573.txt).
 const INDEXNOW_KEY = "38f216160dda9ea59525512b52c19573";
 const canonicalHost = () => {
-  const origin = process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+  const origin = process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
   try {
     return new URL(origin).host;
   } catch {
-    return "sundarbanyatra.com";
+    return "sundarbanyatri.com";
   }
 };
 const canonicalOrigin = () =>
-  (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+  (process.env.CANONICAL_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com").replace(/\/+$/, "");
 export function indexNowPing(urls: string[]) {
   const host = canonicalHost();
   void fetch("https://api.indexnow.org/indexnow", {

@@ -18,7 +18,7 @@ import superjson from "superjson";
 import { gravityToHtml } from "./gravity.mjs";
 
 const API_URL = (process.env.SY_API_URL || "https://travel-website-n69r.onrender.com").replace(/\/+$/, "");
-const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatra.com").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatri.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || process.env.SY_TOKEN || parseFlag("--token");
 
 const liveUrl = slug => `${PUBLIC_SITE}/articles/${slug}`;
@@ -408,9 +408,9 @@ async function main() {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
-          host: "sundarbanyatra.com",
+          host: "sundarbanyatri.com",
           key: KEY,
-          keyLocation: `https://sundarbanyatra.com/${KEY}.txt`,
+          keyLocation: `https://sundarbanyatri.com/${KEY}.txt`,
           urlList: urls,
         }),
       });

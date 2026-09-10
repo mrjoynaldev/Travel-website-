@@ -369,7 +369,7 @@ export function BlockView({
                 onChange={event =>
                   updateBlock(block.id, { link: event.target.value })
                 }
-                placeholder="Link URL, e.g. https://sundarbanyatra.com/tours/sundarban-2-days"
+                placeholder="Link URL, e.g. https://sundarbanyatri.com/tours/sundarban-2-days"
                 className="h-8 text-xs"
               />
             </>

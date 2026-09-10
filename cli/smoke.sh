@@ -2,9 +2,9 @@
 # Sundarban Yatri end-to-end smoke test.
 # Usage: SY_TOKEN=sy_... bash cli/smoke.sh [slug]
 set -u
-SITE="https://sundarbanyatra.com"
+SITE="https://sundarbanyatri.com"
 API="${SY_API_URL:-https://travel-website-n69r.onrender.com}"
-ADMIN="https://sundarbanyatra.com"
+ADMIN="https://sundarbanyatri.com"
 TOKEN="${SY_TOKEN:-$SY_TOKEN}"
 SLUG="${1:-sundarban-safari-guide}"
 PASS=0; FAIL=0
@@ -82,7 +82,7 @@ if [ -n "$TOKEN" ]; then
   rm -rf /tmp/smoke-kit && SY_TOKEN="$TOKEN" node cli/distribute.mjs kit "$SLUG" --out /tmp/smoke-kit >/dev/null 2>&1
   check "kit devto.md teaser"        1 "$(test -f /tmp/smoke-kit/devto.md && grep -q 'canonical_url:' /tmp/smoke-kit/devto.md && awk 'END{print (NR<80)?1:0}' /tmp/smoke-kit/devto.md)"
   check "kit devto cover 1000x420"   1 "$(grep -c 'cover_image:' /tmp/smoke-kit/devto.md 2>/dev/null | awk '{print ($1>=1)?1:0}')"
-  check "kit bluesky blue link"      1 "$(grep -c 'https://sundarbanyatra.com/articles/' /tmp/smoke-kit/bluesky.txt 2>/dev/null | awk '{print ($1>=1)?1:0}')"
+  check "kit bluesky blue link"      1 "$(grep -c 'https://sundarbanyatri.com/articles/' /tmp/smoke-kit/bluesky.txt 2>/dev/null | awk '{print ($1>=1)?1:0}')"
   check "kit bluesky ≤300 graphemes" 1 "$(python3 -c "import sys; t=open('/tmp/smoke-kit/bluesky.txt',encoding='utf-8').read() if __import__('os').path.exists('/tmp/smoke-kit/bluesky.txt') else sys.exit(1); import unicodedata; print(1 if len(unicodedata.normalize('NFC',t))<=300 else 0)" 2>/dev/null || echo 0)"
   check "kit facebook txt"           1 "$(test -f /tmp/smoke-kit/facebook.txt && grep -q 'https://' /tmp/smoke-kit/facebook.txt && echo 1 || echo 0)"
   check "kit instagram txt"          1 "$(test -f /tmp/smoke-kit/instagram.txt && grep -q 'https://' /tmp/smoke-kit/instagram.txt && echo 1 || echo 0)"

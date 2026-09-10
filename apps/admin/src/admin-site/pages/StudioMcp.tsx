@@ -19,7 +19,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://travel-website-n69r.onrender.com";
-const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 function masterPrompt(token: string): string {
   return `You are the full-control site agent for Sundarban Yatri (${API_URL}) — tours, safari, destinations, travel guides and trip enquiries. You can manage EVERYTHING on the site through its MCP server. With that power comes one duty: never break the owner's trust.

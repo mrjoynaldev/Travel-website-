@@ -10,7 +10,7 @@ type PostListItem = Awaited<ReturnType<typeof serverTrpc.blog.list.query>>["item
 
 type Props = { params: Promise<{ slug: string }> };
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 // Pillar FAQ per hub: short, honest, answer-first. Generic fallback otherwise.
 const HUB_FAQS: Record<string, Array<{ q: string; a: string }>> = {

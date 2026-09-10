@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import HireView from "@web/components/HireView";
 import { getBusiness, getFaqs, getTours } from "@web/lib/catalogue";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   title: "Plan Your Trip — Get a Sundarban Tour Quote | Sundarban Yatri",

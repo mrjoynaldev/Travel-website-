@@ -2,7 +2,7 @@ import { serverTrpc } from "@web/lib/trpc-server";
 
 export const dynamic = "force-static";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 /**
  * llms.txt — a markdown map of this site for LLM crawlers

@@ -5,7 +5,7 @@ import { serverTrpc } from "@web/lib/trpc-server";
 
 export const revalidate = 300;
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   title: "Guide archive",

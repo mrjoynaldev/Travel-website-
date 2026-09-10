@@ -3,7 +3,7 @@ import HomeView from "@web/components/HomeView";
 import { serverTrpc } from "@web/lib/trpc-server";
 import { getBrand, getBusiness, getFaqs, getFoodMenu, getTours, getVideoReviews } from "@web/lib/catalogue";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatra.com";
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {
   title: "Sundarban Yatri — Sundarban Tours, Safari, Destinations & Travel Guides",
