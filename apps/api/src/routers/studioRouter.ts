@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { assertCanEditPost, assertRole, canTransition, editorDocumentSchema, getActor, getAnalyticsSummary, getPostForActor, POST_STATUSES, publishScheduled, queueWorkflowNotifications, recordAudit, sanitizeArticleHtml, saveRevision, uploadInputSchema, uploadMedia } from "../blog";
+import { assertCanEditPost, assertRole, canTransition, editorDocumentSchema, getActor, getAnalyticsSummary, getPostForActor, POST_STATUSES, publishScheduled, queueWorkflowNotifications, recordAudit, removeMedia, sanitizeArticleHtml, saveRevision, uploadInputSchema, uploadMedia } from "../blog";
 import { generateApiToken } from "../_core/apiTokens";
 import { getSupabase } from "../supabase";
 import { dispatchPendingNotifications } from "../email";
@@ -305,6 +305,7 @@ export const studioRouter = router({
   media: router({
     list: protectedProcedure.input(z.object({ folder: z.string().max(80).optional(), search: z.string().max(100).optional() })).query(async ({ ctx, input }) => { const actor = await actorFor(ctx); let query = getSupabase().from("media_assets").select("*").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("created_at", { ascending: false }); if (input.folder) query = query.eq("folder", input.folder); if (input.search) query = query.ilike("filename", `%${input.search.replace(/[,%]/g, "")}%`); const { data, error } = await query.limit(150); if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not load media." }); return data ?? []; }),
     upload: protectedProcedure.input(uploadInputSchema).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor", "author"]); return uploadMedia(actor, input); }),
+    remove: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => { const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); return removeMedia(actor, input.id); }),
   }),
 
   moderation: router({

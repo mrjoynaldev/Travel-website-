@@ -1,7 +1,7 @@
 import { nanoid } from "nanoid";
 import sanitizeHtml from "sanitize-html";
 import { z } from "zod";
-import { storagePut } from "./storage";
+import { storagePut, storageRemove } from "./storage";
 import { getSupabase } from "./supabase";
 
 export const APP_ROLES = ["admin", "editor", "author"] as const;
@@ -312,6 +312,99 @@ export async function uploadMedia(actor: BlogActor, input: z.infer<typeof upload
   if (error || !data) dbError("Could not register the uploaded media", error);
   await recordAudit(actor, "media.uploaded", "media_asset", data.id, { mimeType: input.mimeType, byteSize: payload.length });
   return data;
+}
+
+// Brand URL fields (site_settings.brand JSON) that may reference a library asset.
+const BRAND_URL_FIELDS = [
+  ["logoUrl", "site logo"],
+  ["heroImageUrl", "homepage hero image"],
+  ["heroVideoUrl", "homepage hero video"],
+  ["safariImageUrl", "safari section image"],
+  ["aboutImageUrl", "about image"],
+] as const;
+
+function ilikeEscape(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
+export async function removeMedia(actor: BlogActor, id: string) {
+  const db = getSupabase();
+  const { data: asset, error } = await db
+    .from("media_assets")
+    .select("*")
+    .eq("id", id)
+    .eq("organization_id", actor.organizationId)
+    .eq("site_id", actor.siteId)
+    .maybeSingle();
+  if (error || !asset) dbError("Media asset not found", error);
+
+  // Guard 1: featured image of a live (non-deleted) post.
+  const { data: featuredIn } = await db
+    .from("posts")
+    .select("id, title")
+    .eq("featured_media_id", id)
+    .is("deleted_at", null)
+    .limit(4);
+  if (featuredIn?.length) {
+    throw new Error(
+      `This file is the featured image of ${featuredIn.length} post${featuredIn.length > 1 ? "s" : ""} (${featuredIn.map(p => p.title).join(", ")}). Remove it there first.`,
+    );
+  }
+
+  // Guard 2: embedded inside article bodies.
+  const { data: embeddedIn } = await db
+    .from("posts")
+    .select("id, title")
+    .eq("site_id", actor.siteId)
+    .is("deleted_at", null)
+    .ilike("rendered_html", `%${ilikeEscape(asset.url)}%`)
+    .limit(4);
+  if (embeddedIn?.length) {
+    throw new Error(
+      `This file appears inside ${embeddedIn.length} article${embeddedIn.length > 1 ? "s" : ""} (${embeddedIn.map(p => p.title).join(", ")}). Remove it there first.`,
+    );
+  }
+
+  // Guard 3: referenced by site brand settings (logo, hero, sections).
+  const { data: settings } = await db
+    .from("site_settings")
+    .select("brand")
+    .eq("site_id", actor.siteId)
+    .maybeSingle();
+  const brand = (settings?.brand ?? {}) as Record<string, unknown>;
+  for (const [field, label] of BRAND_URL_FIELDS) {
+    if (typeof brand[field] === "string" && (brand[field] as string).trim() === asset.url) {
+      throw new Error(`This file is used as the ${label}. Change it in Site Management first.`);
+    }
+  }
+
+  // Guard 4: referenced by tours, food menu, or video reviews.
+  const [{ data: tourUse }, { data: menuUse }, { data: reviewUse }] = await Promise.all([
+    db.from("tours").select("id, title").eq("site_id", actor.siteId).eq("image_url", asset.url).limit(2),
+    db.from("food_menu_items").select("id, name").eq("site_id", actor.siteId).eq("image_url", asset.url).limit(2),
+    db.from("video_reviews").select("id, customer_name").eq("site_id", actor.siteId).eq("thumbnail_url", asset.url).limit(2),
+  ]);
+  if (tourUse?.length) throw new Error(`This file is the cover image of "${tourUse[0].title}". Change it in the tour first.`);
+  if (menuUse?.length) throw new Error(`This file illustrates "${menuUse[0].name}" on the food menu. Change it there first.`);
+  if (reviewUse?.length) throw new Error(`This file is a review thumbnail for "${reviewUse[0].customer_name}". Change it there first.`);
+
+  // Delete the registry row first (a leftover file is invisible and harmless;
+  // a leftover DB pointer would render a broken image).
+  const { error: deleteError } = await db
+    .from("media_assets")
+    .delete()
+    .eq("id", id)
+    .eq("organization_id", actor.organizationId)
+    .eq("site_id", actor.siteId);
+  if (deleteError) dbError("Could not delete the media asset", deleteError);
+
+  try {
+    await storageRemove(asset.storage_key);
+  } catch {
+    // Row is gone; a stray object will be cleaned on the next storage audit.
+  }
+  await recordAudit(actor, "media.removed", "media_asset", id, { filename: asset.filename });
+  return { success: true as const };
 }
 
 async function createOutbox(

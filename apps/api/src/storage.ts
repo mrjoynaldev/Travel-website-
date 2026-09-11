@@ -62,3 +62,12 @@ export async function storageGetSignedUrl(relKey: string): Promise<string> {
   const { data: publicInfo } = getSupabase().storage.from(BUCKET).getPublicUrl(key);
   return publicInfo.publicUrl;
 }
+
+export async function storageRemove(relKey: string): Promise<void> {
+  const key = normalizeKey(relKey);
+  const { error } = await getSupabase().storage.from(BUCKET).remove([key]);
+  // A missing file is already the desired end state — only real failures throw.
+  if (error && !/not found|does not exist/i.test(error.message)) {
+    throw new Error(`Storage delete failed: ${error.message}`);
+  }
+}

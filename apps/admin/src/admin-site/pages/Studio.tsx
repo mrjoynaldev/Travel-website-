@@ -34,6 +34,7 @@ import {
   Settings2,
   ShieldCheck,
   Tags,
+  Trash2,
   UploadCloud,
   UsersRound,
 } from "lucide-react";
@@ -671,6 +672,26 @@ export function StudioMedia() {
     },
     onError: error => toast.error(error.message),
   });
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const removeAsset = trpc.studio.media.remove.useMutation({
+    onSuccess: () => {
+      setConfirmDeleteId(null);
+      media.refetch();
+      toast.success("Asset deleted from the library.");
+    },
+    onError: error => {
+      setConfirmDeleteId(null);
+      toast.error(error.message);
+    },
+  });
+  const copyLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied — paste it anywhere.");
+    } catch {
+      toast.error("Could not copy. Long-press the image to copy its address.");
+    }
+  };
   const onUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.currentTarget.value = "";
@@ -809,6 +830,39 @@ export function StudioMedia() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {Math.ceil(asset.byte_size / 1024)} KB · {asset.folder}
                 </p>
+                <div className="mt-2.5 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 flex-1 gap-1.5 text-xs"
+                    onClick={() => copyLink(asset.url)}
+                  >
+                    <Copy className="h-3.5 w-3.5" /> Copy link
+                  </Button>
+                  {confirmDeleteId === asset.id ? (
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="h-8 flex-1 gap-1.5 text-xs"
+                      disabled={removeAsset.isPending}
+                      onClick={() => removeAsset.mutate({ id: asset.id })}
+                    >
+                      Sure?
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 flex-1 gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+                      onClick={() => setConfirmDeleteId(asset.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
