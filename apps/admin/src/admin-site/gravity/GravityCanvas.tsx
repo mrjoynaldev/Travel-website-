@@ -8,6 +8,9 @@ import {
   useDraggable,
   useSensor,
   useSensors,
+  type DragEndEvent,
+  type DragMoveEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -892,7 +895,7 @@ export function GravityCanvas({
             )}
             <DndContext
               sensors={sensors}
-              onDragStart={event => {
+              onDragStart={(event: DragStartEvent) => {
                 setActiveId(String(event.active.id));
                 setGuides({ v: [], h: [] });
                 setDropTarget(null);
@@ -904,7 +907,7 @@ export function GravityCanvas({
                   inertiaRef.current = 0;
                 }
               }}
-              onDragMove={event => {
+              onDragMove={(event: DragMoveEvent) => {
                 const id = String(event.active.id);
                 const block = blocks.find(item => item.id === id);
                 if (!block) return;
@@ -968,7 +971,7 @@ export function GravityCanvas({
                   t: now,
                 };
               }}
-              onDragEnd={event => {
+              onDragEnd={(event: DragEndEvent) => {
                 const id = String(event.active.id);
                 const block = blocks.find(item => item.id === id);
                 setActiveId(null);

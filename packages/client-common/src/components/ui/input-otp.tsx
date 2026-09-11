@@ -1,5 +1,5 @@
 import * as React from "react";
-import { OTPInput, OTPInputContext } from "input-otp";
+import { OTPInput, OTPInputContext, type SlotProps } from "input-otp";
 import { MinusIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -41,8 +41,12 @@ function InputOTPSlot({
 }: React.ComponentProps<"div"> & {
   index: number;
 }) {
-  const inputOTPContext = React.useContext(OTPInputContext);
-  const { char, hasFakeCaret, isActive } = inputOTPContext?.slots[index] ?? {};
+  // Cast through unknown: input-otp's context type is bound to its own React
+  // copy, which the local JSX runtime types as opaque. Runtime shape is stable.
+  const { slots } = React.useContext(OTPInputContext) as unknown as {
+    slots: Array<Partial<SlotProps>>;
+  };
+  const { char, hasFakeCaret, isActive } = slots[index] ?? {};
 
   return (
     <div

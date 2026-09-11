@@ -1,0 +1,18 @@
+# Firebase App Hosting backend for the user website (live SSR + ISR).
+# Create the backend in Firebase Console (project sundarban-yatri) from this
+# repo, then point sundarbanyatri.com at it. Admin stays on static Hosting.
+runConfig:
+  cpu: 1
+  memoryMiB: 512
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+env:
+  # Render API — server components + same-origin /api rewrites use this.
+  - variable: API_URL
+    value: https://travel-website-n69r.onrender.com
+  - variable: NEXT_PUBLIC_SITE_URL
+    value: https://sundarbanyatri.com
+# NOTE: NEXT_PUBLIC_API_URL is intentionally unset so browsers use the
+# same-origin /api rewrite (no CORS, cookies flow). Set it only to bypass
+# the rewrite and call the API directly.

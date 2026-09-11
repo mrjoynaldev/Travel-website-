@@ -7,6 +7,10 @@ import { buildWhatsAppUrl, defaultWhatsAppMessage } from "@web/lib/business";
 import { getBusiness, getFaqs, getTours } from "@web/lib/catalogue";
 import { MessageCircle, Phone } from "lucide-react";
 
+// Live serving (App Hosting): re-render at most every 5 minutes so Studio
+// edits appear without redeploys.
+export const revalidate = 300;
+
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {

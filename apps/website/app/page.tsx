@@ -3,6 +3,10 @@ import HomeView from "@web/components/HomeView";
 import { serverTrpc } from "@web/lib/trpc-server";
 import { getBrand, getBusiness, getFaqs, getFoodMenu, getTours, getVideoReviews } from "@web/lib/catalogue";
 
+// Live serving (App Hosting): re-render at most every 5 minutes so Studio
+// edits appear without redeploys.
+export const revalidate = 300;
+
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
 export const metadata: Metadata = {

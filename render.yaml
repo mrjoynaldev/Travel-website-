@@ -24,3 +24,20 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: "https://sundarbanyatri.com,https://www.sundarbanyatri.com"
+  - type: web
+    name: sundarban-yatri-website
+    env: node
+    plan: free
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @fieldnote/website build
+    startCommand: pnpm --filter @fieldnote/website start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # NOTE: do NOT set PORT — Render injects it and the start script listens on $PORT.
+      - key: NODE_VERSION
+        value: "22"
+      - key: API_URL
+        value: https://travel-website-n69r.onrender.com
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://sundarbanyatri.com

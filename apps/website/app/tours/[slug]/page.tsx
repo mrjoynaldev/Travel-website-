@@ -5,6 +5,10 @@ import { getBusiness, getFaqs, getRelatedTours, getTour, getTours } from "@web/l
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
+// Live serving (App Hosting): re-render at most every 5 minutes so Studio
+// edits appear without redeploys.
+export const revalidate = 300;
+
 export async function generateStaticParams() {
   const tours = await getTours();
   return tours.map((t) => ({ slug: t.slug }));

@@ -1,13 +1,21 @@
 import type { NextConfig } from "next";
 
-// Static export for Firebase Hosting (see firebase.json at the repo root).
-// There is no Next.js server in production:
-// - Security/SEO/cache headers are served from firebase.json.
-// - Browsers call the Render API directly via NEXT_PUBLIC_API_URL
-//   (apps/website/.env for local dev, build-time env for Firebase).
-// - Sitemap/robots/RSS/llms.txt are generated at build time, not proxied.
+// Server mode for Firebase App Hosting (live SSR + ISR — admin edits appear
+// without redeploys). API_URL points at the Render API:
+// - Server components call it directly (see src/lib/trpc-server.ts).
+// - Browsers use same-origin /api rewrites below (no CORS needed); setting
+//   NEXT_PUBLIC_API_URL overrides to direct calls when required.
+const apiOrigin = (process.env.API_URL || "http://localhost:4000").replace(/\/+$/, "");
+
+const securityHeaders = [
+  { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
 const nextConfig: NextConfig = {
-  output: "export",
   reactStrictMode: true,
   poweredByHeader: false,
   // Allow Google Cloud Shell preview hosts, otherwise Next blocks /_next dev assets → white screen.
@@ -23,6 +31,15 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 60 * 60 * 24 * 30,
+  },
+  async headers() {
+    return [{ source: "/(.*)", headers: securityHeaders }];
+  },
+  async rewrites() {
+    return [
+      { source: "/api/:path*", destination: `${apiOrigin}/api/:path*` },
+      { source: "/manus-storage/:path*", destination: `${apiOrigin}/manus-storage/:path*` },
+    ];
   },
 };
 

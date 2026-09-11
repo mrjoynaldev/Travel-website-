@@ -1,28 +1,6 @@
 {
   "hosting": [
     {
-      "site": "sundarbanyatri",
-      "public": "apps/website/out",
-      "cleanUrls": true,
-      "trailingSlash": false,
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "headers": [
-        {
-          "source": "**",
-          "headers": [
-            { "key": "X-Content-Type-Options", "value": "nosniff" },
-            { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-            { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-            { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
-          ]
-        },
-        {
-          "source": "**/*.@(ico|png|jpg|jpeg|gif|webp|avif|svg|woff|woff2|ttf|eot|css|js)",
-          "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
-        }
-      ]
-    },
-    {
       "site": "sundarbanyatri-admin",
       "public": "apps/admin/out",
       "cleanUrls": true,
