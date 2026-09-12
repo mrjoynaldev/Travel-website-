@@ -705,7 +705,7 @@ export function StudioEditor() {
                   htmlFor="post-cover"
                   className="font-label text-[10px] text-primary"
                 >
-                  Cover image
+                  Cover image · wide 16:9 works best
                 </Label>
                 {draft.featuredMediaId && (
                   <Button

@@ -317,7 +317,7 @@ export function StudioCatalogTours() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-xl border border-border bg-background/60 p-3">
-                <label className="text-xs font-medium text-muted-foreground">Cover image (tap to upload)</label>
+                <label className="text-xs font-medium text-muted-foreground">Cover image (tap to upload · shown wide 3:2, landscape works best)</label>
                 {form.imageUrl ? (
                   <div className="mt-2 flex items-center gap-3">
                     <img src={form.imageUrl} alt="" className="h-16 w-24 rounded-lg object-cover" />

@@ -14,7 +14,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { ArrowDown, ArrowUp, FileText, Image, Loader2, Palette, Plus, Save, Trash2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { toast } from "sonner";
 
 function Workspace({
@@ -56,6 +56,86 @@ const parseLinks = (source: string, label: string) => {
   return value as LinkItem[];
 };
 
+function parsePosition(value: string): { x: number; y: number } {
+  const match = /^\s*(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%\s*$/.exec(value || "");
+  if (!match) return { x: 50, y: 50 };
+  const clamp = (n: number) => Math.min(100, Math.max(0, Math.round(n)));
+  return { x: clamp(Number(match[1])), y: clamp(Number(match[2])) };
+}
+
+/**
+ * Click-to-set focal point: tap the important part of the photo and the
+ * website keeps that area visible when it crops. Stored as "x% y%".
+ */
+function FocalPicker({
+  imageUrl,
+  value,
+  onChange,
+  hint,
+  aspectClass,
+}: {
+  imageUrl: string;
+  value: string;
+  onChange: (value: string) => void;
+  hint: string;
+  aspectClass: string;
+}) {
+  const point = parsePosition(value);
+  const pick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = Math.min(100, Math.max(0, Math.round(((event.clientX - rect.left) / rect.width) * 100)));
+    const y = Math.min(100, Math.max(0, Math.round(((event.clientY - rect.top) / rect.height) * 100)));
+    onChange(`${x}% ${y}%`);
+  };
+  const presets: Array<{ label: string; value: string }> = [
+    { label: "Top", value: "50% 20%" },
+    { label: "Center", value: "50% 50%" },
+    { label: "Bottom", value: "50% 80%" },
+  ];
+  return (
+    <div className="mt-3 rounded-xl border border-border bg-background/60 p-3">
+      <p className="text-xs font-medium text-muted-foreground">
+        Focus point — tap the part that must stay visible <span className="text-muted-foreground/70">({hint})</span>
+      </p>
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="Set image focus point"
+        onClick={pick}
+        onKeyDown={event => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          const rect = event.currentTarget.getBoundingClientRect();
+          pick({ clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2, currentTarget: event.currentTarget } as ReactMouseEvent<HTMLDivElement>);
+        }}
+        className={`relative mt-2 w-full cursor-crosshair overflow-hidden rounded-lg ${aspectClass}`}
+      >
+        <img src={imageUrl} alt="Focus preview" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: value || undefined }} />
+        <span
+          aria-hidden="true"
+          className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary/80 shadow"
+          style={{ left: `${point.x}%`, top: `${point.y}%` }}
+        />
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        {presets.map(preset => (
+          <Button
+            key={preset.label}
+            type="button"
+            variant={value === preset.value ? "default" : "outline"}
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => onChange(preset.value)}
+          >
+            {preset.label}
+          </Button>
+        ))}
+        <span className="ml-auto font-mono text-[11px] text-muted-foreground">{point.x}% · {point.y}%</span>
+      </div>
+    </div>
+  );
+}
+
 export function StudioBranding() {
   const settings = trpc.studio.settings.get.useQuery();
   const update = trpc.studio.settings.update.useMutation({
@@ -76,15 +156,18 @@ export function StudioBranding() {
   const [accentColor, setAccentColor] = useState("#e4a741");
   const [heroMediaType, setHeroMediaType] = useState<"image" | "video">("image");
   const [heroImageUrl, setHeroImageUrl] = useState("");
+  const [heroImagePosition, setHeroImagePosition] = useState("50% 50%");
   const [heroVideoUrl, setHeroVideoUrl] = useState("");
   const [heroEyebrow, setHeroEyebrow] = useState("");
   const [heroTitle, setHeroTitle] = useState("");
   const [heroSubtitle, setHeroSubtitle] = useState("");
   const [safariImageUrl, setSafariImageUrl] = useState("");
+  const [safariImagePosition, setSafariImagePosition] = useState("50% 50%");
   const [safariTitle, setSafariTitle] = useState("");
   const [safariText, setSafariText] = useState("");
   const [safariPoints, setSafariPoints] = useState("");
   const [aboutImageUrl, setAboutImageUrl] = useState("");
+  const [aboutImagePosition, setAboutImagePosition] = useState("50% 50%");
   const [trustItems, setTrustItems] = useState<{ icon: string; title: string; desc: string }[]>([]);
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -106,15 +189,18 @@ export function StudioBranding() {
     setAccentColor(brand.accentColor || "#e4a741");
     setHeroMediaType(brand.heroMediaType === "video" ? "video" : "image");
     setHeroImageUrl(brand.heroImageUrl || "");
+    setHeroImagePosition(brand.heroImagePosition || "50% 50%");
     setHeroVideoUrl(brand.heroVideoUrl || "");
     setHeroEyebrow(brand.heroEyebrow || "");
     setHeroTitle(brand.heroTitle || "");
     setHeroSubtitle(brand.heroSubtitle || "");
     setSafariImageUrl(brand.safariImageUrl || "");
+    setSafariImagePosition(brand.safariImagePosition || "50% 50%");
     setSafariTitle(brand.safariTitle || "");
     setSafariText(brand.safariText || "");
     setSafariPoints(Array.isArray(brand.safariPoints) ? brand.safariPoints.join("\n") : "");
     setAboutImageUrl(brand.aboutImageUrl || "");
+    setAboutImagePosition(brand.aboutImagePosition || "50% 50%");
     setTrustItems(
       Array.isArray(brand.trustItems)
         ? brand.trustItems
@@ -163,15 +249,18 @@ export function StudioBranding() {
           accentColor,
           heroMediaType,
           heroImageUrl,
+          heroImagePosition,
           heroVideoUrl,
           heroEyebrow,
           heroTitle,
           heroSubtitle,
           safariImageUrl,
+          safariImagePosition,
           safariTitle,
           safariText,
           safariPoints: safariPoints.split("\n").map(line => line.trim()).filter(Boolean).slice(0, 6),
           aboutImageUrl,
+          aboutImagePosition,
           trustItems,
         },
         footerLinks: footer,
@@ -471,16 +560,27 @@ export function StudioBranding() {
           </div>
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.9fr]">
-          <div className="overflow-hidden rounded-xl bg-black">
-            {heroMediaType === "video" && heroVideoUrl ? (
-              <video src={heroVideoUrl} poster={heroImageUrl || undefined} controls preload="metadata" playsInline className="aspect-video w-full" />
-            ) : heroImageUrl ? (
-              <img src={heroImageUrl} alt={heroEyebrow || "Homepage hero preview"} className="aspect-video w-full object-cover" />
-            ) : (
-              <div className="grid aspect-video w-full place-items-center bg-muted p-6 text-center text-sm text-muted-foreground">
-                No hero media yet — the site falls back to its bundled cover image.
-              </div>
-            )}
+          <div>
+            <div className="overflow-hidden rounded-xl bg-black">
+              {heroMediaType === "video" && heroVideoUrl ? (
+                <video src={heroVideoUrl} poster={heroImageUrl || undefined} controls preload="metadata" playsInline className="aspect-video w-full" />
+              ) : heroImageUrl ? (
+                <img src={heroImageUrl} alt={heroEyebrow || "Homepage hero preview"} className="aspect-video w-full object-cover" style={{ objectPosition: heroImagePosition || undefined }} />
+              ) : (
+                <div className="grid aspect-video w-full place-items-center bg-muted p-6 text-center text-sm text-muted-foreground">
+                  No hero media yet — the site falls back to its bundled cover image.
+                </div>
+              )}
+            </div>
+            {heroImageUrl ? (
+              <FocalPicker
+                imageUrl={heroImageUrl}
+                value={heroImagePosition}
+                onChange={setHeroImagePosition}
+                hint="best: wide 16:9 or wider, at least 1920 px"
+                aspectClass="aspect-video"
+              />
+            ) : null}
           </div>
           <div className="space-y-4">
             <div className="rounded-xl border border-border bg-background/60 p-4">
@@ -621,6 +721,15 @@ export function StudioBranding() {
                   />
                 </div>
               )}
+              {safariImageUrl ? (
+                <FocalPicker
+                  imageUrl={safariImageUrl}
+                  value={safariImagePosition}
+                  onChange={setSafariImagePosition}
+                  hint="shown wide — landscape photos work best"
+                  aspectClass="aspect-video"
+                />
+              ) : null}
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground">Heading</label>
@@ -657,6 +766,13 @@ export function StudioBranding() {
                     <X className="h-4 w-4" /> Remove
                   </Button>
                 </div>
+                <FocalPicker
+                  imageUrl={aboutImageUrl}
+                  value={aboutImagePosition}
+                  onChange={setAboutImagePosition}
+                  hint="shown 4:3 — landscape photos work best"
+                  aspectClass="aspect-[4/3]"
+                />
               </div>
             ) : (
               <div className="mt-4">

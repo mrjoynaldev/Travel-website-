@@ -166,10 +166,13 @@ export type Brand = {
   heroTitle: string;
   heroSubtitle: string;
   safariImageUrl: string;
+  safariImagePosition: string;
   safariTitle: string;
   safariText: string;
   safariPoints: string[];
   aboutImageUrl: string;
+  aboutImagePosition: string;
+  heroImagePosition: string;
   trustItems: TrustItem[];
 };
 
@@ -181,10 +184,13 @@ const DEFAULT_BRAND: Brand = {
   heroTitle: "",
   heroSubtitle: "",
   safariImageUrl: "",
+  safariImagePosition: "",
   safariTitle: "",
   safariText: "",
   safariPoints: [],
   aboutImageUrl: "",
+  aboutImagePosition: "",
+  heroImagePosition: "",
   trustItems: [],
 };
 
@@ -205,12 +211,15 @@ export async function getBrand(): Promise<Brand> {
       heroTitle: str(brand, "heroTitle"),
       heroSubtitle: str(brand, "heroSubtitle"),
       safariImageUrl: str(brand, "safariImageUrl"),
+      safariImagePosition: str(brand, "safariImagePosition"),
       safariTitle: str(brand, "safariTitle"),
       safariText: str(brand, "safariText"),
       safariPoints: Array.isArray(brand.safariPoints)
         ? brand.safariPoints.filter((x): x is string => typeof x === "string").slice(0, 6)
         : [],
       aboutImageUrl: str(brand, "aboutImageUrl"),
+      aboutImagePosition: str(brand, "aboutImagePosition"),
+      heroImagePosition: str(brand, "heroImagePosition"),
       trustItems: Array.isArray(brand.trustItems)
         ? brand.trustItems
             .filter((x): x is TrustItem => !!x && typeof x.title === "string" && typeof x.desc === "string")

@@ -25,6 +25,7 @@ export default async function AboutPage() {
   const [business, brand] = await Promise.all([getBusiness(), getBrand()]);
   const wa = buildWhatsAppUrl(defaultWhatsAppMessage, business.whatsapp);
   const aboutImage = brand.aboutImageUrl.trim() || BOAT_IMAGE;
+  const aboutPosition = brand.aboutImagePosition.trim() || undefined;
   return (
     <>
       <section className="border-b border-border bg-[#eff4ee]">
@@ -39,7 +40,7 @@ export default async function AboutPage() {
               <Link href="/contact" className="inline-flex h-12 items-center rounded-full border border-border bg-white px-7 text-[15px] font-semibold hover:border-primary/40 hover:text-primary">Contact Us</Link>
             </div>
           </div>
-          <img src={aboutImage} alt="Boat cruising a Sundarban creek" className="aspect-[4/3] w-full rounded-[24px] object-cover" />
+          <img src={aboutImage} alt="Boat cruising a Sundarban creek" className="aspect-[4/3] w-full rounded-[24px] object-cover" style={aboutPosition ? { objectPosition: aboutPosition } : undefined} />
         </div>
       </section>
 

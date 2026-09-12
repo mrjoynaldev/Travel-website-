@@ -143,6 +143,8 @@ export default function HomeView({ categories, sections, posts, search, category
   const safariText = brand?.safariText?.trim() || SAFARI_DEFAULT.text;
   const safariPoints = brand?.safariPoints?.length ? brand.safariPoints : SAFARI_DEFAULT.points;
   const heroImage = brand?.heroImageUrl?.trim() || HERO_IMAGE;
+  const heroPosition = brand?.heroImagePosition?.trim() || undefined;
+  const safariPosition = brand?.safariImagePosition?.trim() || undefined;
   const heroVideo = brand?.heroMediaType === "video" ? brand?.heroVideoUrl?.trim() : "";
   const heroEyebrow = brand?.heroEyebrow?.trim() || "Sundarban Travel • Tours • Guides";
   const heroTitle = brand?.heroTitle?.trim() || "Plan Your Sundarban Journey with Confidence";
@@ -156,9 +158,9 @@ export default function HomeView({ categories, sections, posts, search, category
       {/* HERO — background + copy come from the brand kit, bundled cover as fallback */}
       <section className="relative overflow-hidden bg-[#0a1913] text-white">
         {heroVideo ? (
-          <video src={heroVideo} poster={heroImage} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" />
+          <video src={heroVideo} poster={heroImage} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" style={heroPosition ? { objectPosition: heroPosition } : undefined} />
         ) : (
-          <img src={heroImage} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" />
+          <img src={heroImage} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" style={heroPosition ? { objectPosition: heroPosition } : undefined} />
         )}
         <div className="absolute inset-0 yatri-hero-veil" />
         <div className="relative container pb-24 pt-16 md:pb-32 md:pt-24 lg:pb-36 lg:pt-28">
@@ -227,7 +229,7 @@ export default function HomeView({ categories, sections, posts, search, category
       <section id="safari" className="container yatri-section scroll-mt-24">
         <div className="grid overflow-hidden rounded-[28px] border border-border bg-white lg:grid-cols-2">
           <div className="relative min-h-[320px] lg:min-h-[480px]">
-            <img src={safariImage} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={safariImage} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={safariPosition ? { objectPosition: safariPosition } : undefined} />
             <span className="absolute left-5 top-5 yatri-chip bg-white/95">Safari • Licensed boats</span>
           </div>
           <div className="p-7 md:p-10 lg:p-12 flex flex-col justify-center">

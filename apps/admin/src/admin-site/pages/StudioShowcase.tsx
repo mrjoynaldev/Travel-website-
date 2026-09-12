@@ -611,7 +611,7 @@ function MenuDialog({
         </DialogHeader>
         <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-5">
           <section>
-            <FieldLabel hint="tap to upload a real photo of the plate">Dish photo *</FieldLabel>
+            <FieldLabel hint="tap to upload a real photo of the plate · shown landscape 4:3">Dish photo *</FieldLabel>
             {form.imageUrl ? (
               <div className="flex items-center gap-3">
                 <img src={form.imageUrl} alt="" className="h-24 w-32 rounded-xl object-cover shadow-sm" />
