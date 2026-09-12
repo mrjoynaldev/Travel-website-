@@ -110,12 +110,12 @@ const log = (...args) => console.error("[mcp]", ...args);
 // tRPC over plain fetch (superjson batch envelope, plain-JSON payloads)
 // ————————————————————————————————————————————————————————————————————————
 
-async function trpc(path, input, method) {
+async function trpc(path, input, method, timeoutMs = 30000) {
   if (!TOKEN) throw new Error("Missing SY_TOKEN. Create a token in Studio → MCP access and set SY_TOKEN.");
   const url = `${API_URL}/api/trpc/${path}?batch=1`;
   const envelope = JSON.stringify({ 0: { json: input === undefined ? null : input } });
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 30000);
+  const timer = setTimeout(() => controller.abort(new Error(`Request timed out after ${timeoutMs / 1000}s. The free API may have been waking from sleep — wait 60 seconds and retry once.`)), timeoutMs);
   let res;
   try {
     if (method === "GET") {
@@ -250,9 +250,11 @@ const TOOLS = [
   },
   {
     name: "media_upload",
-    description: "Upload an IMAGE to the media library. Returns the asset id + URL for covers (featuredMediaId) and article bodies. Images only: jpeg/png/webp/gif, max 10 MB — downscale large photos before sending. Videos and other binaries cannot go through MCP; ask the owner to upload those in Studio.",
+    description: "Upload an IMAGE to the media library. Returns the asset id + URL for covers (featuredMediaId) and article bodies. Images only: jpeg/png/webp/gif, max 10 MB — downscale AI images to max 1920px wide first. First call of the day can take ~60s while the free server wakes; on timeout, wait 60s, check media_list for duplicates, then retry once. Videos cannot go through MCP; ask the owner to upload those in Studio.",
     inputSchema: { type: "object", properties: { filename: { type: "string" }, mimeType: { type: "string", enum: ["image/jpeg", "image/png", "image/webp", "image/gif"] }, base64: { type: "string", description: "Raw base64 or a full data:image/...;base64, URL" }, folder: { type: "string" }, altText: { type: "string" } }, required: ["filename", "mimeType", "base64"] },
-    run: (a) => trpc("studio.media.upload", { filename: a.filename, mimeType: a.mimeType, base64: a.base64, folder: a.folder || "library", altText: a.altText || "" }, "POST"),
+    // 3-minute timeout: image payloads are large and the free API needs up
+    // to ~60s to wake from sleep on a cold start.
+    run: (a) => trpc("studio.media.upload", { filename: a.filename, mimeType: a.mimeType, base64: a.base64, folder: a.folder || "library", altText: a.altText || "" }, "POST", 180000),
   },
   {
     name: "tours_list",
