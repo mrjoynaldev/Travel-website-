@@ -35,7 +35,7 @@ export function ImportDialog({
     const result = importHtml(content, mode === "append" ? bottom : 40);
     if (!result || !result.blocks.length) {
       toast.error(
-        "Could not read any blocks. Use the CodeReport Gravity HTML format or a gravity JSON doc."
+        "Could not read any blocks. Use the Gravity HTML block format or a gravity JSON doc."
       );
       return;
     }
@@ -66,7 +66,7 @@ export function ImportDialog({
         <DialogHeader>
           <DialogTitle>Import HTML into the canvas</DialogTitle>
           <DialogDescription>
-            Paste agent-generated HTML (the CodeReport Gravity block format) or a
+            Paste agent-generated HTML (the Gravity HTML block format) or a
             gravity JSON doc, or upload a .html/.json file. Every recognized block
             becomes an editable block on the artboard.
           </DialogDescription>

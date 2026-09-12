@@ -12,8 +12,8 @@ const setMeta = (selector: string, attributes: Record<string, string>, content: 
 
 export function ArticleMeta({ post }: ArticleMetaProps) {
   useEffect(() => {
-    const title = post.meta_title?.trim() || `${post.title} · CodeReport Global`;
-    const description = post.meta_description?.trim() || post.excerpt?.trim() || "A CodeReport Global article.";
+    const title = post.meta_title?.trim() || `${post.title} · Sundarban Yatri`;
+    const description = post.meta_description?.trim() || post.excerpt?.trim() || "A Sundarban Yatri travel guide.";
     const canonical = post.canonical_url?.trim() || `${window.location.origin}/articles/${post.slug}`;
     const image = post.og_image_url?.trim() || post.featuredMedia?.url;
     document.title = title;

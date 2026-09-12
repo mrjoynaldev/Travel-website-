@@ -74,7 +74,7 @@ export async function GET(request: Request) {
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ fontSize: 22, color: "#9fd4b8" }}>sundarbanyatra.com</div>
+          <div style={{ fontSize: 22, color: "#9fd4b8" }}>sundarbanyatri.com</div>
           <div style={{ display: "flex", gap: 10 }}>
             <div style={{ width: 56, height: 8, borderRadius: 999, background: "#9fd4b8" }} />
             <div style={{ width: 28, height: 8, borderRadius: 999, background: "#eafff2" }} />

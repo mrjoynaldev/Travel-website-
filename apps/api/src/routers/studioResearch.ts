@@ -188,7 +188,7 @@ export const researchRouter = router({
       const geo = input.geo.toUpperCase();
       const response = await fetch(
         `https://trends.google.com/trending/rss?geo=${geo}`,
-        { headers: { "User-Agent": "Mozilla/5.0 (compatible; CodeReportGlobal/1.0)" } },
+        { headers: { "User-Agent": "Mozilla/5.0 (compatible; SundarbanYatri/1.0)" } },
       );
       if (!response.ok) {
         throw new TRPCError({ code: "BAD_REQUEST", message: `Google Trends returned HTTP ${response.status} for geo "${geo}".` });

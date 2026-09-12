@@ -331,8 +331,8 @@ function sanitizeJsonDoc(doc: GravityDoc): { blocks: GravityBlock[]; sections: G
 }
 
 /**
- * Accepts the exact HTML the published site understands (the CodeReport
- * Gravity block format) OR a raw gravity JSON doc, and rebuilds blocks +
+ * Accepts the exact HTML the published site understands (the Gravity
+ * HTML block format) OR a raw gravity JSON doc, and rebuilds blocks +
  * sections laid out top-to-bottom in reading order. Used by the canvas
  * "Import" dialog so agent-generated HTML becomes editable blocks.
  */
