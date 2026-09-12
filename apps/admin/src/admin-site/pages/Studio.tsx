@@ -35,6 +35,7 @@ import {
   ShieldCheck,
   Tags,
   Trash2,
+  Undo2,
   UploadCloud,
   UsersRound,
 } from "lucide-react";
@@ -238,7 +239,27 @@ export function StudioPosts() {
   const [status, setStatus] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [folder, setFolder] = useState<PostFolder>({ kind: "all" });
-  const all = trpc.studio.posts.list.useQuery({});
+  const inTrash = status === "trash";
+  const all = trpc.studio.posts.list.useQuery(inTrash ? { trashed: true } : {});
+  const bootstrap = trpc.studio.bootstrap.useQuery();
+  const canManage = bootstrap.data?.actor.role === "admin" || bootstrap.data?.actor.role === "editor";
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const refresh = () => {
+    setConfirmId(null);
+    all.refetch();
+  };
+  const trashPost = trpc.studio.posts.remove.useMutation({
+    onSuccess: () => { refresh(); toast.success("Post moved to trash."); },
+    onError: error => { setConfirmId(null); toast.error(error.message); },
+  });
+  const restorePost = trpc.studio.posts.transition.useMutation({
+    onSuccess: () => { refresh(); toast.success("Post restored to drafts."); },
+    onError: error => toast.error(error.message),
+  });
+  const destroyPost = trpc.studio.posts.destroy.useMutation({
+    onSuccess: () => { refresh(); toast.success("Post permanently deleted."); },
+    onError: error => { setConfirmId(null); toast.error(error.message); },
+  });
   const taxonomy = trpc.studio.taxonomy.list.useQuery();
   const [newCategoryOpen, setNewCategoryOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
@@ -296,7 +317,7 @@ export function StudioPosts() {
     () =>
       (all.data ?? []).filter(
         post =>
-          (status === "all" || post.status === status) &&
+          (status === "all" || inTrash || post.status === status) &&
           (search.trim() === "" ||
             post.title.toLowerCase().includes(search.trim().toLowerCase())) &&
           (folder.kind === "all" ||
@@ -520,6 +541,7 @@ export function StudioPosts() {
                 <SelectItem value="review">Review</SelectItem>
                 <SelectItem value="published">Published</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
+                <SelectItem value="trash">Trash</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -581,6 +603,11 @@ export function StudioPosts() {
                       </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <StatusPill state={post.status} />
+                        {inTrash && (
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            In trash
+                          </span>
+                        )}
                         <time className="text-xs text-muted-foreground">
                           Updated{" "}
                           {new Date(post.updated_at).toLocaleDateString()}
@@ -588,7 +615,7 @@ export function StudioPosts() {
                       </div>
                     </div>
                     <div className="col-span-2 flex items-center justify-end gap-2 sm:col-span-1 sm:justify-end">
-                      {post.status === "published" && (
+                      {post.status === "published" && !inTrash && (
                         <>
                           <Button
                             size="sm"
@@ -630,6 +657,35 @@ export function StudioPosts() {
                           <span className="hidden sm:inline">Advanced</span>
                         </Button>
                       </Link>
+                      {canManage && !inTrash &&
+                        (confirmId === post.id ? (
+                          <Button size="sm" variant="destructive" className="gap-1.5" disabled={trashPost.isPending} onClick={() => trashPost.mutate({ id: post.id, confirmed: true })}>
+                            Sure?
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground hover:text-destructive" onClick={() => setConfirmId(post.id)}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Trash</span>
+                          </Button>
+                        ))}
+                      {canManage && inTrash && (
+                        <>
+                          <Button size="sm" variant="outline" className="gap-1.5" disabled={restorePost.isPending} onClick={() => restorePost.mutate({ id: post.id, status: "draft" })}>
+                            <Undo2 className="h-3.5 w-3.5" />
+                            <span className="hidden sm:inline">Restore</span>
+                          </Button>
+                          {confirmId === post.id ? (
+                            <Button size="sm" variant="destructive" className="gap-1.5" disabled={destroyPost.isPending} onClick={() => destroyPost.mutate({ id: post.id, confirmed: true })}>
+                              Sure?
+                            </Button>
+                          ) : (
+                            <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground hover:text-destructive" onClick={() => setConfirmId(post.id)}>
+                              <Trash2 className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">Delete</span>
+                            </Button>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 );

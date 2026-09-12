@@ -161,10 +161,11 @@ export const studioRouter = router({
   }),
 
   posts: router({
-    list: protectedProcedure.input(z.object({ status: z.enum(POST_STATUSES).optional(), search: z.string().trim().max(100).optional(), categoryId: z.string().uuid().optional(), tagId: z.string().uuid().optional() })).query(async ({ ctx, input }) => {
+    list: protectedProcedure.input(z.object({ status: z.enum(POST_STATUSES).optional(), search: z.string().trim().max(100).optional(), categoryId: z.string().uuid().optional(), tagId: z.string().uuid().optional(), trashed: z.boolean().default(false) })).query(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const db = getSupabase();
       await publishScheduled(actor.siteId);
-      let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, scheduled_at, featured, featured_media_id, og_image_url, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).is("deleted_at", null).order("updated_at", { ascending: false });
+      let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, scheduled_at, featured, featured_media_id, og_image_url, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("updated_at", { ascending: false });
+      query = input.trashed ? query.not("deleted_at", "is", null) : query.is("deleted_at", null);
       if (actor.role === "author") query = query.eq("author_id", actor.profileId);
       if (input.status) query = query.eq("status", input.status);
       if (input.search) query = query.ilike("title", `%${input.search.replace(/[,%]/g, "")}%`);
@@ -293,6 +294,20 @@ export const studioRouter = router({
       if (error || !data) throw new TRPCError({ code: "NOT_FOUND", message: "The post could not be deleted." });
       await recordAudit(actor, "post.deleted", "post", post.id, { softDeleted: true });
       return data;
+    }),
+    destroy: protectedProcedure.input(z.object({ id: z.string().uuid(), confirmed: z.literal(true) })).mutation(async ({ ctx, input }) => {
+      const actor = await actorFor(ctx); assertRole(actor, ["admin", "editor"]); const { post } = await assertCanEditPost(actor, input.id);
+      if (!post.deleted_at) throw new TRPCError({ code: "BAD_REQUEST", message: "Move the post to trash first — only trashed posts can be permanently deleted." });
+      const db = getSupabase();
+      const scope = { organization_id: actor.organizationId, site_id: actor.siteId };
+      await db.from("post_categories").delete().eq("post_id", post.id);
+      await db.from("post_tags").delete().eq("post_id", post.id);
+      await db.from("post_revisions").delete().eq("post_id", post.id);
+      await db.from("comments").delete().eq("post_id", post.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId);
+      const { error } = await db.from("posts").delete().eq("id", post.id).eq("organization_id", actor.organizationId).eq("site_id", actor.siteId);
+      if (error) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "The post could not be permanently deleted." });
+      await recordAudit(actor, "post.destroyed", "post", post.id, { title: post.title, ...scope });
+      return { success: true as const };
     }),
   }),
 

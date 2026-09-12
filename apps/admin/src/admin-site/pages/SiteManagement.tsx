@@ -81,16 +81,25 @@ function FocalPicker({
   aspectClass: string;
 }) {
   const point = parsePosition(value);
+  const [previewAspect, setPreviewAspect] = useState<string | null>(null);
   const pick = (event: ReactMouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = Math.min(100, Math.max(0, Math.round(((event.clientX - rect.left) / rect.width) * 100)));
     const y = Math.min(100, Math.max(0, Math.round(((event.clientY - rect.top) / rect.height) * 100)));
     onChange(`${x}% ${y}%`);
   };
+  const slide = (axis: "x" | "y", v: number) => {
+    onChange(axis === "x" ? `${v}% ${point.y}%` : `${point.x}% ${v}%`);
+  };
   const presets: Array<{ label: string; value: string }> = [
     { label: "Top", value: "50% 20%" },
     { label: "Center", value: "50% 50%" },
     { label: "Bottom", value: "50% 80%" },
+  ];
+  const aspects: Array<{ label: string; value: string }> = [
+    { label: "16:9", value: "aspect-video" },
+    { label: "4:3", value: "aspect-[4/3]" },
+    { label: "1:1", value: "aspect-square" },
   ];
   return (
     <div className="mt-3 rounded-xl border border-border bg-background/60 p-3">
@@ -108,7 +117,7 @@ function FocalPicker({
           const rect = event.currentTarget.getBoundingClientRect();
           pick({ clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2, currentTarget: event.currentTarget } as ReactMouseEvent<HTMLDivElement>);
         }}
-        className={`relative mt-2 w-full cursor-crosshair overflow-hidden rounded-lg ${aspectClass}`}
+        className={`relative mt-2 w-full cursor-crosshair overflow-hidden rounded-lg ${previewAspect ?? aspectClass}`}
       >
         <img src={imageUrl} alt="Focus preview" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: value || undefined }} />
         <span
@@ -116,6 +125,18 @@ function FocalPicker({
           className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary/80 shadow"
           style={{ left: `${point.x}%`, top: `${point.y}%` }}
         />
+      </div>
+      <div className="mt-2 grid gap-2">
+        <label className="grid grid-cols-[52px_1fr_44px] items-center gap-2 text-[11px] text-muted-foreground">
+          Left–right
+          <input type="range" min={0} max={100} value={point.x} onChange={event => slide("x", Number(event.target.value))} aria-label="Horizontal focus" className="h-1.5 w-full accent-primary" />
+          <span className="text-right font-mono">{point.x}%</span>
+        </label>
+        <label className="grid grid-cols-[52px_1fr_44px] items-center gap-2 text-[11px] text-muted-foreground">
+          Top–bottom
+          <input type="range" min={0} max={100} value={point.y} onChange={event => slide("y", Number(event.target.value))} aria-label="Vertical focus" className="h-1.5 w-full accent-primary" />
+          <span className="text-right font-mono">{point.y}%</span>
+        </label>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
         {presets.map(preset => (
@@ -130,7 +151,30 @@ function FocalPicker({
             {preset.label}
           </Button>
         ))}
-        <span className="ml-auto font-mono text-[11px] text-muted-foreground">{point.x}% · {point.y}%</span>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs text-muted-foreground"
+          onClick={() => onChange("50% 50%")}
+        >
+          Reset
+        </Button>
+        <span className="ml-auto flex items-center gap-1">
+          <span className="mr-1 text-[11px] text-muted-foreground">Preview:</span>
+          {aspects.map(option => (
+            <Button
+              key={option.label}
+              type="button"
+              variant={(previewAspect ?? aspectClass) === option.value ? "default" : "outline"}
+              size="sm"
+              className="h-7 px-2 font-mono text-[11px]"
+              onClick={() => setPreviewAspect(option.value)}
+            >
+              {option.label}
+            </Button>
+          ))}
+        </span>
       </div>
     </div>
   );
