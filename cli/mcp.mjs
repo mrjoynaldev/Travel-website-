@@ -190,15 +190,45 @@ const TOOLS = [
   },
   {
     name: "posts_create_draft",
-    description: "Create a DRAFT post (never published). Returns the new post id for further edits.",
-    inputSchema: { type: "object", properties: { title: { type: "string" }, excerpt: { type: "string" }, html: { type: "string", description: "Full article body as HTML" } }, required: ["title"] },
+    description: "Create a DRAFT post (never published). Returns the new post id for further edits. Attach a cover via featuredMediaId (upload first with media_upload) and a social image via ogImageUrl.",
+    inputSchema: { type: "object", properties: { title: { type: "string" }, excerpt: { type: "string" }, html: { type: "string", description: "Full article body as HTML" }, featuredMediaId: { type: "string", description: "Media-library asset id for the cover image" }, ogImageUrl: { type: "string", description: "Social share image URL" }, metaTitle: { type: "string" }, metaDescription: { type: "string" } }, required: ["title"] },
     run: (a) => trpc("studio.posts.create", {
       title: a.title,
       excerpt: a.excerpt || "",
       contentJson: minimalDoc(a.html || a.excerpt || a.title),
       renderedHtml: a.html || paraHtml(a.excerpt || a.title),
       categoryIds: [], tagIds: [],
+      ...(a.featuredMediaId ? { featuredMediaId: a.featuredMediaId } : {}),
+      ...(a.ogImageUrl ? { ogImageUrl: a.ogImageUrl } : {}),
+      ...(a.metaTitle ? { metaTitle: a.metaTitle } : {}),
+      ...(a.metaDescription ? { metaDescription: a.metaDescription } : {}),
     }, "POST"),
+  },
+  {
+    name: "posts_update",
+    description: "Edit a DRAFT post (title, body, cover image, social image, meta). Fetches the current draft and merges your patch — omitted fields are preserved. Use this to attach images after creating the draft. Pass featuredMediaId as null to clear the cover.",
+    inputSchema: { type: "object", properties: { id: { type: "string" }, title: { type: "string" }, excerpt: { type: "string" }, html: { type: "string", description: "Full article body as HTML (replaces the body)" }, featuredMediaId: { type: ["string", "null"], description: "Media-library asset id, or null to clear" }, ogImageUrl: { type: "string" }, metaTitle: { type: "string" }, metaDescription: { type: "string" } }, required: ["id"] },
+    run: async (a) => {
+      const current = await trpc("studio.posts.get", { id: a.id }, "GET");
+      if (!current) throw new Error("Post not found.");
+      const html = a.html !== undefined ? a.html : (current.rendered_html || "");
+      return trpc("studio.posts.update", {
+        id: a.id,
+        data: {
+          title: a.title !== undefined ? a.title : current.title,
+          slug: current.slug || undefined,
+          excerpt: a.excerpt !== undefined ? a.excerpt : (current.excerpt || ""),
+          contentJson: a.html !== undefined ? minimalDoc(a.html) : (current.content_json || minimalDoc(current.title)),
+          renderedHtml: html,
+          metaTitle: a.metaTitle !== undefined ? a.metaTitle : (current.meta_title || ""),
+          metaDescription: a.metaDescription !== undefined ? a.metaDescription : (current.meta_description || ""),
+          ogImageUrl: a.ogImageUrl !== undefined ? a.ogImageUrl : (current.og_image_url || ""),
+          featuredMediaId: a.featuredMediaId !== undefined ? a.featuredMediaId : (current.featured_media_id || null),
+          categoryIds: (current.categories || []).map((c) => c.id),
+          tagIds: (current.tags || []).map((t) => t.id),
+        },
+      }, "POST");
+    },
   },
   {
     name: "posts_transition",
@@ -217,6 +247,12 @@ const TOOLS = [
     description: "List media-library assets. Optional folder and filename search.",
     inputSchema: { type: "object", properties: { folder: { type: "string" }, search: { type: "string" } } },
     run: (a) => trpc("studio.media.list", { folder: a.folder, search: a.search }, "GET"),
+  },
+  {
+    name: "media_upload",
+    description: "Upload an IMAGE to the media library. Returns the asset id + URL for covers (featuredMediaId) and article bodies. Images only: jpeg/png/webp/gif, max 10 MB — downscale large photos before sending. Videos and other binaries cannot go through MCP; ask the owner to upload those in Studio.",
+    inputSchema: { type: "object", properties: { filename: { type: "string" }, mimeType: { type: "string", enum: ["image/jpeg", "image/png", "image/webp", "image/gif"] }, base64: { type: "string", description: "Raw base64 or a full data:image/...;base64, URL" }, folder: { type: "string" }, altText: { type: "string" } }, required: ["filename", "mimeType", "base64"] },
+    run: (a) => trpc("studio.media.upload", { filename: a.filename, mimeType: a.mimeType, base64: a.base64, folder: a.folder || "library", altText: a.altText || "" }, "POST"),
   },
   {
     name: "tours_list",
@@ -275,7 +311,7 @@ const TOOLS = [
   },
   {
     name: "reviews_create",
-    description: "Add a customer video review as DRAFT. videoUrl must be an already-uploaded file URL (upload via Studio media library first — MCP cannot upload binaries). Only genuine customer clips, never stock.",
+    description: "Add a customer video review as DRAFT. videoUrl must be an already-uploaded file URL (videos: ask the owner to upload in Studio first — MCP uploads images only). Only genuine customer clips, never stock.",
     inputSchema: { type: "object", properties: { customerName: { type: "string" }, videoUrl: { type: "string" }, quote: { type: "string" }, rating: { type: "number" }, tourSlug: { type: "string" } }, required: ["customerName", "videoUrl"] },
     run: (a) => trpc("studio.catalog.reviews.create", {
       customerName: a.customerName, tourSlug: a.tourSlug || "", videoUrl: a.videoUrl,
@@ -309,7 +345,7 @@ const TOOLS = [
   },
   {
     name: "menu_create",
-    description: "Add a food-menu dish as DRAFT. imageUrl must be an already-uploaded photo URL.",
+    description: "Add a food-menu dish as DRAFT. imageUrl must be an already-uploaded photo URL (upload with media_upload first, or via Studio).",
     inputSchema: { type: "object", properties: { name: { type: "string" }, imageUrl: { type: "string" }, description: { type: "string" }, priceNote: { type: "string" }, category: { type: "string" } }, required: ["name", "imageUrl"] },
     run: (a) => trpc("studio.catalog.foodMenu.create", {
       name: a.name, description: a.description || "", priceNote: a.priceNote || "",
@@ -355,7 +391,7 @@ const TOOLS = [
   },
   {
     name: "brand_update",
-    description: `Update brand kit fields (hero, safari, trust, about, tagline, colors). Changes are INSTANTLY PUBLIC with no draft mode. ${CONFIRM_RULE} Pass only the fields to change; everything else is preserved. Binary uploads cannot go through MCP — ask the owner to upload media in Studio, then set the returned URL here.`,
+    description: `Update brand kit fields (hero, safari, trust, about, tagline, colors). Changes are INSTANTLY PUBLIC with no draft mode. ${CONFIRM_RULE} Pass only the fields to change; everything else is preserved. Images can be uploaded with media_upload (videos: ask the owner to upload in Studio), then set the returned URL here.`,
     inputSchema: {
       type: "object",
       properties: {
