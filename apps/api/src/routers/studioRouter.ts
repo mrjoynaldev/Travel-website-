@@ -161,7 +161,7 @@ export const studioRouter = router({
   }),
 
   posts: router({
-    list: protectedProcedure.input(z.object({ status: z.enum(POST_STATUSES).optional(), search: z.string().trim().max(100).optional(), categoryId: z.string().uuid().optional(), tagId: z.string().uuid().optional(), trashed: z.boolean().default(false) })).query(async ({ ctx, input }) => {
+    list: protectedProcedure.input(z.object({ status: z.string().optional(), search: z.string().trim().max(100).optional(), categoryId: z.string().uuid().optional(), tagId: z.string().uuid().optional(), trashed: z.boolean().default(false) })).query(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const db = getSupabase();
       await publishScheduled(actor.siteId);
       let query = db.from("posts").select("id, title, slug, status, excerpt, updated_at, published_at, submitted_at, scheduled_at, featured, featured_media_id, og_image_url, author_id, profiles!posts_author_id_fkey(display_name)").eq("organization_id", actor.organizationId).eq("site_id", actor.siteId).order("updated_at", { ascending: false });
