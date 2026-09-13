@@ -212,6 +212,15 @@ export function StudioBranding() {
   const [safariPoints, setSafariPoints] = useState("");
   const [aboutImageUrl, setAboutImageUrl] = useState("");
   const [aboutImagePosition, setAboutImagePosition] = useState("50% 50%");
+  const [stickyBarBg, setStickyBarBg] = useState("#123F32");
+  const [stickyBarBorder, setStickyBarBorder] = useState("#1a4d3b");
+  const [stickyWhatsappBg, setStickyWhatsappBg] = useState("#167A54");
+  const [stickyWhatsappText, setStickyWhatsappText] = useState("#ffffff");
+  const [stickyCallBg, setStickyCallBg] = useState("#ffffff");
+  const [stickyCallText, setStickyCallText] = useState("#123F32");
+  const [stickyCallBorder, setStickyCallBorder] = useState("#ffffff");
+  const [stickyQuoteBg, setStickyQuoteBg] = useState("#ffffff");
+  const [stickyQuoteText, setStickyQuoteText] = useState("#123F32");
   const [trustItems, setTrustItems] = useState<{ icon: string; title: string; desc: string }[]>([]);
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -245,6 +254,15 @@ export function StudioBranding() {
     setSafariPoints(Array.isArray(brand.safariPoints) ? brand.safariPoints.join("\n") : "");
     setAboutImageUrl(brand.aboutImageUrl || "");
     setAboutImagePosition(brand.aboutImagePosition || "50% 50%");
+    setStickyBarBg(brand.stickyBarBg || "#123F32");
+    setStickyBarBorder(brand.stickyBarBorder || "#1a4d3b");
+    setStickyWhatsappBg(brand.stickyWhatsappBg || "#167A54");
+    setStickyWhatsappText(brand.stickyWhatsappText || "#ffffff");
+    setStickyCallBg(brand.stickyCallBg || "#ffffff");
+    setStickyCallText(brand.stickyCallText || "#123F32");
+    setStickyCallBorder(brand.stickyCallBorder || "#ffffff");
+    setStickyQuoteBg(brand.stickyQuoteBg || "#ffffff");
+    setStickyQuoteText(brand.stickyQuoteText || "#123F32");
     setTrustItems(
       Array.isArray(brand.trustItems)
         ? brand.trustItems
@@ -305,6 +323,15 @@ export function StudioBranding() {
           safariPoints: safariPoints.split("\n").map(line => line.trim()).filter(Boolean).slice(0, 6),
           aboutImageUrl,
           aboutImagePosition,
+          stickyBarBg,
+          stickyBarBorder,
+          stickyWhatsappBg,
+          stickyWhatsappText,
+          stickyCallBg,
+          stickyCallText,
+          stickyCallBorder,
+          stickyQuoteBg,
+          stickyQuoteText,
           trustItems,
         },
         footerLinks: footer,
@@ -831,6 +858,77 @@ export function StudioBranding() {
                 />
               </div>
             )}
+          </div>
+          <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
+            <div>
+              <p className="font-label text-[10px] text-primary">Mobile sticky bar</p>
+              <h2 className="mt-2 font-display text-2xl font-semibold">Bottom bar colours</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Deep-green bar by default. Change any colour; preview updates instantly — save to publish.</p>
+            </div>
+            <div className="mt-4 rounded-xl border border-border p-3" style={{ backgroundColor: stickyBarBg, borderColor: stickyBarBorder }}>
+              <div className="grid grid-cols-3 gap-2">
+                <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: stickyWhatsappBg, color: stickyWhatsappText }}>WhatsApp</span>
+                <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border text-xs font-semibold" style={{ backgroundColor: stickyCallBg, color: stickyCallText, borderColor: stickyCallBorder }}>Call</span>
+                <span className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: stickyQuoteBg, color: stickyQuoteText }}>Get Quote</span>
+              </div>
+            </div>
+            {(() => {
+              const Row = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
+                <label className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background/60 px-3 py-2">
+                  <span className="text-xs font-medium text-muted-foreground">{label}</span>
+                  <span className="flex items-center gap-2">
+                    <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : "#123F32"} onChange={event => onChange(event.target.value)} className="h-7 w-7 cursor-pointer rounded border border-border bg-transparent p-0" />
+                    <Input value={value} onChange={event => onChange(event.target.value)} placeholder="#123F32" className="h-7 w-24 font-mono text-xs" maxLength={7} />
+                  </span>
+                </label>
+              );
+              const presets: Array<{ label: string; values: string[] }> = [
+                { label: "Deep green", values: ["#123F32", "#1a4d3b", "#167A54", "#ffffff", "#ffffff", "#123F32", "#ffffff", "#ffffff", "#123F32"] },
+                { label: "Forest", values: ["#0f2a1f", "#1a3d2e", "#1a7a4c", "#ffffff", "#0f2a1f", "#ffffff", "#c8e6cc", "#0f2a1f", "#ffffff"] },
+                { label: "Light", values: ["#ffffff", "#e5e8e4", "#167A54", "#ffffff", "#ffffff", "#18221F", "#e5e8e4", "#123F32", "#ffffff"] },
+              ];
+              return (
+                <>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <Row label="Bar background" value={stickyBarBg} onChange={setStickyBarBg} />
+                    <Row label="Bar border" value={stickyBarBorder} onChange={setStickyBarBorder} />
+                    <Row label="WhatsApp bg" value={stickyWhatsappBg} onChange={setStickyWhatsappBg} />
+                    <Row label="WhatsApp text" value={stickyWhatsappText} onChange={setStickyWhatsappText} />
+                    <Row label="Call bg" value={stickyCallBg} onChange={setStickyCallBg} />
+                    <Row label="Call text" value={stickyCallText} onChange={setStickyCallText} />
+                    <Row label="Call border" value={stickyCallBorder} onChange={setStickyCallBorder} />
+                    <Row label="Get Quote bg" value={stickyQuoteBg} onChange={setStickyQuoteBg} />
+                    <Row label="Get Quote text" value={stickyQuoteText} onChange={setStickyQuoteText} />
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {presets.map(preset => (
+                      <Button key={preset.label} type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => { const [a, b, c, d, e, f, g, h, i] = preset.values; setStickyBarBg(a); setStickyBarBorder(b); setStickyWhatsappBg(c); setStickyWhatsappText(d); setStickyCallBg(e); setStickyCallText(f); setStickyCallBorder(g); setStickyQuoteBg(h); setStickyQuoteText(i); }}>
+                        {preset.label}
+                      </Button>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs text-muted-foreground"
+                      onClick={() => {
+                        setStickyBarBg("#123F32");
+                        setStickyBarBorder("#1a4d3b");
+                        setStickyWhatsappBg("#167A54");
+                        setStickyWhatsappText("#ffffff");
+                        setStickyCallBg("#ffffff");
+                        setStickyCallText("#123F32");
+                        setStickyCallBorder("#ffffff");
+                        setStickyQuoteBg("#ffffff");
+                        setStickyQuoteText("#123F32");
+                      }}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                </>
+              );
+            })()}
           </div>
           <div className="rounded-xl border border-border bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between gap-3">

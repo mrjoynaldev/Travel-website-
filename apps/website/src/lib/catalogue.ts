@@ -174,6 +174,15 @@ export type Brand = {
   aboutImagePosition: string;
   heroImagePosition: string;
   trustItems: TrustItem[];
+  stickyBarBg: string;
+  stickyBarBorder: string;
+  stickyWhatsappBg: string;
+  stickyWhatsappText: string;
+  stickyCallBg: string;
+  stickyCallText: string;
+  stickyCallBorder: string;
+  stickyQuoteBg: string;
+  stickyQuoteText: string;
 };
 
 const DEFAULT_BRAND: Brand = {
@@ -192,6 +201,15 @@ const DEFAULT_BRAND: Brand = {
   aboutImagePosition: "",
   heroImagePosition: "",
   trustItems: [],
+  stickyBarBg: "",
+  stickyBarBorder: "",
+  stickyWhatsappBg: "",
+  stickyWhatsappText: "",
+  stickyCallBg: "",
+  stickyCallText: "",
+  stickyCallBorder: "",
+  stickyQuoteBg: "",
+  stickyQuoteText: "",
 };
 
 const str = (brand: Partial<Brand>, key: keyof Brand): string => {
@@ -212,6 +230,15 @@ export async function getBrand(): Promise<Brand> {
       heroSubtitle: str(brand, "heroSubtitle"),
       safariImageUrl: str(brand, "safariImageUrl"),
       safariImagePosition: str(brand, "safariImagePosition"),
+      stickyBarBg: str(brand, "stickyBarBg"),
+      stickyBarBorder: str(brand, "stickyBarBorder"),
+      stickyWhatsappBg: str(brand, "stickyWhatsappBg"),
+      stickyWhatsappText: str(brand, "stickyWhatsappText"),
+      stickyCallBg: str(brand, "stickyCallBg"),
+      stickyCallText: str(brand, "stickyCallText"),
+      stickyCallBorder: str(brand, "stickyCallBorder"),
+      stickyQuoteBg: str(brand, "stickyQuoteBg"),
+      stickyQuoteText: str(brand, "stickyQuoteText"),
       safariTitle: str(brand, "safariTitle"),
       safariText: str(brand, "safariText"),
       safariPoints: Array.isArray(brand.safariPoints)
