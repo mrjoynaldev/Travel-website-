@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowUpRight, Menu, Phone, Search, X } from "lucide-react";
+import { ArrowUpRight, FileText, Menu, Phone, Search, X } from "lucide-react";
 import { WhatsAppIcon } from "../icons/WhatsAppIcon";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -64,20 +64,6 @@ export function PublicShell({ publication, pages = [], children }: { publication
   const email = contact.email || FALLBACK_EMAIL;
   const logoUrl = brand.logoUrl || "/logo.png";
   const mark = (_dark = false, size = "h-8 w-8") => <img src={logoUrl} alt={brand.logoAlt || `${siteName} logo`} className={`${size} rounded-full object-cover`} />;
-  // Deep-green + white defaults keep the sticky bar readable on the forest brand.
-  const hex = (value: unknown, fallback: string) =>
-    typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
-  const bar = {
-    bg: hex((brand as Record<string, unknown>).stickyBarBg, "#123F32"),
-    border: hex((brand as Record<string, unknown>).stickyBarBorder, "#1a4d3b"),
-    whatsappBg: hex((brand as Record<string, unknown>).stickyWhatsappBg, "#167A54"),
-    whatsappText: hex((brand as Record<string, unknown>).stickyWhatsappText, "#ffffff"),
-    callBg: hex((brand as Record<string, unknown>).stickyCallBg, "#ffffff"),
-    callText: hex((brand as Record<string, unknown>).stickyCallText, "#123F32"),
-    callBorder: hex((brand as Record<string, unknown>).stickyCallBorder, "#ffffff"),
-    quoteBg: hex((brand as Record<string, unknown>).stickyQuoteBg, "#ffffff"),
-    quoteText: hex((brand as Record<string, unknown>).stickyQuoteText, "#123F32"),
-  };
   return <div className="min-h-screen bg-background"><a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">Skip to content</a>
     {/* Top utility strip */}
     <div className="hidden bg-[#0f4532] text-[#cfe0d5] md:block">
@@ -104,15 +90,24 @@ export function PublicShell({ publication, pages = [], children }: { publication
     </header>
     {open && <div className="fixed inset-0 z-[60] flex flex-col bg-[#f7f6f1] md:hidden" role="dialog" aria-modal="true" aria-label="Site menu"><div className="container flex h-16 shrink-0 items-center justify-between gap-5 border-b border-border/60"><Link href="/" className="flex items-center gap-2.5" aria-label={`${siteName} home`} onClick={() => setOpen(false)}>{mark(false, "h-9 w-9")}<span className="font-display text-xl font-bold tracking-tight">{siteName}</span></Link><Button variant="ghost" size="icon" aria-label="Close menu" onClick={() => setOpen(false)} className="rounded-full border border-border"><X className="h-5 w-5" /></Button></div><nav className="container flex min-h-0 flex-1 flex-col overflow-y-auto py-4" aria-label="Mobile navigation"><a href="/" onClick={() => setOpen(false)} className="border-b border-border/70 py-3.5 font-display text-2xl font-semibold tracking-tight">Home</a>{navigation.map((item) => <a key={`${item.label}-${item.path}`} href={item.path} onClick={() => setOpen(false)} className="border-b border-border/70 py-3.5 font-display text-2xl font-semibold tracking-tight transition-colors hover:text-primary">{item.label}</a>)}<a href="/hire" onClick={() => setOpen(false)} className="border-b border-border/70 py-3.5 font-display text-2xl font-semibold tracking-tight text-primary">Plan Your Trip</a><a href="/archive" onClick={() => setOpen(false)} className="py-3.5 font-display text-2xl font-semibold tracking-tight">All Guides</a></nav><div className="container grid shrink-0 gap-2 pb-6"><a href="/hire" onClick={() => setOpen(false)}><Button className="h-12 w-full rounded-full gap-2 text-base font-semibold">Plan Your Trip <ArrowUpRight className="h-4 w-4" /></Button></a><a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#167A54] text-base font-semibold text-white"><WhatsAppIcon className="h-5 w-5" /> WhatsApp Us</a></div></div>}
     <main id="main">{children}</main>
-    {/* Sticky mobile conversion bar — colours come from Brand → Mobile bar, deep-green defaults */}
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t backdrop-blur-md md:hidden pb-[env(safe-area-inset-bottom)]" style={{ backgroundColor: `${bar.bg}f2`, borderColor: bar.border }}>
-      <div className="grid grid-cols-3 gap-2 p-2.5">
-        <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full text-sm font-semibold" style={{ backgroundColor: bar.whatsappBg, color: bar.whatsappText }}><WhatsAppIcon className="h-4 w-4" /> WhatsApp</a>
-        <a href={phoneHref} className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full border text-sm font-semibold" style={{ backgroundColor: bar.callBg, color: bar.callText, borderColor: bar.callBorder }}><Phone className="h-4 w-4" /> Call</a>
-        <a href="/hire" className="inline-flex h-11 items-center justify-center rounded-full text-sm font-semibold" style={{ backgroundColor: bar.quoteBg, color: bar.quoteText }}>Get Quote</a>
+    {/* Sticky mobile bar — one continuous forest-green bar, no pills */}
+    <div className="fixed inset-x-0 bottom-0 z-40 md:hidden">
+      <div className="flex w-full items-stretch overflow-hidden rounded-t-[16px] bg-[#103D31] shadow-[0_-8px_24px_rgba(0,0,0,0.12)]">
+        <a href={waLink} target="_blank" rel="noopener noreferrer" className="flex flex-1 items-center justify-center gap-2 py-[18px] text-[18px] font-semibold text-white">
+          <WhatsAppIcon className="h-[26px] w-[26px] shrink-0" /> WhatsApp
+        </a>
+        <div className="my-3 w-px shrink-0 bg-white/15" aria-hidden="true" />
+        <a href={phoneHref} className="flex flex-1 items-center justify-center gap-2 py-[18px] text-[18px] font-semibold text-white">
+          <Phone className="h-[26px] w-[26px] shrink-0" /> Call
+        </a>
+        <div className="my-3 w-px shrink-0 bg-white/15" aria-hidden="true" />
+        <a href="/hire" className="flex flex-1 items-center justify-center gap-2 py-[18px] text-[18px] font-semibold text-white">
+          <FileText className="h-[26px] w-[26px] shrink-0" /> Get Quote
+        </a>
       </div>
+      <div className="h-[env(safe-area-inset-bottom)] bg-[#103D31]" aria-hidden="true" />
     </div>
-    <div className="h-[68px] md:hidden" aria-hidden="true" />
+    <div className="h-[72px] md:hidden" aria-hidden="true" />
     <footer id="about" className="border-t border-border bg-[#0f2a1f] text-[#edf4ea]">
       <div className="container grid gap-10 py-14 lg:py-16 md:grid-cols-2 lg:grid-cols-[1.3fr_.7fr_.7fr_.8fr]">
         <div>
