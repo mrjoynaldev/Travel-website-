@@ -97,8 +97,7 @@ export function PublicShell({ publication, pages = [], children }: { publication
           <a href={waLink} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#167A54] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0D3B2E]"><WhatsAppIcon className="h-4 w-4" /> WhatsApp Us</a>
           <a href="/hire"><Button size="sm" className="h-11 rounded-full px-5 text-sm font-semibold">Plan Your Trip <ArrowUpRight className="h-4 w-4" /></Button></a>
         </div>
-        <div className="flex items-center gap-3 lg:hidden">
-          <a href={waLink} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp us" className="grid h-11 w-11 place-items-center rounded-full bg-[#167A54] text-white transition-colors hover:bg-[#0D3B2E]"><WhatsAppIcon className="h-5 w-5" /></a>
+        <div className="flex items-center lg:hidden">
           <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-[#D5D9D3] text-[#10271F]" aria-label="Open menu" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></Button>
         </div>
       </div>
