@@ -249,7 +249,7 @@ export default function HomeView({ categories, sections, posts, search, category
               ))}
             </ul>
             <div className="mt-7 flex flex-wrap gap-3">
-              <a href="/hire?interest=safari" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-semibold text-white hover:bg-[#0f4532] transition-colors">Explore Safari Tours</a>
+              <a href="/hire?interest=safari" className="inline-flex h-12 items-center rounded-full bg-primary px-7 text-[15px] font-semibold text-white hover:bg-[#0f4532] transition-colors">Explore Our Safari Tours</a>
               <a href="/archive" className="inline-flex h-12 items-center rounded-full border border-border bg-white px-7 text-[15px] font-semibold hover:border-primary/40 hover:text-primary transition-colors">Read Travel Guides</a>
             </div>
           </div>

@@ -137,23 +137,26 @@ export const TRUST_ICONS = ["Compass", "Route", "HeartHandshake", "MapPin", "Shi
 
 // Fallback + seed stock for the homepage safari feature block.
 export const SAFARI_DEFAULT = {
-  title: "Creeks, watchtowers and quiet patience",
-  text: "Safari here is a water journey — permitted creeks, forest guides, and watchtowers at Sajnekhali, Sudhanyakhali and Dobanki. Mornings are misty, afternoons golden, and every turn feels unscripted.",
+  title: "Sundarban Safari",
+  text: "Experience the beauty of the Sundarbans through its winding waterways, dense mangrove forests, and rich wildlife. Safari tours are planned to provide a comfortable and enjoyable way to explore this unique ecosystem.",
   points: [
-    "Forest guide + permits handled",
-    "Small-group boats, shade + washroom",
-    "Honest briefing — no guaranteed sightings",
+    "Experienced forest guides",
+    "Required permits arranged",
+    "Comfortable boats with shade and washroom facilities",
+    "Small-group safari options",
+    "Explore the forest, waterways, and watchtowers",
+    "Wildlife sightings depend on nature, tides, and luck",
   ],
 };
 
 export const FAQS = [
   {
     q: "How do I reach the Sundarbans?",
-    a: "Most travellers come via Kolkata to Godkhali / Canning (2.5–4 hrs by road + boat). Share your starting point and we will map the smoothest route — train, car and boat handover included.",
+    a: "Most travellers reach Canning from Kolkata by train or car. From Canning, take a car or auto to Sonakhali Launch Ghat, where you'll board a boat to the Sundarbans. Share your starting point so the team can help plan the easiest route.",
   },
   {
     q: "How many days are enough for a Sundarban trip?",
-    a: "One day works for a taste. Two days / one night is the sweet spot for safari + stay. Three days lets you slow down, add Jharkhali or Gosaba, and catch sunrise and sunset on the water.",
+    a: "3 Days / 2 Nights — Best Choice. The most recommended option for a complete Sundarban experience, with more time for wildlife safaris, exploring Jharkhali, beautiful sunrises and sunsets on the water, and a less rushed experience. 2 Days / 1 Night — Good for a Short Trip. A good option for travellers with limited time, with a Sundarban safari, a comfortable stay, and a taste of the region's wildlife and natural beauty. 1 Day — Quick Visit. Best for travellers with very limited time: a short Sundarban experience, but the trip will be more rushed with less time for exploration.",
   },
   {
     q: "What is usually included in a tour?",
