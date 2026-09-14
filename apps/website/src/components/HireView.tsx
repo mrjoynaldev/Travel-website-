@@ -10,19 +10,21 @@ import { TOURS, FAQS } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
 import { Check, Clock3, Globe2, Phone, ShieldCheck } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
-import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+
+export type HireQuery = { tour?: string; interest?: string; destination?: string; from?: string };
 
 const DEFAULT_FAQS: FAQItem[] = FAQS.map(item => ({ q: item.q, a: item.a }));
 
-function PlanTripInner({ tours, faqs, business }: { tours?: Tour[]; faqs?: FAQItem[]; business?: Business }) {
-  const params = useSearchParams();
-  const tourSlug = params.get("tour") || undefined;
-  const interest = params.get("interest") || undefined;
+function PlanTripInner({ tours, faqs, business, query }: { tours?: Tour[]; faqs?: FAQItem[]; business?: Business; query?: HireQuery }) {
+  // Query values arrive as props from the server page (not useSearchParams) so
+  // this subtree prerenders — including the <h1> — in the initial HTML.
+  const tourSlug = query?.tour || undefined;
+  const interest = query?.interest || undefined;
   const biz = business ?? businessConfig;
   const toursList = tours ?? TOURS;
   const faqList = faqs ?? DEFAULT_FAQS;
-  const prefill = [tourSlug, interest, params.get("destination"), params.get("from")]
+  const prefill = [tourSlug, interest, query?.destination, query?.from]
     .filter(Boolean)
     .join(" • ");
   const activeTour = toursList.find((t) => t.slug === tourSlug);
@@ -120,10 +122,10 @@ function PlanTripInner({ tours, faqs, business }: { tours?: Tour[]; faqs?: FAQIt
   );
 }
 
-export default function HireView({ tours, faqs, business }: { tours?: Tour[]; faqs?: FAQItem[]; business?: Business }) {
+export default function HireView({ tours, faqs, business, query }: { tours?: Tour[]; faqs?: FAQItem[]; business?: Business; query?: HireQuery }) {
   return (
     <Suspense fallback={<div className="container py-24 text-center text-sm text-muted-foreground">Loading trip planner…</div>}>
-      <PlanTripInner tours={tours} faqs={faqs} business={business} />
+      <PlanTripInner tours={tours} faqs={faqs} business={business} query={query} />
     </Suspense>
   );
 }

@@ -10,6 +10,7 @@ import { Faq } from "@web/components/conversion/Faq";
 import { SectionHeader } from "@web/components/travel/SectionHeader";
 import { TourCard } from "@web/components/travel/TourCard";
 import { buildWhatsAppUrl, businessConfig, defaultWhatsAppMessage } from "@web/lib/business";
+import { displayImageUrl } from "@web/lib/social-image";
 import type { Brand, Business, FAQItem, MenuItem, VideoReview } from "@web/lib/catalogue";
 import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE, TRUST_FEATURES, SAFARI_DEFAULT } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
@@ -138,11 +139,15 @@ export default function HomeView({ categories, sections, posts, search, category
   const reviewList = videoReviews ?? [];
   const menuList = foodMenu ?? [];
   const trustList = brand?.trustItems?.length ? brand.trustItems : TRUST_FEATURES;
-  const safariImage = brand?.safariImageUrl?.trim() || SAFARI_IMAGE;
+  // Display-size variants: CMS brand images are often multi-MB originals, so
+  // request width-appropriate renditions (helper passes other URLs through).
+  const safariImageRaw = brand?.safariImageUrl?.trim() || SAFARI_IMAGE;
+  const safariImage = displayImageUrl(safariImageRaw, 1200) || safariImageRaw;
   const safariTitle = brand?.safariTitle?.trim() || SAFARI_DEFAULT.title;
   const safariText = brand?.safariText?.trim() || SAFARI_DEFAULT.text;
   const safariPoints = brand?.safariPoints?.length ? brand.safariPoints : SAFARI_DEFAULT.points;
-  const heroImage = brand?.heroImageUrl?.trim() || HERO_IMAGE;
+  const heroImageRaw = brand?.heroImageUrl?.trim() || HERO_IMAGE;
+  const heroImage = displayImageUrl(heroImageRaw, 1600) || heroImageRaw;
   const heroPosition = brand?.heroImagePosition?.trim() || undefined;
   const safariPosition = brand?.safariImagePosition?.trim() || undefined;
   const heroVideo = brand?.heroMediaType === "video" ? brand?.heroVideoUrl?.trim() : "";

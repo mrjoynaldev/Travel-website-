@@ -3,6 +3,7 @@ import { TourCard } from "@web/components/travel/TourCard";
 import { Faq } from "@web/components/conversion/Faq";
 import { LeadForm } from "@web/components/conversion/LeadForm";
 import { businessConfig, buildWhatsAppUrl, tourWhatsAppMessage } from "@web/lib/business";
+import { displayImageUrl } from "@web/lib/social-image";
 import type { Business, FAQItem, TourWithDetail } from "@web/lib/catalogue";
 import { FAQS, TOURS } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
@@ -51,10 +52,10 @@ export function TourDetail({
       {/* Gallery */}
       <section className="container pt-8 lg:pt-10">
         <div className="grid gap-3 md:grid-cols-3">
-          <img src={tour.gallery[0]} alt={tour.title} className="aspect-[16/10] w-full rounded-[20px] object-cover md:col-span-2 md:aspect-auto md:h-full md:min-h-[320px]" />
+          <img src={displayImageUrl(tour.gallery[0], 1000) || tour.gallery[0]} alt={tour.title} className="aspect-[16/10] w-full rounded-[20px] object-cover md:col-span-2 md:aspect-auto md:h-full md:min-h-[320px]" />
           <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-            <img src={tour.gallery[1]} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
-            <img src={tour.gallery[2]} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
+            <img src={displayImageUrl(tour.gallery[1], 800) || tour.gallery[1]} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
+            <img src={displayImageUrl(tour.gallery[2], 800) || tour.gallery[2]} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
           </div>
         </div>
       </section>

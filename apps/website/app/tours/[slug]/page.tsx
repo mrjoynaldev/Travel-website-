@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!tour) return { title: "Tour not found" };
   const image = (tour.gallery && tour.gallery[0]) || tour.image;
   return {
-    title: `${tour.title} — Itinerary, Inclusions & Booking | Sundarban Yatri`,
+    title: `${tour.title} — Itinerary & Booking | Sundarban Yatri`,
     description: tour.summary,
     alternates: { canonical: `/tours/${slug}` },
     openGraph: {

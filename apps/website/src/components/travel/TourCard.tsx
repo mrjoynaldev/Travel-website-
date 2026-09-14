@@ -1,6 +1,7 @@
 import { ArrowRight, Clock3 } from "lucide-react";
 import Link from "next/link";
 import type { Tour } from "@web/lib/travel-data";
+import { displayImageUrl } from "@web/lib/social-image";
 
 export function TourCard({ tour }: { tour: Tour }) {
   return (
@@ -8,7 +9,7 @@ export function TourCard({ tour }: { tour: Tour }) {
       <Link href={`/tours/${tour.slug}`} aria-label={`View ${tour.title}`} className="block">
         <div className="relative aspect-[3/2] overflow-hidden">
           <img
-            src={tour.image}
+            src={displayImageUrl(tour.image, 800) || tour.image}
             alt={tour.title}
             loading="lazy"
             className="h-full w-full object-cover transition duration-700 group-hover:scale-105"

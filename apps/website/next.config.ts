@@ -35,6 +35,18 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
+  async redirects() {
+    return [
+      // Canonical domain: www must not serve the site separately (duplicate-
+      // content SEO risk). Host-scoped so localhost/preview hosts are untouched.
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.sundarbanyatri.com" }],
+        destination: "https://sundarbanyatri.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/api/:path*", destination: `${apiOrigin}/api/:path*` },
