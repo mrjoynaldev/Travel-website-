@@ -224,7 +224,10 @@ export const studioRouter = router({
     update: protectedProcedure.input(z.object({ id: z.string().uuid(), data: postInput, revisionNote: z.string().max(300).default("Content updated") })).mutation(async ({ ctx, input }) => {
       const actor = await actorFor(ctx); const { post } = await assertCanEditPost(actor, input.id); await saveRevision(actor, post, input.revisionNote);
       const html = sanitizeArticleHtml(decodeHtmlInput(input.data.renderedHtml));
-      const { data, error } = await getSupabase().from("posts").update({ title: input.data.title, slug: slugify(input.data.slug || input.data.title), excerpt: input.data.excerpt ?? null, content_json: input.data.contentJson, rendered_html: html, meta_title: input.data.metaTitle ?? null, meta_description: input.data.metaDescription ?? null, canonical_url: input.data.canonicalUrl || null, og_image_url: input.data.ogImageUrl || null, featured_media_id: input.data.featuredMediaId ?? null }).eq("id", post.id).select("*").single();
+      // Preserve the public URL: never re-derive the slug from the title on
+      // update (that silently moved live /articles/<slug> URLs to 404).
+      const slug = input.data.slug?.trim() ? slugify(input.data.slug) : post.slug;
+      const { data, error } = await getSupabase().from("posts").update({ title: input.data.title, slug, excerpt: input.data.excerpt ?? null, content_json: input.data.contentJson, rendered_html: html, meta_title: input.data.metaTitle ?? null, meta_description: input.data.metaDescription ?? null, canonical_url: input.data.canonicalUrl || null, og_image_url: input.data.ogImageUrl || null, featured_media_id: input.data.featuredMediaId ?? null }).eq("id", post.id).select("*").single();
       if (error || !data) throw new TRPCError({ code: "BAD_REQUEST", message: "The post could not be saved. The slug may already exist." });
       await syncTaxonomy(data.id, input.data.categoryIds, input.data.tagIds);
       await recordAudit(actor, "post.updated", "post", data.id, { status: data.status });

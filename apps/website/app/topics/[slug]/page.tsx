@@ -94,8 +94,11 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
   } catch {
     notFound();
   }
-  const name = category?.name || "Topic";
-  const description = category?.description || "A collection of Sundarban travel guides organized around a shared theme.";
+  // Unknown slugs must 404 (not render a generic "Topic" page) so crawlers
+  // don't index thin duplicate soft-404s.
+  if (!category) notFound();
+  const name = category.name;
+  const description = category.description || "A collection of Sundarban travel guides organized around a shared theme.";
   const hubUrl = `${siteUrl()}/topics/${slug}`;
   const faqs = HUB_FAQS[slug] || GENERIC_FAQS;
   const [startHere, ...rest] = items;

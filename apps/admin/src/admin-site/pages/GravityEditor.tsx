@@ -313,8 +313,39 @@ export function GravityEditor() {
       setPublishOpen(true);
       return;
     }
-    save();
-    transition.mutate({ id: postId, status: target });
+    // Save first so the transition applies to the content on screen.
+    update.mutate(
+      { id: postId, data: buildPayload() },
+      {
+        onSuccess: () => {
+          toast.success("Changes saved and revision recorded.");
+          transition.mutate(
+            { id: postId, status: target },
+            {
+              onSuccess: data => {
+                if (data.status === "published") {
+                  toast.success(`Published live: ${publicArticleUrl(data.slug)}`, {
+                    duration: 10000,
+                    action: {
+                      label: "Copy URL",
+                      onClick: () => {
+                        navigator.clipboard
+                          .writeText(publicArticleUrl(data.slug))
+                          .then(() => toast.success("Live URL copied to clipboard."));
+                      },
+                    },
+                  });
+                } else {
+                  toast.success("Workflow state updated.");
+                }
+                post.refetch();
+                revisions.refetch();
+              },
+            }
+          );
+        },
+      }
+    );
   };
 
   const settingsProps = {

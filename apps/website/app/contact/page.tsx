@@ -9,6 +9,10 @@ import { Clock3, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
+// FAQs and business contact details are edited in Studio — re-render at most
+// every 5 minutes so changes appear without redeploys.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "Contact Sundarban Yatri — Call, WhatsApp or Enquire",
   description: "Reach Sundarban Yatri by call, WhatsApp, email or enquiry form. Working hours Mon–Sat, 9am–7pm IST. Operating ex-Kolkata / Canning / Godkhali.",
@@ -62,7 +66,7 @@ export default async function ContactPage() {
           <div>
             <h2 className="h2 font-display">Send an enquiry form</h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">Best from outside India, or if you prefer email. We reply by email / WhatsApp in working hours (IST).</p>
-            <div className="mt-5"><LeadForm ctaLabel="Send Enquiry" /></div>
+            <div className="mt-5"><LeadForm ctaLabel="Send Enquiry" whatsapp={business.whatsapp} /></div>
           </div>
           <div>
             <h2 className="h2 font-display">Where we operate</h2>

@@ -443,23 +443,89 @@ export function StudioEditor() {
     { done: Boolean(draft.excerpt.trim()), label: "Write a short excerpt" },
   ];
   const publishReady = publishRequired.every(item => item.done);
+  // The workflow forbids draft → published directly (app + DB trigger), so
+  // publishers walk draft → review → published. Saving first guarantees each
+  // transition applies to the content on screen (no save/transition race).
+  type FlowStatus = "draft" | "review" | "published" | "archived";
+  const notifyLive = (slug: string) => {
+    toast.success(`Published live: ${publicArticleUrl(slug)}`, {
+      duration: 10000,
+      action: {
+        label: "Copy URL",
+        onClick: () => {
+          navigator.clipboard
+            .writeText(publicArticleUrl(slug))
+            .then(() => toast.success("Live URL copied to clipboard."));
+        },
+      },
+    });
+  };
+  const runTransitionChain = (id: string, queue: FlowStatus[]) => {
+    const [next, ...rest] = queue;
+    if (!next) {
+      post.refetch();
+      revisions.refetch();
+      return;
+    }
+    transition.mutate(
+      { id, status: next },
+      {
+        onSuccess: data => {
+          if (!rest.length) {
+            if (data.status === "published") notifyLive(data.slug);
+            else toast.success("Workflow state updated.");
+            post.refetch();
+            revisions.refetch();
+            return;
+          }
+          runTransitionChain(id, rest);
+        },
+      }
+    );
+  };
+  const persistThenTransition = (targets: FlowStatus[]) => {
+    if (!postId || !targets.length) return;
+    const payload = {
+      ...draft,
+      categoryIds: draft.categoryIds,
+      tagIds: draft.tagIds,
+    };
+    update.mutate(
+      { id: postId, data: payload },
+      {
+        onSuccess: () => {
+          lastSavedHash.current = JSON.stringify(draft);
+          toast.success("Changes saved and revision recorded.");
+          runTransitionChain(postId, targets);
+        },
+      }
+    );
+  };
+  // Next legal step(s) toward going live from the current status.
+  const liveTargets = (): FlowStatus[] => {
+    if (status === "published") return [];
+    if (!canPublish) return status === "review" ? [] : ["review"];
+    return status === "draft" ? ["review", "published"] : ["published"];
+  };
   const publishPost = () => {
     setPublishOpen(false);
-    const targetStatus = canPublish ? "published" : "review";
     if (postId) {
-      save();
-      transition.mutate({ id: postId, status: targetStatus });
-    } else {
-      create.mutate(
-        { ...draft, categoryIds: draft.categoryIds, tagIds: draft.tagIds },
-        {
-          onSuccess: data => {
-            transition.mutate({ id: data.id, status: targetStatus });
-            router.push("/studio/posts");
-          },
-        }
-      );
+      persistThenTransition(liveTargets());
+      return;
     }
+    create.mutate(
+      { ...draft, categoryIds: draft.categoryIds, tagIds: draft.tagIds },
+      {
+        onSuccess: data => {
+          toast.success("Draft created.");
+          const queue: FlowStatus[] = canPublish
+            ? ["review", "published"]
+            : ["review"];
+          runTransitionChain(data.id, queue);
+          router.push(`/studio/posts/${data.id}`);
+        },
+      }
+    );
   };
 
   const actionBar = (
@@ -576,10 +642,8 @@ export function StudioEditor() {
             {postId && status === "draft" && (
               <Button
                 variant="secondary"
-                disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "review" })
-                }
+                disabled={transition.isPending || update.isPending}
+                onClick={() => persistThenTransition(["review"])}
                 className="gap-2"
               >
                 <Send className="h-4 w-4" />
@@ -588,10 +652,8 @@ export function StudioEditor() {
             )}
             {postId && status === "review" && canPublish && (
               <Button
-                disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "published" })
-                }
+                disabled={transition.isPending || update.isPending}
+                onClick={() => persistThenTransition(["published"])}
                 className="gap-2"
               >
                 <CheckCircle2 className="h-4 w-4" />
@@ -601,10 +663,8 @@ export function StudioEditor() {
             {postId && status === "review" && canPublish && (
               <Button
                 variant="outline"
-                disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "draft" })
-                }
+                disabled={transition.isPending || update.isPending}
+                onClick={() => persistThenTransition(["draft"])}
                 className="gap-2"
               >
                 <Undo2 className="h-4 w-4" />
@@ -614,10 +674,8 @@ export function StudioEditor() {
             {postId && status === "published" && canPublish && (
               <Button
                 variant="outline"
-                disabled={transition.isPending}
-                onClick={() =>
-                  transition.mutate({ id: postId, status: "archived" })
-                }
+                disabled={transition.isPending || update.isPending}
+                onClick={() => persistThenTransition(["archived"])}
                 className="gap-2"
               >
                 <Archive className="h-4 w-4" />

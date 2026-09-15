@@ -84,7 +84,7 @@ function PlanTripInner({ tours, faqs, business, query }: { tours?: Tour[]; faqs?
             <h2 className="mt-2 font-display text-xl font-semibold">Send an enquiry form instead</h2>
             <p className="mt-1.5 text-sm text-muted-foreground">We reply by email / WhatsApp in working hours (IST).</p>
             <div className="mt-5">
-              <LeadForm tourSlug={tourSlug} tourTitle={activeTour?.title} ctaLabel={activeTour ? `Ask About This Tour` : "Send Enquiry"} />
+              <LeadForm tourSlug={tourSlug} tourTitle={activeTour?.title} ctaLabel={activeTour ? `Ask About This Tour` : "Send Enquiry"} whatsapp={biz.whatsapp} />
             </div>
           </div>
         </div>

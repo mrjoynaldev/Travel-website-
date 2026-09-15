@@ -15,11 +15,13 @@ export function LeadForm({
   tourTitle,
   compact = false,
   ctaLabel = "Get a Tour Quote",
+  whatsapp,
 }: {
   tourSlug?: string;
   tourTitle?: string;
   compact?: boolean;
   ctaLabel?: string;
+  whatsapp?: string;
 }) {
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -63,7 +65,7 @@ export function LeadForm({
           Thanks {form.name.split(" ")[0] || "traveller"} — our team will help you plan. For a faster reply, continue on WhatsApp.
         </p>
         <a
-          href={buildWhatsAppUrl(tourWhatsAppMessage(tourTitle ?? "a Sundarban tour"))}
+          href={buildWhatsAppUrl(tourWhatsAppMessage(tourTitle ?? "a Sundarban tour"), whatsapp)}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white hover:bg-[#178a45] transition-colors"

@@ -36,7 +36,14 @@ export function generateStaticParams() {
     "mcp",
     "distribution",
   ];
-  return [{ segments: [] }, ...views.map(view => ({ segments: [view] }))];
+  return [
+    { segments: [] },
+    ...views.map(view => ({ segments: [view] })),
+    // Deep links with ids (e.g. /studio/posts/<id>) fall through to the
+    // /studio.html shell via the hosting rewrite and resolve client-side,
+    // but the id-less "new post" route can and should prerender directly.
+    { segments: ["posts", "new"] },
+  ];
 }
 
 export default function StudioPage() {

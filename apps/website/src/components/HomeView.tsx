@@ -437,7 +437,7 @@ export default function HomeView({ categories, sections, posts, search, category
               </button>
               {showEnquiry && (
                 <div className="mt-4 rounded-[20px] bg-white p-6 text-foreground">
-                  <LeadForm ctaLabel="Send Enquiry" />
+                  <LeadForm ctaLabel="Send Enquiry" whatsapp={business?.whatsapp} />
                 </div>
               )}
             </div>

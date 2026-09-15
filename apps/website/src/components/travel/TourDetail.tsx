@@ -28,6 +28,11 @@ export function TourDetail({
   const relatedTours = related ?? TOURS.filter((t) => t.slug !== tour.slug).slice(0, 3);
   const faqList = faqs ?? DEFAULT_FAQS;
   const wa = buildWhatsAppUrl(tourWhatsAppMessage(tour.title), biz.whatsapp);
+  // CMS tours may have 0–2 gallery images: lead with the cover image and only
+  // render slots that actually have a URL (never an <img> without src).
+  const photos = [tour.gallery[0] || tour.image, tour.gallery[1], tour.gallery[2]].filter(
+    (u): u is string => !!u && u.trim().length > 0
+  );
 
   return (
     <>
@@ -36,29 +41,44 @@ export function TourDetail({
         <div className="container py-10 md:py-14">
           <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Tours", href: "/tours" }, { label: tour.title }]} />
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="yatri-chip">{tour.featured ? "Most popular" : tour.group}</span>
-            <span className="yatri-chip yatri-chip-accent">{tour.duration}</span>
+            {(tour.featured || tour.group.trim()) && (
+              <span className="yatri-chip">{tour.featured ? "Most popular" : tour.group}</span>
+            )}
+            {tour.duration.trim() && (
+              <span className="yatri-chip yatri-chip-accent">{tour.duration}</span>
+            )}
           </div>
           <h1 className="mt-4 h1 font-display max-w-3xl">{tour.title}</h1>
           <p className="mt-3 max-w-2xl body-lg text-muted-foreground">{tour.summary}</p>
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4 text-primary" /> {tour.duration}</span>
-            <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-primary" /> Starts: {tour.startPoint}</span>
-            <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> Best for {tour.bestFor}</span>
+            {tour.duration.trim() && (
+              <span className="inline-flex items-center gap-1.5"><Clock3 className="h-4 w-4 text-primary" /> {tour.duration}</span>
+            )}
+            {tour.startPoint.trim() && (
+              <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-primary" /> Starts: {tour.startPoint}</span>
+            )}
+            {tour.bestFor?.trim() && (
+              <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> Best for {tour.bestFor}</span>
+            )}
           </div>
         </div>
       </section>
 
       {/* Gallery */}
-      <section className="container pt-8 lg:pt-10">
-        <div className="grid gap-3 md:grid-cols-3">
-          <img src={displayImageUrl(tour.gallery[0], 1000) || tour.gallery[0]} alt={tour.title} className="aspect-[16/10] w-full rounded-[20px] object-cover md:col-span-2 md:aspect-auto md:h-full md:min-h-[320px]" />
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
-            <img src={displayImageUrl(tour.gallery[1], 800) || tour.gallery[1]} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
-            <img src={displayImageUrl(tour.gallery[2], 800) || tour.gallery[2]} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
+      {photos.length > 0 && (
+        <section className="container pt-8 lg:pt-10">
+          <div className="grid gap-3 md:grid-cols-3">
+            <img src={displayImageUrl(photos[0], 1000) || photos[0]} alt={tour.title} className="aspect-[16/10] w-full rounded-[20px] object-cover md:col-span-2 md:aspect-auto md:h-full md:min-h-[320px]" />
+            {photos.length > 1 && (
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-1">
+                {photos.slice(1).map((src, i) => (
+                  <img key={src} src={displayImageUrl(src, 800) || src} alt="" loading="lazy" className="aspect-[16/10] w-full rounded-[20px] object-cover md:aspect-auto md:h-full" />
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="container py-10 lg:py-14">
         <div className="grid gap-10 lg:grid-cols-[1fr_360px] lg:gap-12">
@@ -154,7 +174,7 @@ export function TourDetail({
               </div>
               <div className="my-5 border-t border-dashed border-border" />
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Outside India? Enquire by form</p>
-              <div className="mt-3"><LeadForm compact tourSlug={tour.slug} tourTitle={tour.title} ctaLabel="Send Enquiry" /></div>
+              <div className="mt-3"><LeadForm compact tourSlug={tour.slug} tourTitle={tour.title} ctaLabel="Send Enquiry" whatsapp={biz.whatsapp} /></div>
             </div>
           </aside>
         </div>

@@ -56,5 +56,8 @@ export default async function TagPage({ params }: { params: Promise<{ slug: stri
   } catch {
     notFound();
   }
-  return <ListingPage eyebrow="Tag" title={tag ? `#${tag.name}` : "Tag"} description="Sundarban guides connected by a specific place, topic or idea." items={items} />;
+  // Unknown slugs must 404 (not render a generic "Tag" page) so crawlers
+  // don't index thin duplicate soft-404s.
+  if (!tag) notFound();
+  return <ListingPage eyebrow="Tag" title={`#${tag.name}`} description="Sundarban guides connected by a specific place, topic or idea." items={items} />;
 }

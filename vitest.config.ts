@@ -27,6 +27,8 @@ export default defineConfig({
       "apps/api/src/**/*.spec.ts",
       "apps/admin/src/**/*.test.ts",
       "apps/admin/src/**/*.spec.ts",
+      "apps/website/src/**/*.test.ts",
+      "apps/website/src/**/*.spec.ts",
     ],
   },
 });

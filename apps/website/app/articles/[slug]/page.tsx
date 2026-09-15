@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ArticleView from "@web/components/ArticleView";
 import { injectRelatedLinks } from "@web/lib/articleHtml";
+import { getBusiness, type Business } from "@web/lib/catalogue";
 import { serverTrpc } from "@web/lib/trpc-server";
 import { optimizedSocialImage } from "@web/lib/social-image";
 
@@ -79,11 +80,13 @@ export default async function ArticlePage({ params }: Props) {
   let post: Awaited<ReturnType<typeof serverTrpc.blog.bySlug.query>>["post"];
   let related: Awaited<ReturnType<typeof serverTrpc.blog.bySlug.query>>["related"] = [];
   let comments: { id: string; parent_id: string | null; author_name: string; body: string; created_at: string }[] = [];
+  let business: Business | undefined;
   try {
     const data = await serverTrpc.blog.bySlug.query({ slug });
     post = data.post;
     related = data.related;
     comments = await serverTrpc.blog.comments.query({ postId: post.id });
+    business = await getBusiness();
   } catch {
     notFound();
   }
@@ -168,7 +171,7 @@ export default async function ArticlePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ArticleView post={{ ...post, rendered_html: bodyHtml }} related={related} comments={comments} slug={slug} />
+      <ArticleView post={{ ...post, rendered_html: bodyHtml }} related={related} comments={comments} slug={slug} business={business} />
     </>
   );
 }

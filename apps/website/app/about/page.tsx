@@ -7,6 +7,10 @@ import { Compass, HeartHandshake, MapPin, MessageCircle, Phone, Route, ShieldChe
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
+// Business info, brand imagery and FAQs are edited in Studio — re-render at
+// most every 5 minutes so changes appear without redeploys.
+export const revalidate = 300;
+
 export const metadata: Metadata = {
   title: "About Sundarban Yatri — Local Guidance for the Sundarbans",
   description: "Sundarban Yatri helps travellers understand the Sundarbans before they go — honest routes, realistic plans and human help on call and WhatsApp.",

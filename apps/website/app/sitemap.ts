@@ -2,7 +2,9 @@ import type { MetadataRoute } from "next";
 import { getTours, getAllPublishedRefs } from "@web/lib/catalogue";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-static";
+// Refresh hourly (not build-time only) so Studio-published posts, tours and
+// topics enter the sitemap without redeploys.
+export const revalidate = 3600;
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 

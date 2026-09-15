@@ -1,6 +1,8 @@
 import { serverTrpc } from "@web/lib/trpc-server";
 
-export const dynamic = "force-static";
+// Refresh hourly (not build-time only) so newly published guides appear
+// without redeploys.
+export const revalidate = 3600;
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
@@ -29,7 +31,7 @@ export async function GET() {
   const name = publication?.name || "Sundarban Yatri";
   const description =
     publication?.description ||
-    "Developer-first AI news, analysis, and practical guides for people who build and ship software.";
+    "Sundarban Yatri — practical Sundarban tours, safari guidance, destinations and trip-planning guides.";
 
   const lines: string[] = [
     `# ${name}`,
@@ -52,7 +54,7 @@ export async function GET() {
           (c: any) =>
             `- [${c.name}](${base}/topics/${c.slug}): ${c.description || `Articles about ${c.name}.`}`,
         )
-      : ["- News, analysis, and guides about AI and software development."]),
+      : ["- Sundarban tours, safari guidance, destinations and practical trip-planning guides."]),
     "",
     "## Articles",
     "",
