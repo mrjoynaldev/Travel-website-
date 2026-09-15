@@ -7,6 +7,7 @@ export type Tour = {
   summary: string;
   image: string;
   featured?: boolean;
+  price?: string;
   priceNote?: string;
   bestFor?: string;
 };
@@ -105,7 +106,8 @@ export const TOURS: Tour[] = [
     summary:
       "A winter feast in the delta — prawn malai curry, katla kalia, mutton kosha and seasonal delicacies across 3 days, plus the full safari circuit.",
     image: img("photo-1470252649378-9c29740c9fa8"),
-    priceNote: "Festival dates",
+    price: "₹5,500",
+    priceNote: "per person · Dec – Feb",
     bestFor: "Food lovers & families",
   },
   {
@@ -117,7 +119,8 @@ export const TOURS: Tour[] = [
     summary:
       "July–September monsoon special — mustard hilsa, steamed hilsa, hilsa biryani and more, with cruising, village stays and Baul folk evenings.",
     image: img("photo-1439066615861-d1af74d74000"),
-    priceNote: "July – September",
+    price: "₹5,000",
+    priceNote: "per person · Jul – Sep",
     bestFor: "Food lovers",
   },
 ];

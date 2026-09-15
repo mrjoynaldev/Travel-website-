@@ -27,9 +27,9 @@ export function TourCard({ tour }: { tour: Tour }) {
             {tour.title}
           </h3>
           <p className="mt-2 text-sm lg:text-[14.5px] leading-6 text-muted-foreground line-clamp-2">{tour.summary}</p>
-          {tour.priceNote && (
+          {tour.price && (
             <p className="mt-4 text-[13px] font-semibold text-primary bg-[#ddebe3] self-start rounded-full px-3 py-1">
-              {tour.priceNote}
+              {tour.price} <span className="font-normal text-muted-foreground">{tour.priceNote}</span>
             </p>
           )}
           <div className="mt-5 pt-4 border-t border-border flex items-center justify-between">

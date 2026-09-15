@@ -60,6 +60,9 @@ export function TourDetail({
             {tour.bestFor?.trim() && (
               <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> Best for {tour.bestFor}</span>
             )}
+            {tour.price?.trim() && (
+              <span className="inline-flex items-center gap-1.5 font-semibold text-primary">{tour.price} <span className="font-normal text-muted-foreground">{tour.priceNote}</span></span>
+            )}
           </div>
         </div>
       </section>

@@ -375,10 +375,20 @@ export function StudioCatalogTours() {
                 </div>
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <label className="text-xs font-medium text-muted-foreground">Gallery (one image per line — or tap to upload & append)</label>
-                    <MediaUploadButton accept={IMAGE_ACCEPT} folder="tours" label="Tap to upload" onUploaded={asset => setForm(f => ({ ...f, gallery: f.gallery ? `${f.gallery}\n${asset.url}` : asset.url }))} />
+                    <label className="text-xs font-medium text-muted-foreground">Gallery (one image per line — tap upload for each image)</label>
+                    <MediaUploadButton accept={IMAGE_ACCEPT} folder="tours" label="+ Upload image" onUploaded={asset => setForm(f => ({ ...f, gallery: f.gallery ? `${f.gallery}\n${asset.url}` : asset.url }))} />
                   </div>
-                  <Textarea rows={3} value={form.gallery} onChange={e => setForm(f => ({ ...f, gallery: e.target.value }))} className="mt-1" />
+                  <Textarea rows={5} value={form.gallery} onChange={e => setForm(f => ({ ...f, gallery: e.target.value }))} className="mt-1 font-mono text-xs" placeholder={"https://example.com/photo1.jpg\nhttps://example.com/photo2.jpg"} />
+                  {lines(form.gallery).length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {lines(form.gallery).map((url, i) => (
+                        <div key={i} className="group relative h-20 w-28 overflow-hidden rounded-lg border border-border">
+                          <img src={url} alt={`Gallery ${i + 1}`} className="h-full w-full object-cover" />
+                          <button type="button" onClick={() => setForm(f => ({ ...f, gallery: lines(f.gallery).filter((_, j) => j !== i).join("\n") }))} className="absolute right-1 top-1 rounded-full bg-black/60 p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-3 w-3" /></button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground">Itinerary — one day per line: Day | Title | Description</label>
