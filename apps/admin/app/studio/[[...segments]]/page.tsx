@@ -1,8 +1,9 @@
 import StudioRoute from "../route-client";
 
 // Static export: every known Studio view prerenders as a shell; data loads
-// in the browser. Unknown deep links (e.g. /studio/posts/<id>) also need
-// the SPA shell so client-side routing can take over.
+// in the browser. Deep links with IDs (e.g. /studio/posts/<id>) are handled
+// by the Vercel rewrite in vercel.json, which serves the nearest prerendered
+// shell and lets client-side routing take over.
 export function generateStaticParams() {
   const views = [
     "posts",
@@ -39,16 +40,9 @@ export function generateStaticParams() {
   return [
     { segments: [] },
     ...views.map(view => ({ segments: [view] })),
-    // Deep links with ids need the SPA shell too — the catch-all renders
-    // StudioRoute which resolves the view client-side via useRouteId().
     { segments: ["posts", "new"] },
-    { segments: ["posts", ":id"] },
   ];
 }
-
-// Dynamic params (like :id) are not known at build time — let the SPA
-// shell render for any unmatched /studio/* path so client routing works.
-export const dynamicParams = true;
 
 export default function StudioPage() {
   return <StudioRoute />;
