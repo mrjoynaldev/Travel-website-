@@ -561,6 +561,18 @@ export function StudioEditor() {
   );
 
   const publishChecks = [...publishRequired, ...publishRecommended];
+  if (postId && post.isError)
+    return (
+      <DashboardLayout>
+        <div className="grid min-h-[70vh] place-items-center text-center">
+          <div>
+            <p className="font-display text-2xl font-semibold">Post not found</p>
+            <p className="mt-2 text-sm text-muted-foreground">This post may have been deleted or you don&apos;t have access.</p>
+            <Link href="/studio/posts" className="mt-4 inline-block text-sm font-semibold text-primary hover:underline">← Back to posts</Link>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
   if (postId && (post.isLoading || !ready))
     return (
       <DashboardLayout>
