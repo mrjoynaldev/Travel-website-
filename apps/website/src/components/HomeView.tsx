@@ -100,7 +100,7 @@ export default function HomeView({ categories, sections, posts, search, category
     if (params.search !== undefined) setSearchInput(params.search);
     setFeedPage(nextPage);
     startTransition(() => {
-      router.push(buildQuery({ search: nextSearch, category: nextCategory, page: nextPage }));
+      router.push(buildQuery({ search: nextSearch, category: nextCategory, page: nextPage }), { scroll: false });
       void loadFeed(nextSearch, nextCategory, nextPage);
     });
   };
