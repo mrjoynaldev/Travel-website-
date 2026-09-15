@@ -28,10 +28,11 @@
  */
 
 const API_URL = (process.env.SY_API_URL || "https://travel-website-n69r.onrender.com").replace(/\/+$/, "");
+const PUBLIC_SITE = (process.env.SY_SITE_URL || "https://sundarbanyatri.com").replace(/\/+$/, "");
 const TOKEN = process.env.SY_TOKEN || "";
 const SELFTEST = process.argv.includes("--selftest");
 const MAX_OUT = 20000;
-const SERVER_VERSION = "1.2.0";
+const SERVER_VERSION = "1.3.0";
 
 // ————————————————————————————————————————————————————————————————————————
 // Skill library — served as MCP prompts (task routines) + resources
@@ -162,6 +163,52 @@ const minimalDoc = (text) => ({
   content: [{ type: "paragraph", content: [{ type: "text", text: text || "" }] }],
 });
 const paraHtml = (text) => `<p>${String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`;
+const liveUrl = (slug) => `${PUBLIC_SITE}/articles/${slug}`;
+
+const slugifyName = (name) => String(name || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+// Resolve category/tag names to ids against the live taxonomy, auto-creating
+// anything missing — so MCP drafts always land in the right hub with no
+// manual Studio taxonomy work.
+async function resolveTaxonomyIds(kind, names) {
+  const list = (names || []).map((n) => String(n || "").trim()).filter(Boolean);
+  if (!list.length) return [];
+  const pool = await trpc("studio.taxonomy.list", null, "GET");
+  const items = kind === "category" ? (pool.categories || []) : (pool.tags || []);
+  const ids = [];
+  for (const name of list) {
+    const slug = slugifyName(name);
+    const hit = items.find((item) => item.name.toLowerCase() === name.toLowerCase() || item.slug === slug);
+    if (hit) {
+      ids.push(hit.id);
+      continue;
+    }
+    const created = kind === "category"
+      ? await trpc("studio.taxonomy.createCategory", { name }, "POST")
+      : await trpc("studio.taxonomy.createTag", { name }, "POST");
+    items.push(created);
+    ids.push(created.id);
+  }
+  return ids;
+}
+
+// Walk a post to published through the legal workflow (draft → review →
+// published). Direct draft → published is forbidden by the API + DB trigger.
+async function chainPublish(id) {
+  let post = await trpc("studio.posts.get", { id }, "GET");
+  if (!post) throw new Error("Post not found.");
+  if (post.status === "published") return post;
+  if (post.status === "draft") {
+    post = await trpc("studio.posts.transition", { id, status: "review" }, "POST");
+  }
+  if (post.status === "review") {
+    post = await trpc("studio.posts.transition", { id, status: "published" }, "POST");
+  }
+  if (!post || post.status !== "published") {
+    throw new Error(`Cannot publish from status "${post?.status}".`);
+  }
+  return post;
+}
 
 // ————————————————————————————————————————————————————————————————————————
 // Tool catalogue (full control; high-impact tools carry confirm-first rules)
@@ -190,14 +237,15 @@ const TOOLS = [
   },
   {
     name: "posts_create_draft",
-    description: "Create a DRAFT post (never published). Returns the new post id for further edits. Attach a cover via featuredMediaId (upload first with media_upload) and a social image via ogImageUrl.",
-    inputSchema: { type: "object", properties: { title: { type: "string" }, excerpt: { type: "string" }, html: { type: "string", description: "Full article body as HTML" }, featuredMediaId: { type: "string", description: "Media-library asset id for the cover image" }, ogImageUrl: { type: "string", description: "Social share image URL" }, metaTitle: { type: "string" }, metaDescription: { type: "string" } }, required: ["title"] },
-    run: (a) => trpc("studio.posts.create", {
+    description: "Create a DRAFT post (never published). Returns the new post id for further edits. Pass categories/tags by NAME (e.g. [\"Safari\"], [\"Winter\"]) — they are matched against the live taxonomy and auto-created when missing, so the draft lands in the right hub automatically. Attach a cover via featuredMediaId (upload first with media_upload) and a social image via ogImageUrl.",
+    inputSchema: { type: "object", properties: { title: { type: "string" }, excerpt: { type: "string" }, html: { type: "string", description: "Full article body as HTML" }, categories: { type: "array", items: { type: "string" }, description: "Category names (matched or auto-created)" }, tags: { type: "array", items: { type: "string" }, description: "Tag names (matched or auto-created)" }, featuredMediaId: { type: "string", description: "Media-library asset id for the cover image" }, ogImageUrl: { type: "string", description: "Social share image URL" }, metaTitle: { type: "string" }, metaDescription: { type: "string" } }, required: ["title"] },
+    run: async (a) => trpc("studio.posts.create", {
       title: a.title,
       excerpt: a.excerpt || "",
       contentJson: minimalDoc(a.html || a.excerpt || a.title),
       renderedHtml: a.html || paraHtml(a.excerpt || a.title),
-      categoryIds: [], tagIds: [],
+      categoryIds: await resolveTaxonomyIds("category", a.categories),
+      tagIds: await resolveTaxonomyIds("tag", a.tags),
       ...(a.featuredMediaId ? { featuredMediaId: a.featuredMediaId } : {}),
       ...(a.ogImageUrl ? { ogImageUrl: a.ogImageUrl } : {}),
       ...(a.metaTitle ? { metaTitle: a.metaTitle } : {}),
@@ -232,9 +280,18 @@ const TOOLS = [
   },
   {
     name: "posts_transition",
-    description: `Move a post through draft→review→published→archived. ${CONFIRM_RULE}`,
+    description: `Move a post one step through draft→review→published→archived. ${CONFIRM_RULE}`,
     inputSchema: { type: "object", properties: { id: { type: "string" }, status: { type: "string", enum: ["draft", "review", "published", "archived"] } }, required: ["id", "status"] },
     run: (a) => trpc("studio.posts.transition", { id: a.id, status: a.status }, "POST"),
+  },
+  {
+    name: "posts_publish",
+    description: `One-shot publish: walks a post to published through every legal step automatically (draft→review→published) and returns the live article URL. Categories/tags stay as set on the draft. ${CONFIRM_RULE}`,
+    inputSchema: { type: "object", properties: { id: { type: "string", description: "Draft or in-review post id" } }, required: ["id"] },
+    run: async (a) => {
+      const post = await chainPublish(a.id);
+      return { id: post.id, title: post.title, slug: post.slug, status: post.status, liveUrl: liveUrl(post.slug) };
+    },
   },
   {
     name: "taxonomy_list",

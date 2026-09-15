@@ -31,8 +31,9 @@ effect immediately. Optional expiry is available at creation.
 
 ## 1b. MCP access (recommended for AI agents — full control)
 
-`cli/mcp.mjs` is a zero-dependency **MCP server** (stdio) exposing 20 tools —
-posts, taxonomy, media, tours, FAQs, video reviews, food menu, leads,
+`cli/mcp.mjs` is a zero-dependency **MCP server** (stdio) exposing 25 tools —
+posts (incl. one-shot `posts_publish` and category-aware `posts_create_draft`),
+taxonomy, media, tours, FAQs, video reviews, food menu, leads,
 business — plus these docs as MCP **prompts** (`write-trip-guide`,
 `audit-tour`, `follow-up-leads`, `publish-check`, `food-reel-plan`,
 `season-prep`) and **resources** (every skill file, always fresh from
@@ -95,7 +96,8 @@ node cli/blog.mjs <command> [options]
 | `posts create [fields]` | Create a draft — all fields supported |
 | `posts update <id> [fields]` | Update any field (merged with current) |
 | `posts submit <id>` | Draft → review |
-| `posts publish <id>` | Review → published (live) |
+| `posts publish <id>` | Publish live — chains review automatically when starting from draft |
+| `posts launch [fields]` | One-shot: create draft → review → published (same fields as create) |
 | `posts archive <id>` | Archive a post |
 | `posts delete <id>` | Soft-delete (move to trash) |
 | `posts feature <id> [--off]` | Toggle homepage feature flag |
@@ -131,8 +133,8 @@ HTML by the CLI (`cli/gravity.mjs`).
 ### Examples
 
 ```bash
-# Publish a complete guide from a Gravity JSON file
-node cli/blog.mjs posts create \
+# One-shot: write + categorize + publish a complete guide (category auto-matched/created)
+node cli/blog.mjs posts launch \
   --title "How to Reach Sundarban from Kolkata (2026)" \
   --slug "how-to-reach-sundarban" \
   --excerpt "Trains, road and boat: timings, costs and the smoothest route." \
@@ -140,7 +142,9 @@ node cli/blog.mjs posts create \
   --category "How to Reach" --tag "sundarban" --tag "kolkata" \
   --thumbnail 9f3c…-… --og-image https://…/cover.jpg \
   --gravity-file ./article.gravity.json
-node cli/blog.mjs posts submit <id>
+
+# Or step by step (publish chains review automatically)
+node cli/blog.mjs posts create --title "…" --category "Safari" --file ./article.txt
 node cli/blog.mjs posts publish <id>
 
 # Upload a cover with alt text, then attach it

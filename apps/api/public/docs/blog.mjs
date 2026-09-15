@@ -138,8 +138,7 @@ const MIME_BY_EXT = {
   ".mp4": "video/mp4", ".webm": "video/webm",
 };
 
-async function buildPostInput({ requireContent }) {
-  const input = {};
+async function buildPostInput({ requireContent }) {  const input = {};
   const title = argValue("--title");
   if (title) input.title = title;
   if (requireContent && !title) throw new Error("--title is required");
@@ -194,6 +193,30 @@ async function buildPostInput({ requireContent }) {
 /* Commands                                                            */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Walk a post to published through the legal workflow (draft → review →
+ * published). Direct draft → published is forbidden by the API + DB trigger,
+ * so single-step publish calls must chain — never fail on a draft.
+ */
+async function chainPublish(id) {
+  let post = await client.studio.posts.get.query({ id });
+  if (post.status === "published") {
+    note(`✓ Already published: ${liveUrl(post.slug)}`);
+    return post;
+  }
+  if (post.status === "draft") {
+    note("→ draft cannot publish directly — submitting for review first…");
+    post = await client.studio.posts.transition.mutate({ id, status: "review" });
+  }
+  if (post.status === "review") {
+    post = await client.studio.posts.transition.mutate({ id, status: "published" });
+  }
+  if (post.status !== "published") {
+    throw new Error(`Cannot publish from status "${post.status}".`);
+  }
+  return post;
+}
+
 const HELP = `
 Sundarban Yatri CLI — full publication control
 
@@ -217,7 +240,8 @@ Posts:
   posts create [fields]                             Create a draft (see fields below)
   posts update <id> [fields]                        Update any field (merged with current)
   posts submit <id>                                 Draft → review
-  posts publish <id>                                Review → published (live)
+  posts publish <id>                                Review → published (works from draft too: chains review automatically)
+  posts launch [fields]                             One-shot: create draft → review → published (same fields as create)
   posts archive <id>                                Published → archived
   posts delete <id>                                 Move to trash (soft delete)
   posts feature <id> [--off]                        Toggle homepage feature flag
@@ -297,7 +321,7 @@ async function main() {
       }
       if (sub === "create") {
         const post = await client.studio.posts.create.mutate(await buildPostInput({ requireContent: true }));
-        note(`✓ Draft created (id ${post.id}). Not public yet — run: posts publish ${post.id}`);
+        note(`✓ Draft created (id ${post.id}). Publish it: posts publish ${post.id} (chains review automatically) or one-shot: posts launch [same fields]`);
         return print(post);
       }
       if (sub === "update") {
@@ -328,7 +352,14 @@ async function main() {
         return print(post);
       }
       if (sub === "publish") {
-        const post = await client.studio.posts.transition.mutate({ id: requireArg(args, 2, "posts publish <id>"), status: "published" });
+        const post = await chainPublish(requireArg(args, 2, "posts publish <id>"));
+        note(`✓ Published live: ${liveUrl(post.slug)}`);
+        return print(post);
+      }
+      if (sub === "launch") {
+        const created = await client.studio.posts.create.mutate(await buildPostInput({ requireContent: true }));
+        note(`✓ Draft created (id ${created.id}). Publishing…`);
+        const post = await chainPublish(created.id);
         note(`✓ Published live: ${liveUrl(post.slug)}`);
         return print(post);
       }
@@ -456,7 +487,7 @@ async function main() {
       const bare = [];
       const dead = [];
       const generic = [];
-      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/sundarbanyatri\.in)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
+      const anchorRe = /<a[^>]+href=(["'])(?:https:\/\/sundarbanyatri\.com)?\/articles\/([a-z0-9-]+)\1[^>]*>([\s\S]*?)<\/a>/gi;
       for (const post of items) {
         const html = post.rendered_html || "";
         for (const match of html.matchAll(anchorRe)) {
@@ -470,7 +501,7 @@ async function main() {
             generic.push(`${post.slug} -> ${dst}: '${anchor}'`);
           }
         }
-        const bareUrls = html.match(/(?<![">/])https?:\/\/sundarbanyatri\.in\/articles\/[a-z0-9-]+/g) || [];
+        const bareUrls = html.match(/(?<![">/])https?:\/\/sundarbanyatri\.com\/articles\/[a-z0-9-]+/g) || [];
         if (bareUrls.length) bare.push(`${post.slug}: ${bareUrls.length} bare URL(s)`);
       }
       console.log(`✓ Body-link graph across ${items.length} published post(s) (clickable <a href> only)`);
