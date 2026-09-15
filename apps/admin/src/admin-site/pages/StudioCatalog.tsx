@@ -43,6 +43,7 @@ type TourDetail = {
   meetingPoint: string;
   transport: string;
   stay: string;
+  safety?: string;
 };
 type TourRecord = {
   id: string;
@@ -162,7 +163,7 @@ export function StudioCatalogTours() {
     title: "", slug: "", duration: "", days: "1", category: "", summary: "",
     imageUrl: "", featured: false, priceNote: "", bestFor: "", status: "draft" as "draft" | "published",
     startPoint: "", overview: "", highlights: "", gallery: "",
-    itinerary: "", inclusions: "", exclusions: "", meetingPoint: "", transport: "", stay: "",
+    itinerary: "", inclusions: "", exclusions: "", meetingPoint: "", transport: "", stay: "", safety: "",
   });
 
   const openNew = () => {
@@ -171,7 +172,7 @@ export function StudioCatalogTours() {
       title: "", slug: "", duration: "", days: "1", category: "", summary: "",
       imageUrl: "", featured: false, priceNote: "", bestFor: "", status: "draft",
       startPoint: "", overview: "", highlights: "", gallery: "",
-      itinerary: "", inclusions: "", exclusions: "", meetingPoint: "", transport: "", stay: "",
+      itinerary: "", inclusions: "", exclusions: "", meetingPoint: "", transport: "", stay: "", safety: "",
     });
     setEditorOpen(true);
   };
@@ -190,7 +191,7 @@ export function StudioCatalogTours() {
       itinerary: (d.itinerary ?? []).map(item => `${item.day} | ${item.title} | ${item.desc}`).join("\n"),
       inclusions: (d.inclusions ?? []).join("\n"),
       exclusions: (d.exclusions ?? []).join("\n"),
-      meetingPoint: d.meetingPoint ?? "", transport: d.transport ?? "", stay: d.stay ?? "",
+      meetingPoint: d.meetingPoint ?? "", transport: d.transport ?? "", stay: d.stay ?? "", safety: d.safety ?? "",
     });
     setEditorOpen(true);
   };
@@ -225,6 +226,7 @@ export function StudioCatalogTours() {
         meetingPoint: form.meetingPoint.trim(),
         transport: form.transport.trim(),
         stay: form.stay.trim(),
+        safety: form.safety.trim(),
       },
       sortOrder: editing?.sort_order ?? 0,
       status: form.status,
@@ -417,6 +419,10 @@ export function StudioCatalogTours() {
                     <label className="text-xs font-medium text-muted-foreground">Stay</label>
                     <Input value={form.stay} onChange={e => setForm(f => ({ ...f, stay: e.target.value }))} className="mt-1" />
                   </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Safety & guidelines</label>
+                  <Textarea rows={3} value={form.safety} onChange={e => setForm(f => ({ ...f, safety: e.target.value }))} className="mt-1" placeholder="Forest permits, plastic ban, boat safety, what to carry..." />
                 </div>
               </div>
             </div>

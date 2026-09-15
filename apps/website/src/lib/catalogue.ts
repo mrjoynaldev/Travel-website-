@@ -40,6 +40,7 @@ function mapDetail(row: { detail?: Record<string, unknown> }): TourDetail {
     meetingPoint: str("meetingPoint"),
     transport: str("transport"),
     stay: str("stay"),
+    safety: str("safety"),
   };
 }
 

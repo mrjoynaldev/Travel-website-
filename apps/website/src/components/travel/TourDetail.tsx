@@ -149,6 +149,13 @@ export function TourDetail({
               ))}
             </div>
 
+            {tour.safety?.trim() && (
+              <div className="mt-8 rounded-[20px] border border-amber-200 bg-amber-50 p-6">
+                <h3 className="font-display text-lg font-semibold text-amber-900">Safety & guidelines</h3>
+                <p className="mt-2 text-[14.5px] leading-7 text-amber-800">{tour.safety}</p>
+              </div>
+            )}
+
             <h2 className="mt-12 h2 font-display">Common questions</h2>
             <div className="mt-5"><Faq items={faqList.slice(0, 5)} /></div>
 
