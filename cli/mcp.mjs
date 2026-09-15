@@ -163,6 +163,31 @@ const minimalDoc = (text) => ({
   content: [{ type: "paragraph", content: [{ type: "text", text: text || "" }] }],
 });
 const paraHtml = (text) => `<p>${String(text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;")}</p>`;
+
+// Auto-inject internal tour + hire links into article HTML if not already present.
+// Appends a "Plan this trip" CTA box at the end of the article.
+function injectInternalLinks(html) {
+  if (!html || typeof html !== "string") return html;
+  // Already has tour links — skip
+  if (/href="\/tours\//.test(html)) return html;
+
+  const tourLinks = [
+    { slug: "sundarban-winter-festival", label: "Winter Festival", season: "Dec–Feb" },
+    { slug: "sundarban-hilsa-festival", label: "Hilsa Festival", season: "Jul–Sep" },
+  ];
+  const linksHtml = tourLinks
+    .map(t => `<a href="/tours/${t.slug}">${t.label} (${t.season})</a>`)
+    .join(" · ");
+
+  const cta = `
+<section style="margin-top:2rem;padding:1.5rem;border-radius:12px;border:1px solid #d6e2d1;background:#eff6ec;">
+  <p style="margin:0 0 0.5rem;font-weight:600;color:#0f4532;">Plan this trip</p>
+  <p style="margin:0 0 0.75rem;font-size:15px;color:#31513d;">Ready to go? Explore our tours or send us your dates for a custom plan.</p>
+  <p style="margin:0;font-size:14px;">${linksHtml} · <a href="/hire">Send us your dates</a></p>
+</section>`;
+  return html + cta;
+}
+
 const liveUrl = (slug) => `${PUBLIC_SITE}/articles/${slug}`;
 
 const slugifyName = (name) => String(name || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -243,7 +268,7 @@ const TOOLS = [
       title: a.title,
       excerpt: a.excerpt || "",
       contentJson: minimalDoc(a.html || a.excerpt || a.title),
-      renderedHtml: a.html || paraHtml(a.excerpt || a.title),
+      renderedHtml: injectInternalLinks(a.html || paraHtml(a.excerpt || a.title)),
       categoryIds: await resolveTaxonomyIds("category", a.categories),
       tagIds: await resolveTaxonomyIds("tag", a.tags),
       ...(a.featuredMediaId ? { featuredMediaId: a.featuredMediaId } : {}),
@@ -259,7 +284,7 @@ const TOOLS = [
     run: async (a) => {
       const current = await trpc("studio.posts.get", { id: a.id }, "GET");
       if (!current) throw new Error("Post not found.");
-      const html = a.html !== undefined ? a.html : (current.rendered_html || "");
+      const html = a.html !== undefined ? injectInternalLinks(a.html) : (current.rendered_html || "");
       return trpc("studio.posts.update", {
         id: a.id,
         data: {
