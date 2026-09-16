@@ -280,9 +280,15 @@ const TOOLS = [
   },
   {
     name: "posts_transition",
-    description: `Move a post one step through draft→review→published→archived. ${CONFIRM_RULE}`,
+    description: `Move a post through the workflow: draft→review→published→archived. Also supports restoring archived posts back to draft. ${CONFIRM_RULE}`,
     inputSchema: { type: "object", properties: { id: { type: "string" }, status: { type: "string", enum: ["draft", "review", "published", "archived"] } }, required: ["id", "status"] },
     run: (a) => trpc("studio.posts.transition", { id: a.id, status: a.status }, "POST"),
+  },
+  {
+    name: "posts_restore",
+    description: "Restore an archived post back to draft so it can be edited and republished.",
+    inputSchema: { type: "object", properties: { id: { type: "string", description: "Archived post id" } }, required: ["id"] },
+    run: (a) => trpc("studio.posts.transition", { id: a.id, status: "draft" }, "POST"),
   },
   {
     name: "posts_publish",
