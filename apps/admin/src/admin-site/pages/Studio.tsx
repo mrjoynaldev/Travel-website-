@@ -757,7 +757,7 @@ export function StudioMedia() {
       toast.error("Could not copy. Long-press the image to copy its address.");
     }
   };
-  const [editingAsset, setEditingAsset] = useState<{ id: string; filename: string; alt_text: string | null; caption: string | null } | null>(null);
+  const [editingAsset, setEditingAsset] = useState<{ id: string; filename: string; alt_text: string | null; caption: string | null; mime_type: string; url: string } | null>(null);
   const [editAltText, setEditAltText] = useState("");
   const [editCaption, setEditCaption] = useState("");
   const updateAsset = trpc.studio.media.update.useMutation({
