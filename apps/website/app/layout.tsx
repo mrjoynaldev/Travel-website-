@@ -86,6 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={`${dmSans.variable} ${editorial.variable} ${dmMono.variable}`}>
       <head>
+        <link rel="preconnect" href="https://gusdnslzxueuynrjjnyv.supabase.co" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -120,7 +121,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   priceRange: "$$",
                   telephone: "+91-8513819474",
                   email: "hello@sundarbanyatri.com",
-                  sameAs: [],
+                  sameAs: [
+                    "https://www.facebook.com/sundarbanyatri",
+                    "https://www.instagram.com/sundarbanyatri",
+                    "https://www.youtube.com/@sundarbanyatri",
+                  ],
                 },
                 {
                   "@type": "WebSite",

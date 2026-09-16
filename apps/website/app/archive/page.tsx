@@ -9,7 +9,7 @@ const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatr
 
 export const metadata: Metadata = {
   title: "Guide archive",
-  description: "Every Sundarban Yatri travel guide, browsable by year.",
+  description: "Browse every Sundarban Yatri travel guide, safari tip, and destination article — organized by date for easy reference.",
   // Thin index page: keep crawlable for users, out of the index.
   robots: { index: false, follow: true },
   alternates: { canonical: "/archive" },
