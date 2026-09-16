@@ -314,6 +314,12 @@ const TOOLS = [
     run: (a) => trpc("studio.media.upload", { filename: a.filename, mimeType: a.mimeType, base64: a.base64, folder: a.folder || "library", altText: a.altText || "" }, "POST", 180000),
   },
   {
+    name: "media_update",
+    description: "Update an existing media asset's metadata (alt text, caption, filename). Use media_list first to find the asset id.",
+    inputSchema: { type: "object", properties: { id: { type: "string", description: "Media asset UUID" }, altText: { type: "string", description: "Alt text for accessibility/SEO" }, caption: { type: "string", description: "Caption shown below the image" }, filename: { type: "string", description: "Display filename" } }, required: ["id"] },
+    run: (a) => trpc("studio.media.update", { id: a.id, ...(a.altText !== undefined && { altText: a.altText }), ...(a.caption !== undefined && { caption: a.caption }), ...(a.filename !== undefined && { filename: a.filename }) }, "POST"),
+  },
+  {
     name: "tours_list",
     description: "List tour packages (all statuses).",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
