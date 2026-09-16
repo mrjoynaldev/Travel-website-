@@ -121,11 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   priceRange: "$$",
                   telephone: "+91-8513819474",
                   email: "hello@sundarbanyatri.com",
-                  sameAs: [
-                    "https://www.facebook.com/sundarbanyatri",
-                    "https://www.instagram.com/sundarbanyatri",
-                    "https://www.youtube.com/@sundarbanyatri",
-                  ],
+                  sameAs: [],
                 },
                 {
                   "@type": "WebSite",
