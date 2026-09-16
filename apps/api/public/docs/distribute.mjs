@@ -15,10 +15,11 @@
  *   SY_SITE_URL  Optional. Defaults to https://sundarbanyatri.com
  *   SY_KITS_DIR  Optional. Defaults to ~/sy-cli/kits/<slug>/
  *
- * Channel tiers (POST-WRITING-SKILL.md §9):
- *   AUTO   dev.to · Bluesky · Mastodon · Hashnode-RSS   (posted by system, hard daily cap)
- *   QUEUE  Reddit                                       (approve-then-post, 3/day cap)
- *   MANUAL Hacker News · LinkedIn · X · Medium import · Quora · newsletter tips
+ * Channel tiers (POST-WRITING-SKILL.md §9, travel-first):
+ *   TIER 1 Instagram · Facebook Page · YouTube Short · WhatsApp broadcast (books trips)
+ *   AUTO   Facebook · Instagram · Bluesky · Mastodon · dev.to-teaser (queue approve, auto post)
+ *   QUEUE  Reddit + Quora answers                       (approve-then-post, 3/day cap)
+ *   MANUAL YouTube description · WhatsApp text · Medium import (7–10d, canonical)
  */
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -150,7 +151,8 @@ function graphemeLength(value) {
 }
 
 function devTags(post) {
-  const fallback = ["ai", "webdev", "programming", "news"];
+  // Travel-first tag pool: post tags first, Sundarban trip tags as fallback.
+  const fallback = ["sundarban", "sundarbantour", "kolkata", "travel"];
   const own = (post.tags || [])
     .map(tag => String(tag.name || tag.slug || "").toLowerCase().replace(/[^a-z0-9]/g, ""))
     .filter(tag => tag.length >= 3 && tag.length <= 20);
@@ -202,13 +204,12 @@ ${teaserPreview}…
 
 ## What you'll get in the full article
 
-${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkthrough`}
-- Copy-paste commands + expected output + common errors
-- Verified on the exact versions mentioned — no fluff
+ ${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step trip plan`}
+- Verified timings, costs and inclusions with check dates — no fluff
 
-👉 **Read the full article:** ${url}
+👉 **Read the full guide:** ${url}
 
-*If this saved you time, a reaction on dev.to helps — discussion continues on the original post.*
+*Planning a Sundarban trip? Discussion continues on the original post.*
 
 ---
 *Canonical: ${url}*
@@ -217,11 +218,11 @@ ${bullets.map(bullet => `- ${bullet}`).join("\n") || `- Full step-by-step walkth
   files["bluesky.txt"] = `${blueskyTitle}${blueskyTail}\n`;
 
   // Facebook Page: link on its own line so Graph API creates link preview via og:image (1200×630)
-  files["facebook.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nRead the full guide: ${url}\n\n#AI #SoftwareDevelopment ${tags.slice(0, 2).map(t => `#${t}`).join(" ")}\n`;
+  files["facebook.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nRead the full guide: ${url}\n\n#Sundarban #SundarbanTour ${tags.slice(0, 2).map(t => `#${t}`).join(" ")}\n`;
 
   // Instagram: caption not clickable — drive to link in bio + image via cover
   const instaTags = tags.slice(0, 3).map(t => `#${t}`).join(" ");
-  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #sundarbanyatri\n`;
+  files["instagram.txt"] = `${title}\n\n${summary}\n\n${bullets.slice(0, 3).map(b => `• ${b}`).join("\n")}\n\nFull guide — link in bio: ${url}\n\n${instaTags} #Sundarban #SundarbanYatri\n`;
 
   files["reddit-comments.md"] = `# Reddit kit — ${title}
 URL: ${url}
@@ -230,16 +231,16 @@ URL: ${url}
 - Threads younger than 24 hours only. Read the thread fully before commenting.
 - Lead with the ANSWER, not the link. The link is supporting evidence, one sentence, never a CTA.
 - One community per week maximum. Global cap: 3 approved posts/day across all channels.
-- Candidate subs by topic: r/LocalLLaMA, r/OpenAI, r/ClaudeAI, r/webdev, r/MachineLearning, r/devops, r/programming (pick ONLY where the topic genuinely fits).
+- Candidate subs by topic: r/travel, r/india, r/kolkata and Kolkata travel subs, Quora Sundarban topics, TripAdvisor Sundarban threads (pick ONLY where the trip question genuinely fits).
 
 ## Draft A — direct-answer comment
 > Replace [QUESTION CONTEXT] with what the thread actually asks. Delete this note before posting.
 
 [QUESTION CONTEXT]
 
-The core issue comes down to [ONE-PARAGRAPH DIRECT ANSWER drawn from the article].
+The core answer comes down to [ONE-PARAGRAPH DIRECT ANSWER drawn from the article].
 
-I tested this while writing up "${title}" — full breakdown with the numbers/code: ${url}
+I verified this while writing up "${title}" — full breakdown with timings/costs: ${url}
 
 ## Draft B — data-point comment
 > Use when the thread debates tradeoffs. Delete this note before posting.
@@ -254,11 +255,11 @@ Context: ${summary} Full analysis: ${url}
 ${summary}
 
 In this piece we cover:
-${bullets.map(bullet => `• ${bullet}`).join("\n") || "• The full story behind the news and what it changes for developers"}
+${bullets.map(bullet => `• ${bullet}`).join("\n") || "• The full trip plan and what it changes for travellers"}
 
-Read the full analysis: ${url}
+Read the full guide: ${url}
 
-#AI #SoftwareDevelopment${tags.slice(0, 2).map(tag => ` #${tag.charAt(0).toUpperCase()}${tag.slice(1)}`).join("")}
+#Sundarban #SundarbanTour${tags.slice(0, 2).map(tag => ` #${tag.charAt(0).toUpperCase()}${tag.slice(1)}`).join("")}
 `;
 
   files["hn-title.txt"] = `${truncateWords(title, 80)}\n`;
@@ -267,9 +268,9 @@ Read the full analysis: ${url}
 
 What's new: ${summary}
 
-Why it's interesting: [FILL IN — the §4b angle in one sentence: what this changes for developers that other coverage misses]
+Why it's interesting: [FILL IN — the §4b angle in one sentence: what this changes for travellers that other coverage misses]
 
-Full write-up with [THE ORIGINAL EVIDENCE: numbers/table/benchmark]: ${url}
+Full write-up with [THE ORIGINAL EVIDENCE: timings/costs/table]: ${url}
 
 Reminder: submit the URL only (${url}) with the title from hn-title.txt. Never automate HN submissions.
 `;
@@ -279,54 +280,58 @@ Import via Medium → your profile → "… → Import a story": it sets rel=can
 Never use their closed write API — canonical cannot be added after publishing through it.
 `;
 
-  files["newsletter-tip.md"] = `Newsletter tip — send only after the article is indexed (day ~7–10).
+  files["newsletter-tip.md"] = `Editor pitch — send only after the article is indexed (day ~7–10).
 
-To: TLDR AI tips / Ben's Bites submit / Console.dev
+To: [FILL IN — a travel editor / tour-feature desk that covers Sundarban or Bengal trips]
 Subject suggestion: ${title}
 Link: ${url}
 
 One-line pitch: ${summary}
-Information gain (why their readers care): [FILL IN — the one thing no other outlet covered]
+Information gain (why their readers care): [FILL IN — the one thing no other outlet covered: verified timings, cost table, or route change]
 `;
 
   files["checklist.md"] = `# Distribution checklist — ${title}
 Article: ${url}
 Published: ${post.published_at ? new Date(post.published_at).toISOString().slice(0, 10) : "unknown"}
-Golden rule: sundarbanyatri.com is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium/Hashnode). Link drops (Bluesky/HN/Reddit) can go same-day.
+Golden rule: sundarbanyatri.com is canonical. Wait 7–10 days after publish BEFORE full-copy syndication (dev.to/Medium). Trip-channel posts (Instagram/Facebook/YouTube/WhatsApp/Reddit/Quora) go same-day.
+
+## TIER 1 — books trips (do on every publish)
+- [ ] Instagram — post instagram.txt + cover 1080×1350 (auto via Graph API, caption link in bio)
+- [ ] Facebook Page — post facebook.txt (auto via Graph API, link preview via og:image)
+- [ ] YouTube Short — review/safari clip + description link (manual)
+- [ ] WhatsApp — status + broadcast to past/lost leads for weekend/season pushes (manual)
 
 ## AUTO channels (system posts within hard daily cap)
-- [ ] dev.to — review devto.md (teaser), flip published:true, confirm canonical_url renders
-- [ ] Bluesky — post bluesky.txt verbatim
-- [ ] Mastodon — reuse bluesky.txt content (drop hashtags beyond 2 if noisy)
-- [ ] Facebook Page — post facebook.txt (auto via Graph API, link preview via og:image)
-- [ ] Instagram — post instagram.txt + cover 1080×1350 (auto via Graph API, caption link in bio)
-- [ ] Hashnode — RSS import picks it up automatically once feed connected; verify canonical shows
+- [ ] Facebook Page — review facebook.txt first (trip intent)
+- [ ] Instagram — review instagram.txt first (trip intent)
+- [ ] Bluesky — post bluesky.txt verbatim (reach-only)
+- [ ] Mastodon — reuse bluesky.txt content (drop hashtags beyond 2 if noisy, reach-only)
+- [ ] dev.to — review devto.md (teaser), flip published:true, confirm canonical_url renders (reach-only)
 
 ## Verified channel rules (official docs, 2026-08-22)
 | Channel | Format | Link rule | Media |
 |---|---|---|---|
-| dev.to | teaser markdown + front matter | canonical_url = our URL; ≤4 lowercase tags | cover_image REQUIRED (1000×420 render) |
+| Instagram | caption + 1080×1350 image | link in bio (captions not clickable) | image REQUIRED 1080×1350 |
+| Facebook Page | message + link param | link on own line → og:image preview | link preview auto via og:image |
+| YouTube Short | 30–60s real clip + description | full URL in description + pinned comment | real review/safari footage only |
 | Bluesky | plain text ≤300 graphemes incl. URL+hashtags | API injects facets automatically | link-preview card auto-built from og:image |
 | Mastodon | plain text ≤500 chars | URLs always count as 23 chars — never shorten | optional: 1 image via Studio media library first |
-| Facebook Page | message + link param | link on own line → og:image preview | link preview auto via og:image |
-| Instagram | caption + 1080×1350 image | link in bio (captions not clickable) | image REQUIRED 1080×1350 |
-| HN | title + first comment with bare URL | links must be https:// | no media |
-| LinkedIn/X | short prose + bare URL on its own line | native auto-linking | optional image boosts CTR |
+| dev.to | teaser markdown + front matter | canonical_url = our URL; ≤4 lowercase travel tags | cover_image REQUIRED (1000×420 render) |
+| Quora/Reddit | full value-first answer | link only where it completes the answer | optional photo that proves the claim |
 
 ## QUEUE channel
-- [ ] Reddit — pick ONE fresh thread (<24h) matching drafts in reddit-comments.md; approve in Studio queue (cap 3/day)
+- [ ] Reddit + Quora — pick ONE fresh trip-question thread (<24h) matching drafts in reddit-comments.md; approve in Studio queue (cap 3/day)
 
 ## MANUAL channels
-- [ ] Hacker News — hn-title.txt + hn-firstcomment.md (same day as publish, weekday morning US time)
-- [ ] LinkedIn — linkedin.md
-- [ ] X/Twitter — adapt bluesky.txt (manual posting only)
+- [ ] YouTube Short description + WhatsApp broadcast text (Tier 1, same day)
+- [ ] Quora answer — adapt reddit-comments.md Draft A (same day OK)
 - [ ] Medium — Import-a-story with medium-import.url (after indexing window)
-- [ ] Newsletter tip — newsletter-tip.md (after indexing window)
+- [ ] Editor pitch — newsletter-tip.md (after indexing window)
+- [ ] LinkedIn / X / HN files in this kit are legacy — skip for Sundarban trips (zero trip intent)
 
 ## ONE-TIME (site-wide, not per-article)
-- [ ] GitHub awesome-list PR featuring our best asset
-- [ ] Source of Sources (sos) signup for expert-quote requests
-- [ ] daily.dev Squad setup (plain corporate-blog sources are ineligible)
+- [ ] TripAdvisor + Google Business profile completeness
+- [ ] Travel-forum profiles with real answers (no links until trusted)
 
 ## Placement log
 | Date | Channel | URL of placement | Result (views/upvotes/replies) |
@@ -394,7 +399,7 @@ async function pushKit(slug) {
   const instaImageFinal = rawCover
     ? rawCover.split("?")[0].replace("/storage/v1/object/public/", "/storage/v1/render/image/public/") + "?width=1080&height=1350&resize=cover&quality=75"
     : "";
-  console.error("-> Enqueuing devto + bluesky + mastodon + facebook + instagram into the Studio distribution queue...");
+  console.error("-> Enqueuing facebook + instagram + bluesky + mastodon + devto into the Studio distribution queue...");
   const items = [
     { channel: "devto", payload: { bodyMarkdown: devtoMd } },
     { channel: "bluesky", payload: { text: blueskyTxt } },
@@ -415,11 +420,13 @@ async function main() {
   if (!command || command === "help" || command === "--help") {
     console.log(`Usage: node distribute.mjs <command> <slug> [--out <dir>]
 
-  kit <slug>    Generate a distribution kit (dev.to draft, Bluesky post, Reddit
-                comment drafts, LinkedIn post, HN submission files, Medium import
-                URL, newsletter pitch, placement checklist) for one published article.
-  push <slug>   Enqueue devto + bluesky + mastodon payloads from an existing kit
-                into the Studio distribution queue (approve-then-post, cap 3/day).
+  kit <slug>    Generate a travel-first distribution kit (Instagram caption,
+                Facebook post, Reddit/Quora answer drafts, Bluesky post, dev.to
+                teaser, Medium import URL, editor pitch, placement checklist)
+                for one published article.
+  push <slug>   Enqueue facebook + instagram + bluesky + mastodon + devto payloads
+                from an existing kit into the Studio distribution queue
+                (approve-then-post, cap 3/day).
 
 Env: SY_TOKEN (required), SY_API_URL, SY_SITE_URL, SY_KITS_DIR.`);
     return;

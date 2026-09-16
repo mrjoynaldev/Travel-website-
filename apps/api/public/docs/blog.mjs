@@ -227,8 +227,9 @@ Account:
 
 Research:
   research ga [--days <n>]              GA4 traffic: visitors, views, top pages, countries, sources
-  research trends [--geo <US>]          Google Trends trending searches by country
-  research hn [--query <q>]             Hacker News front page or topic search
+  research trends [--geo <IN>]          Google Trends trending searches (default IN; US/GB for international)
+  research answers --query <q>          Travel demand worksheet: the §1b sweep template prefilled for <q>
+  research hn [--query <q>]             DEPRECATED for travel (dev forum, zero trip intent) — kept for compat
 
 Ranking review:
   rankings [--days <28>]                Per-article engagement + §8 verdict table (weekly ritual)
@@ -422,7 +423,29 @@ async function main() {
         note(`✓ Google Trends for ${geo} (${(data.items || []).length} items). Use --geo <country-code> to switch.`);
         return print(data);
       }
+      if (sub === "answers") {
+        const query = argValue("--query") || argValue("--q");
+        if (!query) { console.error("Usage: research answers --query <trip question, e.g. 'sundarban 2 day tour cost'>"); process.exit(1); }
+        console.log(`# Demand sweep — "${query}" (POST-WRITING-SKILL.md §1b: fill REAL numbers, no vibes)
+Segment (LEAD-SKILL §1, ONE): [Kolkata families / couples / photographers & birders / international]
+1. Autocomplete trip-phrased suggestions (want ≥3): [n + list]
+2. PAA + Related questions/variants (want ≥3): [n + list]
+3. Reddit travel threads (count, upvotes, recency): [numbers]
+4. TripAdvisor/forum questions (count, views, unanswered): [numbers]
+5. Operator pages on this question (what timings/costs/inclusions are missing): [gap]
+6. YouTube trip videos (count, views, quality): [numbers]
+7. research trends --geo IN (+ US/GB if international): [interest + rising queries]
+8. Instagram/blogs on this topic (generic listicles = gap): [numbers]
+9. Top-5 SERP (strength per result + gap table): [weak/authority + gap]
+10. Official sources (forest notice / timetable / fee chart URLs): [links]
+11. Seasonality (festival/holiday/weekend velocity): [signal]
+12. News scan — rule/route/fee changes in 48h: [change or none]
+Demand Score v2: autocomplete__/2 + PAA__/2 + community__/2 + weak SERP__/2 = __/8 (6-8 WRITE | 3-5 maybe | 0-2 skip)
+Verdict: [WRITE / maybe / skip] + angle (§4b one-liner) + hub + tour link + CTA`);
+        return;
+      }
       if (sub === "hn") {
+        note("⚠ research hn is DEPRECATED for travel — Hacker News has zero trip intent. Use: research answers --query <q>.");
         const query = argValue("--query");
         const data = await client.studio.research.hackerNews.query({ query, limit: Number(argValue("--limit")) || 20 });
         note(query ? `✓ Hacker News stories matching "${query}".` : "✓ Hacker News front page right now.");
@@ -459,15 +482,20 @@ async function main() {
       const data = await client.studio.rankings.query({ days });
       const t = data.totals;
       console.log(`✓ Weekly ranking review — last ${t.windowDays} days across ${t.posts} published post(s)`);
-      console.log(`  views ${t.views} · 75%-scrolls ${t.depth75} · finished reads ${t.readingComplete} · code copies ${t.codeCopies} · comments ${t.comments} · subscribers ${t.subscribers}`);
+      console.log(`  views ${t.views} · 75%-scrolls ${t.depth75} · finished reads ${t.readingComplete} · comments ${t.comments} · subscribers ${t.subscribers}`);
       if (!data.rows.length) return print("No published posts yet.");
       for (const row of data.rows) {
+        // Server verdict predates the travel rewrite — remap the legacy dev verdict locally.
+        const verdict = String(row.verdict || "").includes("code gets copied")
+          ? "NEW companion spoke — readers save details (cost/timing tables earn keeps)"
+          : row.verdict;
         console.log(`\n• ${row.title}`);
         console.log(`  /articles/${row.slug}  (${row.ageDays ?? "?"}d old, updated ${row.updatedAt ? new Date(row.updatedAt).toISOString().slice(0, 10) : "?"})`);
-        console.log(`  views ${row.views} · depth75 ${row.depth75} · finished ${row.complete} · copies ${row.copies} · engagement ${row.engagementRate}%`);
-        console.log(`  → VERDICT: ${row.verdict}`);
+        console.log(`  views ${row.views} · depth75 ${row.depth75} · finished ${row.complete} · saves ${row.copies} · engagement ${row.engagementRate}%`);
+        console.log(`  → VERDICT: ${verdict}`);
       }
-      console.log("\nApply POST-WRITING-SKILL.md §8 next: one highest-leverage move for the week.");
+      console.log("\nNext: cross-check LEAD-SKILL.md §6 — which guide produced enquiries (leads_list)? Traffic without enquiries = fix the CTA/tour link first.");
+      console.log("Apply POST-WRITING-SKILL.md §8 next: one highest-leverage move for the week.");
       return;
     }
 

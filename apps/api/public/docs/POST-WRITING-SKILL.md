@@ -88,19 +88,27 @@ how badly current answers serve them.
 | 8 | Instagram / blogs — search the place/topic | Existing posts, quality (generic listicles = gap) |
 | 9 | Top-5 SERP — open all five | Strength rating per result (weak blog / docs / authority) + gap table (§4.2) |
 | 10 | Official sources — forest dept notices, transport timetables | Facts for the source map (§5e): timings, fees, rules, dates |
-| 11 | Seasonality — festivals, holidays, season edges | Velocity signal: stars + new releases + "how-to" hooks devs are building on |
-| 12 | News scan — route/permit/rule changes | Fast-win topics: "reproduce [paper] in 15 minutes" posts with runnable code + measured numbers |
+| 11 | Seasonality — festivals, holidays, season edges, weekend demand | Velocity signal: festival dates announced, forest-dept notices, weekend/holiday rush, new safari-slot releases |
+| 12 | News scan — route/permit/fee/running-status changes | Fast-win topics: "what changed + what it means for your trip" explainers within 48h, with verified new numbers |
 
 **Demand Score v2 (measured, 0–8 — same gate thresholds: 6–8 🔥 WRITE, 3–5 ⚠️ maybe, 0–2 ❌ skip):**
 - Autocomplete +2 — 3+ problem-phrased suggestions across suffixes
 - PAA +2 — 3+ related questions/variants
-- Community +2 — ANY TWO of: 5+ Reddit threads (or 500+ combined upvotes) · 3+ forum questions with real views · 3+ YouTube videos with thin answers · operator pages missing timings/costs
-- Weak SERP +2 — top-5 has ≥2 weak blogs/docs pages you can beat on depth, freshness, or runnable proof
+- Community +2 — ANY TWO of: 5+ Reddit travel threads (or 500+ combined upvotes) · 3+ TripAdvisor/forum questions with real views · 3+ YouTube trip videos with thin answers · operator pages missing timings/costs/inclusions
+- Weak SERP +2 — top-5 has ≥2 weak blogs/docs pages you can beat on depth, freshness, or verified field proof (timings, costs, photos)
 
 **Output:** a research note in the kit (`research.md`) with the numbers per
 source + the score + the verdict + the named lead segment (§4d). It feeds the
 brief (§12) and the source map (§5e). No research note with numbers = no brief =
 no draft. A score built on guesses is a score of zero.
+
+**Travel research stack (use this, nothing else):** `research trends --geo IN`
+(default IN for domestic segments; add `--geo US` / `--geo GB` only when the
+named buyer is international travellers) + `research ga` (our own traffic) +
+manual sweeps of YouTube trip vlogs, Reddit travel subs, TripAdvisor/forum
+threads and operator pages. Do NOT use `research hn` for travel topics —
+Hacker News is a developer forum with zero trip intent; a "hit" there means
+nothing for enquiries.
 
 Search behavior shift: users increasingly paste **full conversational
 questions** into Google and assistants ("I want to pick up a new hobby… can you
@@ -324,6 +332,9 @@ Pick the BEST one — specific promise, no vague openers (`Beautiful…`,
 - Doesn't answer a real traveller question → reject
 - Invented sightings, prices or reviews → reject
 - Doesn't match queries → reject
+- No verified facts table with check date → reject (deep research IS the value)
+- No named proof for the segment's worry (food/toilet/kid logistics · stay/privacy · odds/timing · permit/reach/payment) → reject
+- No tour link + call/WhatsApp close (or `/hire` form for international) → reject (traffic without a path to enquiry is vanity)
 
 **STEP 8: Authority building (after article)**
 Generate 3–5 related guide ideas in the same topic plus the tours/destinations to link. Must interlink.
@@ -403,9 +414,9 @@ Lead-specific content generation rules:
   - Every cost/timing/itinerary table MUST carry verified numbers with the
     check date. No invented prices, timings or inclusions — unverified cells
     get `TODO verify`, never a guess.
-  - Code blocks still follow the strict rule when used (rare in travel):
-    every fenced block declares its language explicitly; never type UI residue
-    like "Copy" into content.
+  - No fenced code blocks in travel guides — use facts tables, lists and
+    timelines instead. If a code-like value must appear (e.g. a train
+    number), set it as inline `code` inside a sentence, never as a block.
 - **Close**: verdict/what-to-book + one button CTA (call/WhatsApp first, tour page or hub).
 - **Internal linking (SEO structure — required):** Every guide must contain **2× `Also read: [keyword anchor]( /articles/slug )`** inside the body (one mid-article, one near end) + link UP to its cluster hub (`/topics/safari`, `/topics/how-to-reach`, `/topics/cost` or similar) + link to ≥1 matching tour (`/tours/<slug>`). Use keyword anchors (`sundarban 2 day tour cost`), never `click here`. The site auto-injects Related/Also-read blocks server-side (`injectRelatedLinks` in `apps/website/src/lib/articleHtml.ts`) if you miss them, but you must still write them.
 
@@ -452,9 +463,9 @@ decoration:
 |---|---|
 | Facts tables | Costs, timings, inclusions, itineraries — verified numbers with check dates |
 | Images / photos | Show the REAL jetty, boat, watchtower or village instead of describing it; alt text mandatory; hero ≥1200px wide |
-| Video embeds (YouTube etc.) | Official demos, screencasts of visual tools — when moving pixels prove more than prose |
-| Audio embeds | Podcast/discussion clips that are primary sources |
-| Tables | Config options, version comparisons, head-to-heads — assemble what nobody else assembled |
+| Video embeds (YouTube etc.) | Real boat/safari/jetty/review clips — when moving pixels prove more than prose |
+| Audio embeds | Rare — operator/guide voice notes that are primary sources |
+| Tables | Costs, timings, itineraries, month-by-month, head-to-heads — assemble what nobody else assembled |
 | Blockquotes | Verbatim source quotes, always with a link |
 | Bold / highlights | The one thing to remember per section — sparingly |
 | Internal links | Descriptive anchors naming the destination's promise (never "click here") |
@@ -548,14 +559,14 @@ Engines weight demonstrable Experience, Expertise, Authority, Trust:
 - **Author identity** on the post (byline via author fields) + a one-line
   "why you can trust this analysis" note where relevant.
 - **Sources section / inline citations**: every claim traced to a primary
-  source link (docs, changelog, benchmark, filing).
+  source link (forest notice, operator quote, timetable, fee chart, review clip).
 - **Original research we did** that AI cannot produce: did the trip,
   read the full operator quote, compared seasons, built the cost table.
 - **HOW it was verified (one line in-post where relevant):** state what was
   actually checked — `timings confirmed with operator, [month year]`. WHO
   (editor byline) + HOW (this verification line) + WHY (the reader's trip)
   is the trust signal engines and readers both check.
-- Expert quotes from podcasts/talks/papers with links — sourced expertise is
+- Expert quotes from operators, forest staff and recent guests with links — sourced expertise is
   still expertise.
 
 ## 7c. Citation-source map (where LLMs actually pull from)
@@ -580,8 +591,8 @@ every list. Implications:
 - Verify HTTP 200 on the article URL.
 - The post auto-enters `/sitemap.xml` and (for 48h) `/news-sitemap.xml`.
 - Log the target query cluster and the visible position baseline.
-- Promo lane (same day, ≤30 min): Instagram + Facebook posts with the cover photo + link;
-  link drops in relevant travel communities where genuinely useful; reply to every serious comment within 24h;
+- Promo lane (same day, ≤30 min): Instagram Reel/carousel + Facebook post with the cover photo + link; YouTube Short when a real clip exists; WhatsApp status/broadcast for weekend/season pushes;
+  link drops in relevant travel communities (Reddit travel subs, Quora Sundarban topics, TripAdvisor threads) where genuinely useful; reply to every serious comment within 24h;
 - Metrics lane (weekly, into the kit checklist): GSC impressions/clicks/CTR/  position per target query + GA sessions/time-on-page + saves/shares/upvotes.
   Impressions up + CTR flat = title job (§8b); position 5–15 = update job.
 
@@ -653,13 +664,18 @@ Golden rules:
    social posts are exempt — only full-text copies wait.
 3. **Never hand-paste raw markdown into platforms.** Two-step flow:
    `node distribute.mjs kit <slug>` writes `~/sy-cli/kits/<slug>/` with
-   per-platform files (`devto.md`, `bluesky.txt`, `reddit-comments.md`,
-   `linkedin.md`, `hn-title.txt` + `hn-firstcomment.md`, `medium-import.url`,
-   `newsletter-tip.md`, `checklist.md`); then
+   per-platform files (`instagram.txt`, `facebook.txt`, `reddit-comments.md`,
+   `bluesky.txt`, `devto.md`, `linkedin.md`, `hn-title.txt` + `hn-firstcomment.md`,
+   `medium-import.url`, `newsletter-tip.md`, `checklist.md`); then
    `node distribute.mjs push <slug>` enqueues the auto channels into the
    Studio Distribution queue, where the editor approves each post (auto
    channels: no daily limit unless DISTRIBUTION_DAILY_CAP is set
-   server-side; manual Reddit comments stay capped at 3/day per the tiers).
+   server-side; manual Reddit/Quora answers stay capped at 3/day per the tiers).
+   Travel priority inside the kit: `instagram.txt` + `facebook.txt` first,
+   `reddit-comments.md` second, `bluesky.txt` third; `devto.md` is reach-only
+   teaser. The generator emits travel tags, trip hashtags and travel-sub
+   candidates by default — still sanity-check tags against the post before
+   approving the queue.
 
 **COMPREHENSIVE POST SKILL — every integrated platform, official docs, blue links + photos/video (AI must learn this table).**
 
@@ -692,11 +708,12 @@ AI rule: use 1 strong image (cover) everywhere it helps CTR; add 2nd image or 15
 - **Facebook Page:** `https://developers.facebook.com/docs/graph-api/reference/page/feed` `v26.0` — `POST /{PAGE_ID}/feed {message, link}` with System User `61593649201642` Page token (never expires, `pages_manage_posts` + `pages_read_engagement`). Link must be `https://` on own line for preview. Page `1194345043773378`.
 - **Instagram:** `https://developers.facebook.com/docs/instagram-api/content-publishing` — Business `17841430858092702 Sundarban Yatri` linked to Page. `POST /{IG_ID}/media {image_url: 1080×1350, caption: link in bio}` → `media_publish`. Captions not clickable — always `Link in bio: {url}`.
 
-Channel tiers:
-- **AUTO system (queue approve, auto post — no limit `MAX_DAILY_POSTS` `distributionRouter.ts:9` 00:00 UTC):** dev.to (teaser + canonical), Bluesky (facets+card), Mastodon (auto-link), Facebook Page (link preview), Instagram (image+caption)
-- **QUEUE + APPROVE:** Reddit comments — approve-then-post only, cap 3/day. Find threads <24h; value first; link only when relevant; never same community twice/week.
-- **MANUAL (paste from kit):** Hacker News (title + first comment drafted; automating = ban), LinkedIn, X, Medium (Import-a-story sets canonical — never closed API), Quora, newsletter tips (TLDR AI, Ben's Bites, Console.dev).
-- **ONE-TIME checklist:** GitHub awesome-list PRs, Source of Sources signup, daily.dev Squad (corporate blogs ineligible).
+Channel tiers (travel-first — book trips before chasing reach):
+- **TIER 1 — books trips (do on every publish):** Instagram Reel/carousel (link in bio + DM keyword), Facebook Page post (link preview), YouTube Short (review/safari clip + description link), WhatsApp broadcast/status to past + lost leads.
+- **AUTO system (queue approve, auto post — no limit `MAX_DAILY_POSTS` `distributionRouter.ts:9` 00:00 UTC):** Facebook Page (link preview) + Instagram (image+caption) first; Bluesky (facets+card) + Mastodon (auto-link) + dev.to (teaser + canonical) are reach-only — approve, never prioritize over Tier 1.
+- **QUEUE + APPROVE:** Reddit + Quora answers — approve-then-post only, cap 3/day. Find trip-question threads <24h; value first; link only when it completes the answer; never same community twice/week.
+- **MANUAL (paste from kit):** YouTube Short description + WhatsApp broadcast text + Quora answer (from kit); Medium import only 7–10 days after indexing with canonical. Do NOT use HN / LinkedIn / X / dev-newsletters for Sundarban trips — zero trip intent.
+- **ONE-TIME checklist:** TripAdvisor + Google Business profile completeness, travel-forum profiles with real answers (no links until trusted). No GitHub / daily.dev / dev-newsletter placements — wrong audience.
 
 Smoke: `SY_TOKEN=... bash cli/smoke.sh` tests every auto channel (public site, `/docs`, `/healthz`, `distribution.list`, `blog.bySlug`, `blog.track`, queue `pending/posted`, and per-channel link-embed + cover + facets/card). Must be `31+` passed before deploy is considered ready.
 
@@ -757,8 +774,8 @@ Before `studio.posts.create`, you MUST answer all 17. If any answer is `No/Weak`
 15. Will someone share this? (would you send to a friend/post on Reddit?) If not → weak.
 
 **Part 5 — Signals:**
-16. Who will visit in first 24h? If no one → Google ignores. Plan Instagram/Facebook/community promo BEFORE publishing.
-17. Where will I promote this? (Instagram, Facebook, travel communities) No plan = no signals.
+16. Who will visit in first 24h? If no one → Google ignores. Plan Instagram/Facebook/WhatsApp/community promo BEFORE publishing.
+17. Where will I promote this? (Instagram, Facebook, YouTube Short, WhatsApp status, Reddit/Quora travel threads) No plan = no signals.
 
 **CTR pre-flight (testing-phase gate — score inside Q5/Q6/Q10, any fail = rewrite before `submit`):**
 - C1. Would THIS title beat the current top-3 titles if a planning traveller compared them side by side? Title = `[Topic] + [Outcome] + [Context]`, ≤60 chars, mirrors the literal query (`Cost`, `How to Reach`, `Best Time` — the words people type).
@@ -807,7 +824,7 @@ row. No brief = no draft.
 - Internal links: UP [hub URL + anchor] / SIDEWAYS [2 sibling URLs + anchors] / TOUR [tour URL + anchor]
 - Sources (3–5 primary URLs): [official notice, operator page, timetable, thread]
 - Media: [cover + real Sundarban photos, alt text notes]
-- Promotion plan (24h): [Instagram/Facebook post + community link drop]
+- Promotion plan (24h): [Instagram Reel + Facebook post + YouTube Short/WhatsApp status + 1 Reddit/Quora answer]
 - KPI baseline: [GSC position + impressions at publish]
 ```
 

@@ -253,9 +253,9 @@ SY_TOKEN=$SY_TOKEN node distribute.mjs kit <slug>
 SY_TOKEN=$SY_TOKEN node distribute.mjs push <slug> --out ~/sy-cli/kits/<slug>
 #   → enqueues channels into Studio Distribution queue; editor approves. AUTO POST — no daily limit (set DISTRIBUTION_DAILY_CAP env to cap if needed) all channels.
 #
-# CHANNEL PRIORITY FOR TRAVEL: Instagram + Facebook Page first (visual, trip intent),
-# then Bluesky/Mastodon link drops and community threads (Reddit travel subs, same-day OK).
-# Full-copy syndication (dev.to/Medium/Hashnode) waits 7–10 days after publish; canonical always ours.
+# CHANNEL PRIORITY FOR TRAVEL: Instagram + Facebook Page + YouTube Short + WhatsApp first (visual, trip intent),
+# then community answers (Reddit/Quora travel threads, same-day OK) and Bluesky/Mastodon link drops.
+# Full-copy syndication (dev.to/Medium) waits 7–10 days after publish; canonical always ours.
 #
 # BLUE LINK embedding (how to make links clickable — official docs):
 #   dev.to: Markdown [text](url) + front matter canonical_url — developers.forem.com/api/v0 — teaser only, never full copy

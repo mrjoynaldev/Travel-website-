@@ -439,7 +439,7 @@ export const studioRouter = router({
       if (ageDays !== null && ageDays > 21 && s.views === 0) verdict = "REWRITE or MERGE — zero reads past week 3";
       else if (s.views >= 10 && engagementRate >= 40) verdict = "NEW companion spoke — demand proven";
       else if (s.views >= 10 && engagementRate < 20) verdict = "UPDATE title/intro — readers bounce early";
-      else if (s.copies >= 3 && s.copies >= s.views * 0.15) verdict = "NEW how-to companion — code gets copied";
+      else if (s.copies >= 3 && s.copies >= s.views * 0.15) verdict = "NEW companion spoke — readers save details (cost/timing tables earn keeps)";
       else if (ageDays !== null && ageDays > 120) verdict = "REFRESH candidate — aging, check GSC position";
       return {
         postId: post.id as string,
