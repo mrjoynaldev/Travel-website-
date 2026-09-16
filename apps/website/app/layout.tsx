@@ -120,8 +120,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   serviceType: ["Sundarban Tours", "Sundarban Safari", "Travel Guides"],
                   priceRange: "$$",
                   telephone: "+91-8513819474",
-                  email: "hello@sundarbanyatri.com",
-                  sameAs: [],
+                  sameAs: [
+                    "https://www.facebook.com/share/1F5ECoHcGg/",
+                    "https://www.instagram.com/sundarbanyatri",
+                  ],
                 },
                 {
                   "@type": "WebSite",
