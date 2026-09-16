@@ -18,6 +18,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
   Boxes,
   Copy,
   Download,
@@ -748,6 +757,17 @@ export function StudioMedia() {
       toast.error("Could not copy. Long-press the image to copy its address.");
     }
   };
+  const [editingAsset, setEditingAsset] = useState<{ id: string; filename: string; alt_text: string | null; caption: string | null } | null>(null);
+  const [editAltText, setEditAltText] = useState("");
+  const [editCaption, setEditCaption] = useState("");
+  const updateAsset = trpc.studio.media.update.useMutation({
+    onSuccess: () => {
+      setEditingAsset(null);
+      media.refetch();
+      toast.success("Asset updated.");
+    },
+    onError: error => toast.error(error.message),
+  });
   const onUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.currentTarget.value = "";
@@ -896,6 +916,19 @@ export function StudioMedia() {
                   >
                     <Copy className="h-3.5 w-3.5" /> Copy link
                   </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 gap-1.5 text-xs"
+                    onClick={() => {
+                      setEditingAsset(asset);
+                      setEditAltText(asset.alt_text || "");
+                      setEditCaption(asset.caption || "");
+                    }}
+                  >
+                    <PenLine className="h-3.5 w-3.5" /> Edit
+                  </Button>
                   {confirmDeleteId === asset.id ? (
                     <Button
                       type="button"
@@ -934,6 +967,35 @@ export function StudioMedia() {
           </p>
         </div>
       )}
+      <Dialog open={Boolean(editingAsset)} onOpenChange={open => { if (!open) setEditingAsset(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit asset</DialogTitle>
+            <DialogDescription>Update alt text and caption for this media asset.</DialogDescription>
+          </DialogHeader>
+          {editingAsset && (
+            <div className="grid gap-4 py-2">
+              {editingAsset.mime_type.startsWith("image/") && (
+                <img src={editingAsset.url} alt={editAltText} className="w-full rounded-lg object-cover max-h-48" />
+              )}
+              <div className="grid gap-2">
+                <Label htmlFor="edit-alt">Alt text</Label>
+                <Input id="edit-alt" value={editAltText} onChange={e => setEditAltText(e.target.value)} placeholder="Describe this image for accessibility and SEO" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-caption">Caption</Label>
+                <Input id="edit-caption" value={editCaption} onChange={e => setEditCaption(e.target.value)} placeholder="Optional caption shown below the image" />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingAsset(null)}>Cancel</Button>
+            <Button onClick={() => { if (editingAsset) updateAsset.mutate({ id: editingAsset.id, altText: editAltText, caption: editCaption }); }} disabled={updateAsset.isPending}>
+              {updateAsset.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Frame>
   );
 }
