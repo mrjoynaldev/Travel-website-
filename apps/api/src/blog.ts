@@ -98,9 +98,9 @@ export function assertRole(actor: BlogActor, allowed: readonly AppRole[]) {
 
 export function canTransition(role: AppRole, from: PostStatus, to: PostStatus, ownsPost: boolean) {
   const permittedGraph: Record<PostStatus, PostStatus[]> = {
-    draft: ["review", "archived"],
+    draft: ["review", "published", "archived"],
     review: ["draft", "published", "archived"],
-    published: ["archived"],
+    published: ["draft", "archived"],
     archived: ["draft"],
   };
   if (!permittedGraph[from].includes(to)) return false;

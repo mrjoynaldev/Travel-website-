@@ -505,7 +505,8 @@ export function StudioEditor() {
   const liveTargets = (): FlowStatus[] => {
     if (status === "published") return [];
     if (!canPublish) return status === "review" ? [] : ["review"];
-    return status === "draft" ? ["review", "published"] : ["published"];
+    // Admins/editors can publish from any non-published status
+    return ["published"];
   };
   const publishPost = () => {
     setPublishOpen(false);
@@ -683,7 +684,18 @@ export function StudioEditor() {
                 <span className="hidden md:inline">Return to draft</span>
               </Button>
             )}
-            {postId && status === "published" && canPublish && (
+            {postId && status === "archived" && canPublish && (
+              <Button
+                variant="outline"
+                disabled={transition.isPending || update.isPending}
+                onClick={() => persistThenTransition(["draft"])}
+                className="gap-2"
+              >
+                <Undo2 className="h-4 w-4" />
+                <span className="hidden md:inline">Restore to draft</span>
+              </Button>
+            )}
+            {postId && status !== "archived" && canPublish && (
               <Button
                 variant="outline"
                 disabled={transition.isPending || update.isPending}

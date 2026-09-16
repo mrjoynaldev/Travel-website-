@@ -217,22 +217,25 @@ async function resolveTaxonomyIds(kind, names) {
   return ids;
 }
 
-// Walk a post to published through the legal workflow (draft → review →
-// published). Direct draft → published is forbidden by the API + DB trigger.
+// Walk a post to published through the legal workflow.
+// Now supports direct draft → published for admins/editors.
 async function chainPublish(id) {
   let post = await trpc("studio.posts.get", { id }, "GET");
   if (!post) throw new Error("Post not found.");
   if (post.status === "published") return post;
-  if (post.status === "draft") {
-    post = await trpc("studio.posts.transition", { id, status: "review" }, "POST");
-  }
-  if (post.status === "review") {
+  // Try direct publish (draft → published or review → published)
+  try {
     post = await trpc("studio.posts.transition", { id, status: "published" }, "POST");
+    return post;
+  } catch {
+    // If direct publish fails, go through review first
+    if (post.status === "draft") {
+      post = await trpc("studio.posts.transition", { id, status: "review" }, "POST");
+      post = await trpc("studio.posts.transition", { id, status: "published" }, "POST");
+      return post;
+    }
+    throw new Error(`Cannot publish from status "${post.status}".`);
   }
-  if (!post || post.status !== "published") {
-    throw new Error(`Cannot publish from status "${post?.status}".`);
-  }
-  return post;
 }
 
 // ————————————————————————————————————————————————————————————————————————
