@@ -10,7 +10,7 @@ import { Faq } from "@web/components/conversion/Faq";
 import { SectionHeader } from "@web/components/travel/SectionHeader";
 import { TourCard } from "@web/components/travel/TourCard";
 import { buildWhatsAppUrl, businessConfig, defaultWhatsAppMessage } from "@web/lib/business";
-import { displayImageUrl } from "@web/lib/social-image";
+import { displayImageUrl, responsiveSrcSet } from "@web/lib/social-image";
 import type { Brand, Business, FAQItem, MenuItem, VideoReview } from "@web/lib/catalogue";
 import { TOURS, FAQS, HERO_IMAGE, SAFARI_IMAGE, TRUST_FEATURES, SAFARI_DEFAULT } from "@web/lib/travel-data";
 import type { Tour } from "@web/lib/travel-data";
@@ -165,7 +165,7 @@ export default function HomeView({ categories, sections, posts, search, category
         {heroVideo ? (
           <video src={heroVideo} poster={heroImage} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover" style={heroPosition ? { objectPosition: heroPosition } : undefined} />
         ) : (
-          <img src={heroImage} alt="Mangrove waterways of the Sundarbans at dawn" className="absolute inset-0 h-full w-full object-cover" style={heroPosition ? { objectPosition: heroPosition } : undefined} />
+          <img src={heroImage} srcSet={responsiveSrcSet(heroImageRaw, [768, 1280, 1600])} sizes="100vw" alt="Mangrove waterways of the Sundarbans at dawn" fetchPriority="high" decoding="async" loading="eager" width={1600} height={900} className="absolute inset-0 h-full w-full object-cover" style={heroPosition ? { objectPosition: heroPosition } : undefined} />
         )}
         <div className="absolute inset-0 yatri-hero-veil" />
         <div className="relative container pb-24 pt-16 md:pb-32 md:pt-24 lg:pb-36 lg:pt-28">
@@ -182,7 +182,7 @@ export default function HomeView({ categories, sections, posts, search, category
             <a href="#tours" className="inline-flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[15px] font-semibold text-[#0f4532] hover:bg-[#f5e7cc] transition-colors">
               Explore Sundarban Tours <ArrowRight className="h-4 w-4" />
             </a>
-            <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#1fa855] px-7 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors">
+            <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#167A54] px-7 text-[15px] font-semibold text-white hover:bg-[#0D3B2E] transition-colors">
               <WhatsAppIcon className="h-4 w-4" /> WhatsApp Us
             </a>
           </div>
@@ -234,7 +234,7 @@ export default function HomeView({ categories, sections, posts, search, category
       <section id="safari" className="container yatri-section scroll-mt-24">
         <div className="grid overflow-hidden rounded-[28px] border border-border bg-white lg:grid-cols-2">
           <div className="relative min-h-[320px] lg:min-h-[480px]">
-            <img src={safariImage} alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" className="absolute inset-0 h-full w-full object-cover" style={safariPosition ? { objectPosition: safariPosition } : undefined} />
+            <img src={safariImage} srcSet={responsiveSrcSet(safariImageRaw, [640, 1024])} sizes="(max-width: 1024px) 100vw, 50vw" alt="Royal Bengal Tiger habitat in the Sundarban mangroves" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" style={safariPosition ? { objectPosition: safariPosition } : undefined} />
             <span className="absolute left-5 top-5 yatri-chip bg-white/95">Safari • Licensed boats</span>
           </div>
           <div className="p-7 md:p-10 lg:p-12 flex flex-col justify-center">
@@ -408,7 +408,7 @@ export default function HomeView({ categories, sections, posts, search, category
             <h2 className="mt-3 h2 font-display">Questions Travellers Ask Before They Go</h2>
             <p className="mt-4 leading-7 text-muted-foreground">Straight answers on routes, days, inclusions and seasons. For anything specific, WhatsApp us — a human replies.</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white"><WhatsAppIcon className="h-4 w-4" /> Ask on WhatsApp</a>
+              <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex h-11 items-center gap-2 rounded-full bg-[#167A54] px-6 text-sm font-semibold text-white"><WhatsAppIcon className="h-4 w-4" /> Ask on WhatsApp</a>
               <a href="/hire" className="inline-flex h-11 items-center gap-2 rounded-full border border-border bg-white px-6 text-sm font-semibold hover:border-primary/40 hover:text-primary">Get a Quote</a>
             </div>
           </div>
@@ -430,7 +430,7 @@ export default function HomeView({ categories, sections, posts, search, category
                   <span className="flex items-center gap-2 text-[15px] font-bold"><Phone className="h-5 w-5" /> {biz.phoneDisplay}</span>
                   <span className="mt-0.5 block text-xs font-medium text-[#0f4532]/70">Tap to call • {biz.hours}</span>
                 </a>
-                <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors"><WhatsAppIcon className="h-5 w-5" /> WhatsApp Us</a>
+                <a href={waGeneral} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-[#167A54] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#0D3B2E] transition-colors"><WhatsAppIcon className="h-5 w-5" /> WhatsApp Us</a>
               </div>
               <button onClick={() => setShowEnquiry((v) => !v)} aria-expanded={showEnquiry} className="mt-4 text-sm font-medium text-white/70 underline underline-offset-4 hover:text-white transition-colors">
                 {showEnquiry ? "Hide enquiry form ↑" : "Outside India? Send an enquiry form instead →"}

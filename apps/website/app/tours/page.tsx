@@ -32,7 +32,7 @@ export default async function ToursPage() {
           <p className="mt-4 max-w-2xl body-lg text-muted-foreground">Seasonal festival journeys ex-Canning / Sonakhali — winter feast and monsoon hilsa specials — every plan confirmed on call with route, safari, stay and inclusions.</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <a href={`tel:${business.phone}`} className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-6 text-[15px] font-bold text-white hover:bg-[#0f4532]"><Phone className="h-4 w-4" /> {business.phoneDisplay}</a>
-            <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-[15px] font-semibold text-white hover:bg-[#178a45]"><MessageCircle className="h-4 w-4" /> WhatsApp Us</a>
+            <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex h-12 items-center gap-2 rounded-full bg-[#167A54] px-6 text-[15px] font-semibold text-white hover:bg-[#0D3B2E]"><MessageCircle className="h-4 w-4" /> WhatsApp Us</a>
           </div>
         </div>
       </section>

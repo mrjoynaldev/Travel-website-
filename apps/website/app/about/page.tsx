@@ -93,7 +93,7 @@ export default async function AboutPage() {
           <p className="mt-3 max-w-xl leading-7 text-white/75">Call or WhatsApp with your dates and group size. If we are not the right fit, we will tell you that too.</p>
           <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
             <a href={`tel:${business.phone}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[15px] font-bold text-[#0f4532] transition-colors hover:bg-[#f5e7cc]"><Phone className="h-4 w-4" /> {business.phoneDisplay}</a>
-            <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#178a45]"><MessageCircle className="h-4 w-4" /> WhatsApp Us</a>
+            <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full bg-[#167A54] px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-[#0D3B2E]"><MessageCircle className="h-4 w-4" /> WhatsApp Us</a>
           </div>
         </div>
       </section>

@@ -68,7 +68,7 @@ export function LeadForm({
           href={buildWhatsAppUrl(tourWhatsAppMessage(tourTitle ?? "a Sundarban tour"), whatsapp)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-[#1fa855] px-6 text-sm font-semibold text-white hover:bg-[#178a45] transition-colors"
+          className="mt-5 inline-flex h-11 items-center gap-2 rounded-full bg-[#167A54] px-6 text-sm font-semibold text-white hover:bg-[#0D3B2E] transition-colors"
         >
           <WhatsAppIcon className="h-4 w-4" /> Continue on WhatsApp
         </a>

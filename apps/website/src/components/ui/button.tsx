@@ -18,7 +18,7 @@ const buttonVariants = cva(
         "primary-soft": "bg-[#ddebe3] text-[#0f4532] hover:bg-[#ddebe3]/90",
         "accent": "bg-[#d59b43] text-white hover:bg-[#d59b43]/90",
         "accent-soft": "bg-[#f5e7cc] text-[#d59b43] hover:bg-[#f5e7cc]/90",
-        "whatsapp": "bg-[#1fa855] text-white hover:bg-[#1fa855]/90",
+        "whatsapp": "bg-[#167A54] text-white hover:bg-[#167A54]/90",
         "phone": "bg-[#0f4532] text-white hover:bg-[#0f4532]/90",
       },
       size: {

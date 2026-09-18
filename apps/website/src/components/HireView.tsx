@@ -68,7 +68,7 @@ function PlanTripInner({ tours, faqs, business, query }: { tours?: Tour[]; faqs?
               rel="noopener noreferrer"
               className="yatri-card group flex items-center gap-5 p-6 lg:p-7"
             >
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#1fa855]/12 text-[#1fa855]"><WhatsAppIcon className="h-6 w-6" /></span>
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#167A54]/12 text-[#167A54]"><WhatsAppIcon className="h-6 w-6" /></span>
               <span>
                 <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">WhatsApp us</span>
                 <span className="mt-1 block font-display text-2xl lg:text-[1.7rem] font-bold tracking-tight group-hover:text-primary transition-colors">Chat now →</span>

@@ -23,6 +23,23 @@ export function optimizedImageUrl(url: string | undefined | null, width = 800, h
  * - Unsplash → imgix w/q params retargeted (auto=format keeps WebP/AVIF).
  * - Anything else → returned unchanged.
  */
+/**
+ * Responsive srcset for an image URL (`"u480 480w, u800 800w"`), built with
+ * displayImageUrl so CMS originals are never shipped at full size on mobile.
+ * Returns undefined when the URL is not transformable (caller falls back to
+ * a single src). Widths must be ascending.
+ */
+export function responsiveSrcSet(url: string | undefined | null, widths: number[], quality = 75): string | undefined {
+  if (!url || !widths.length) return undefined;
+  const entries: string[] = [];
+  for (const w of widths) {
+    const variant = displayImageUrl(url, w, quality);
+    if (!variant || variant === url) return undefined;
+    entries.push(`${variant} ${w}w`);
+  }
+  return entries.join(", ");
+}
+
 export function displayImageUrl(url: string | undefined | null, width = 1200, quality = 75): string | undefined {
   if (!url || !/^https?:\/\//.test(url)) return url ?? undefined;
   const unsplash = url.replace(/&amp;/g, "&").match(/^(https:\/\/images\.unsplash\.com\/[^?#]+)(\?[^#]*)?(#.*)?$/);

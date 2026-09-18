@@ -73,7 +73,7 @@ export function PublicShell({ publication, pages = [], children }: { publication
   const phoneHref = `tel:${contact.phone || FALLBACK_PHONE}`;
   const email = contact.email || FALLBACK_EMAIL;
   const logoUrl = brand.logoUrl || "/logo.png";
-  const mark = (_dark = false, size = "h-8 w-8") => <img src={logoUrl} alt={brand.logoAlt || `${siteName} logo`} className={`${size} rounded-full object-cover`} />;
+  const mark = (_dark = false, size = "h-8 w-8") => <img src={logoUrl} alt={brand.logoAlt || `${siteName} logo`} width={44} height={44} decoding="async" className={`${size} rounded-full object-cover`} />;
   return <div className="min-h-screen bg-background"><a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">Skip to content</a>
     {/* Top utility strip */}
     <div className="hidden bg-[#0f4532] text-[#cfe0d5] md:block">

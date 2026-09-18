@@ -34,7 +34,7 @@ export function TripPlannerCard({ business }: { business?: Business }) {
   return (
     <div className="rounded-[24px] border border-border bg-white/95 p-6 lg:p-8 shadow-[0_28px_60px_-28px_rgba(15,69,50,.35)] backdrop-blur">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-display text-xl lg:text-[1.4rem] font-semibold tracking-tight">Plan Your Trip</h3>
+        <h2 className="font-display text-xl lg:text-[1.4rem] font-semibold tracking-tight">Plan Your Trip</h2>
         <span className="yatri-chip">Fastest on call</span>
       </div>
       <p className="mt-1.5 text-sm text-muted-foreground">Fill the basics, then send it to us in one tap — we reply with the right tour.</p>
@@ -98,7 +98,7 @@ export function TripPlannerCard({ business }: { business?: Business }) {
           href={waUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1fa855] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#178a45] transition-colors shadow-[0_16px_32px_-14px_rgba(31,168,85,.6)]"
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#167A54] px-6 py-3.5 text-[15px] font-semibold text-white hover:bg-[#0D3B2E] transition-colors shadow-[0_16px_32px_-14px_rgba(22,122,84,.6)]"
         >
           <WhatsAppIcon className="h-4 w-4" /> Send on WhatsApp
         </a>

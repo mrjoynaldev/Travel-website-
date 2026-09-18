@@ -1,7 +1,7 @@
 import { ArrowRight, Clock3 } from "lucide-react";
 import Link from "next/link";
 import type { Tour } from "@web/lib/travel-data";
-import { displayImageUrl } from "@web/lib/social-image";
+import { displayImageUrl, responsiveSrcSet } from "@web/lib/social-image";
 
 export function TourCard({ tour }: { tour: Tour }) {
   return (
@@ -10,8 +10,11 @@ export function TourCard({ tour }: { tour: Tour }) {
         <div className="relative aspect-[3/2] overflow-hidden">
           <img
             src={displayImageUrl(tour.image, 800) || tour.image}
+            srcSet={responsiveSrcSet(tour.image, [480, 800])}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             alt={tour.title}
             loading="lazy"
+            decoding="async"
             className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-80" />
