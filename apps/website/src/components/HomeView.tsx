@@ -142,7 +142,7 @@ export default function HomeView({ categories, sections, posts, search, category
   // Display-size variants: CMS brand images are often multi-MB originals, so
   // request width-appropriate renditions (helper passes other URLs through).
   const safariImageRaw = brand?.safariImageUrl?.trim() || SAFARI_IMAGE;
-  const safariImage = displayImageUrl(safariImageRaw, 1200) || safariImageRaw;
+  const safariImage = displayImageUrl(safariImageRaw, 800) || safariImageRaw;
   const safariTitle = brand?.safariTitle?.trim() || SAFARI_DEFAULT.title;
   const safariText = brand?.safariText?.trim() || SAFARI_DEFAULT.text;
   const safariPoints = brand?.safariPoints?.length ? brand.safariPoints : SAFARI_DEFAULT.points;

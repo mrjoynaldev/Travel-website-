@@ -3,7 +3,7 @@ export function optimizedSocialImage(url: string | undefined | null, width = 120
   const clean = url.replace(/&amp;/g, "&").split(/[?#]/)[0];
   const match = clean.match(/^(https:\/\/[^/]+\.supabase\.co)\/storage\/v1\/object\/public\/(.+)$/);
   if (!match) return url;
-  return `${match[1]}/storage/v1/render/image/public/${match[2]}?width=${width}&height=${height}&resize=cover&quality=75`;
+  return `${match[1]}/storage/v1/render/image/public/${match[2]}?width=${width}&height=${height}&resize=cover&quality=75&format=webp`;
 }
 
 export function optimizedImageUrl(url: string | undefined | null, width = 800, height = 600): string | undefined {
@@ -11,7 +11,7 @@ export function optimizedImageUrl(url: string | undefined | null, width = 800, h
   const clean = url.replace(/&amp;/g, "&").split(/[?#]/)[0];
   const match = clean.match(/^(https:\/\/[^/]+\.supabase\.co)\/storage\/v1\/object\/public\/(.+)$/);
   if (!match) return url;
-  return `${match[1]}/storage/v1/render/image/public/${match[2]}?width=${width}&height=${height}&resize=cover&quality=80`;
+  return `${match[1]}/storage/v1/render/image/public/${match[2]}?width=${width}&height=${height}&resize=cover&quality=80&format=webp`;
 }
 
 /**
@@ -36,6 +36,6 @@ export function displayImageUrl(url: string | undefined | null, width = 1200, qu
   }
   const clean = url.replace(/&amp;/g, "&").split(/[?#]/)[0];
   const sb = clean.match(/^(https:\/\/[^/]+\.supabase\.co)\/storage\/v1\/object\/public\/(.+)$/);
-  if (sb) return `${sb[1]}/storage/v1/render/image/public/${sb[2]}?width=${width}&resize=contain&quality=${quality}`;
+  if (sb) return `${sb[1]}/storage/v1/render/image/public/${sb[2]}?width=${width}&resize=contain&quality=${quality}&format=webp`;
   return url;
 }
