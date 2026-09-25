@@ -2,9 +2,13 @@ import type { MetadataRoute } from "next";
 import { getTours, getAllPublishedRefs } from "@web/lib/catalogue";
 import { serverTrpc } from "@web/lib/trpc-server";
 
-// Refresh hourly (not build-time only) so Studio-published posts, tours and
-// topics enter the sitemap without redeploys.
-export const revalidate = 3600;
+// Always render fresh (not build-time only) so Studio-published posts,
+// tours and topics enter the sitemap instantly without redeploys.
+// NOTE: `revalidate = 3600` was ignored for this route — the sitemap froze
+// at build time (Sep 18) and missed newer posts. force-dynamic guarantees
+// every request sees all published content; the queries below are light
+// and this URL is hit infrequently (Google + occasional checks).
+export const dynamic = "force-dynamic";
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://sundarbanyatri.com";
 
